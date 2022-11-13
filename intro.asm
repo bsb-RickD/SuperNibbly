@@ -7,13 +7,23 @@
 
    jmp main
 
+; to switch vsync irq and palette fading on or off
+USE_IRQ = 1 ; comment the line to turn off
+
+; to use compressed assets or not
+;DECOMPRESS_BG = 1
+
 .include "kernal_constants.asm"
 .include "helpers.asm"
 .include "vera.asm"
+.ifdef USE_IRQ
 .include "irq.asm"
+.endif
+
    
 ; constants
 FramesToWait      = 5
+
 
 color:   .byte 0
 inc_dec: .byte 1
@@ -28,9 +38,11 @@ c64_pal: .byte $00,$0,$ff,$f,$00,$8,$fe,$a,$4c,$c,$c5,$0,$0a,$0,$e7,$e,$85,$d,$4
    stz bgcol
    stz bgcol+1
 
+.ifdef USE_IRQ
    ; save irq, and install our custom_irq
    mow #custom_irq, R0
    jsr init_irq
+.endif
 
    jsr switch_to_tiled_mode
    jsr fill_screen
@@ -40,7 +52,7 @@ repeat:
    cmp #$51          ; Q
    beq done
    jsr KRNL_CHROUT   ; print to screen
-
+.ifdef USE_IRQ   
    wai
    lda #FramesToWait
    cmp vsync_count
@@ -69,11 +81,13 @@ write2pal:
    ora color
    sta bgcol
    sta bgcol+1
+.endif   
 
-   bra repeat
+   bra repeat   
 done:
+.ifdef USE_IRQ
    jsr reset_irq
-
+.endif   
    jsr switch_to_textmode   
    
    rts
@@ -134,14 +148,19 @@ done:
 .proc fill_screen
    ; vera address0 set to 0, increment 1
    set_vera_address 0,0,VERA_increment_1,0   
-   mow #screen, R0      ; screendata to R0 (source)     
-   mow #VERA_data0, R1  ; vera data #0 to R1 (destination)
-   mow #SCREEN_SIZE, R2 ; size to R2 (bytes to copy)
-   jsr KRNL_MEM_COPY    ; and.. copy
+   mow #screen, R0         ; screendata to R0 (source)        
+   mow #VERA_data0, R1     ; vera data #0 to R1 (destination)
+.ifdef DECOMPRESS_BG
+   jsr KRNL_MEM_DECOMPRESS
+.else   
+   mow #SCREEN_SIZE, R2
+   jsr KRNL_MEM_COPY
+.endif
 
-   rts
+   rts   
 .endproc
 
+.ifdef USE_IRQ
 vsync_count: .word 0
 
 .proc custom_irq
@@ -177,13 +196,19 @@ vsync_count: .word 0
    wai
    bra wait_for_vsync
 .endproc
-
+.endif
 
 screen:
-.incbin "screen.bin"
-.incbin "tiles.bin"
+.ifdef DECOMPRESS_BG
+   .incbin "intro_bg.bin"
+.else
+   .incbin "intro_back.bin"
+.endif
 SCREEN_SIZE = *-screen
 
 screen_pal:
 .incbin "palette.bin"
 PALETTE_SIZE = *-screen_pal
+
+decompress:
+.byte 255
