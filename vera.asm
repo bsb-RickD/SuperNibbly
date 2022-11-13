@@ -2,6 +2,7 @@
 
 .include "zeropage_constants.asm"
 .include "vera_constants.asm"
+.include "helpers.asm"
 
 ; addr = 17 bit address, dataport = 0/1, increment = data increment, direction = 1 for decrement
 .macro set_vera_address addr, dataport, increment, direction
@@ -9,14 +10,10 @@
 .assert (dataport) = 0 || (dataport) = 1, error, "when setting vera address, dataport must be 0 or 1"
 .assert ((increment) >= VERA_increment_0) && ((increment) <= VERA_increment_640), error, "when setting vera address, increment must be between 0 and 15"
 .assert (direction) = 0 || (direction) = 1, error, "when setting vera address, direction must be 0 or 1"
-   lda #dataport
-   sta VERA_ctrl
-   lda #((addr) & $FF)
-   sta VERA_addr_low
-   lda #((addr) >> 8) & $FF
-   sta VERA_addr_high
-   lda #(((addr) >> 16) & $1) | increment | direction
-   sta VERA_addr_bank
+   mob #dataport, VERA_ctrl
+   mob #((addr) & $FF), VERA_addr_low
+   mob #(((addr) >> 8) & $FF), VERA_addr_high
+   mob #((((addr) >> 16) & $1) | increment | direction), VERA_addr_bank
 .endmacro   
 
 .proc push_vera_address
@@ -78,7 +75,6 @@ return:
    sta VERA_addr_high                           ; store it
    lda #(VRAM_palette >> 16)+VERA_increment_1   ; last bit of VRAM_Palette address, increment 1
    sta VERA_addr_bank                           ; store it
-   lda #1
 
    rts
 .endproc
@@ -105,9 +101,7 @@ for:
    sta VERA_data1
    iny
    bne next
-   lda R11+1
-   inc
-   sta R11+1
+   inc R11+1
 next:
    dex
    bne for
