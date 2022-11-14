@@ -43,4 +43,31 @@ HELPERS_INCLUDED = 1
    .endif
 .endmacro
 
+; phw - push word
+.macro phw word
+   .if (.match (.left (1,{word}),#))
+      ; immediate mode
+      lda #<(.right (.tcount ({word})-1, {word}))
+      sta dest
+      lda #>(.right (.tcount ({word})-1, {word}))
+      sta dest+1
+   .else
+      ; assume absolute oder zero page
+      lda word
+      pha
+      lda word+1
+      pha
+   .endif
+.endmacro
+
+; plw - pull word
+.macro plw word
+   ; assume absolute oder zero page
+   pla
+   sta word+1
+   pla 
+   sta word
+.endmacro
+
+
 .endif
