@@ -330,7 +330,7 @@ vsync_count: .word 0
 
 screen:
 .ifdef DECOMPRESS_BG
-   .incbin "intro_bg2.bin"
+   .incbin "intro_bg.bin"
 .else
    .incbin "intro_back.bin"
 .endif
