@@ -42,6 +42,7 @@ filename_out: .byte  "out.bin",0
    stz bgcol
    stz bgcol+1
 
+/*   
    mow #filename_in, R11
    mow #screen, R12
    jsr file_load
@@ -50,6 +51,7 @@ filename_out: .byte  "out.bin",0
    mow #screen, R12
    mow #(screen+16), R13
    jsr file_save
+*/   
 
 .ifdef USE_IRQ
    ; save irq, and install our custom_irq
@@ -270,9 +272,15 @@ error:
    mow #decompress, R1     ; decompress to mem R1 (destination)
 .endif
    jsr KRNL_MEM_DECOMPRESS
+   sec                     ; r1 now points to output+1
+   lda R1
+   sbc #<decompress        ; subtract start of buffer to get length of data to copy
+   sta R2                  ; store it in r2
+   lda R1+1
+   sbc #>decompress
+   sta R2+1
    mow #decompress, R0     ; source
    mow #VERA_data0, R1     ; vera data #0 to R1 (destination)
-   mow #SCREEN_SIZE, R2
    jsr KRNL_MEM_COPY
 .else   
    mow #SCREEN_SIZE, R2
