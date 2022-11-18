@@ -271,7 +271,9 @@ error:
 .ifdef DECOMPRESS_TO_MEM
    mow #decompress, R1     ; decompress to mem R1 (destination)
 .endif
-   jsr KRNL_MEM_DECOMPRESS
+   ;jsr KRNL_MEM_DECOMPRESS
+   jsr memory_decompress
+.ifdef DECOMPRESS_TO_MEM   
    sec                     ; r1 now points to output+1
    lda R1
    sbc #<decompress        ; subtract start of buffer to get length of data to copy
@@ -282,6 +284,7 @@ error:
    mow #decompress, R0     ; source
    mow #VERA_data0, R1     ; vera data #0 to R1 (destination)
    jsr KRNL_MEM_COPY
+.endif   
 .else   
    mow #SCREEN_SIZE, R2
    jsr KRNL_MEM_COPY
@@ -327,6 +330,8 @@ vsync_count: .word 0
    bra wait_for_vsync
 .endproc
 .endif
+
+.include "lzsa.s"
 
 screen:
 .ifdef DECOMPRESS_BG
