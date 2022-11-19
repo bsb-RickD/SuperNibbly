@@ -9,9 +9,21 @@ str_ut_passed:
 str_ut_failed:
 .byte CHR_COLOR_RED, "failed", CHR_COLOR_WHITE, CHR_NL, 0
 
+.macro prints str
+   .local @msg
+   .local @end
+   mow #@msg, R11
+   ldx #(@end-@msg)
+   jsr print_x_length
+   bra @end
+@msg:
+.byte str
+@end:
+.endmacro
+
 .macro print str
    mow #str, R11
-   jsr print_
+   jsr print_zero_terminated
 .endmacro
 
 .macro fill_memory start, count, value
@@ -63,7 +75,7 @@ failed:
 
 
 ; R11 points to string, zero terminated
-.proc print_
+.proc print_zero_terminated
    ldy #0
 print_next_char:  
    lda (R11),y
@@ -72,10 +84,24 @@ print_next_char:
    iny
    bne print_next_char
    inc R11H
-   bra print_
+   bra print_zero_terminated
 done:
    rts
 .endproc
+
+; R11 points to string, x holds length
+.proc print_x_length
+   ldy #0
+print_next_char:   
+   lda (R11),y
+   jsr KRNL_CHROUT
+   iny
+   dex
+   bne print_next_char
+   rts
+.endproc
+
+
 
 ; R11 points to mem1
 ; R12 points to mem2
