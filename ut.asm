@@ -1,9 +1,6 @@
 str_ut_welcome:
 .byte "=== unit test framework ===", CHR_NL, CHR_NL, 0
 
-str_ut_result_separator:
-.byte ": ",0
-
 str_ut_passed:
 .byte CHR_COLOR_GREEN, "passed", CHR_COLOR_WHITE, CHR_NL, 0
 str_ut_failed:
@@ -40,23 +37,27 @@ str_ut_failed:
    jsr compare_memory_
 .endmacro
 
-; it is a pass if carry is clear
-.macro ut_exp_pass
-   jsr ut_pass_on_cc
+; it is a pass Z is set
+.macro ut_exp_equal
+   jsr ut_pass_on_equal
 .endmacro
 
-; it is a pass if carry is set
-.macro ut_exp_fail
-   jsr ut_pass_on_cs
+; it is a pass if Z is clear
+.macro ut_exp_neq
+   jsr ut_pass_on_not_equal
 .endmacro
 
 
-; print unit test result - passed if carry is clear
-.proc ut_pass_on_cc
+; print unit test result - passed if Z is set
+.proc ut_pass_on_equal
    php
-   print str_ut_result_separator
+   sec
+   jsr KRNL_PLOT
+   clc
+   ldy #40
+   jsr KRNL_PLOT
    plp
-   bcs failed
+   bne failed
    print str_ut_passed
    rts
 failed:
@@ -64,13 +65,15 @@ failed:
    rts
 .endproc
 
-; print unit test result - passed if carry is set
-.proc ut_pass_on_cs
-   ; negate carry
-   rol            ; Cb into b0
-   eor   #$01     ; toggle bit
-   ror            ; b0 into Cb
-   bra   ut_pass_on_cc
+; print unit test result - passed if Z is clear
+.proc ut_pass_on_not_equal
+   ; negate Z
+   beq zero_set
+   lda #0
+   bra ut_pass_on_equal
+zero_set:
+   lda #1
+   bra ut_pass_on_equal
 .endproc
 
 
@@ -107,12 +110,12 @@ print_next_char:
 ; R12 points to mem2
 ; x,y bytes to compare (low, high)
 ;
-; carry clear: memory equal
-; carry set: memory different (R11, R12 point to differing memory)
+; Z set: memory equal
+; Z clear: memory different (R11, R12 point to differing memory)
 .proc compare_memory_
    lda (R11)
    cmp (R12)
-   bne different
+   bne done
    IncW R11
    IncW R12
    dex
@@ -121,10 +124,8 @@ print_next_char:
    bmi same
    ldx #$FF
    bra compare_memory_
-different:
-   sec
-   rts
 same:
-   clc
+   lda #0   
+done:
    rts
 .endproc

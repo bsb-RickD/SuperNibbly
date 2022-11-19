@@ -11,6 +11,7 @@
 .include "regs.inc"
 .include "helpers.asm"
 .include "ut.asm"
+.include "vera.asm"
 
 
 str_mem_test_different:
@@ -45,24 +46,37 @@ str_mem_test_different:
    jsr KRNL_MEM_DECOMPRESS
    ; compare and print result
    compare_memory lzsa_output, lzsa_reference, LZSA_reference_len
-   ut_exp_pass
+   ut_exp_equal
    rts
-msg:
 .endproc
 
 .proc test_krnl_decompress_vram
-   prints "krnl decompress vram"
+   print msg
+   prints " - #output bytes"
    ; setup - init memory to ff
    fill_memory lzsa_output, LZSA_reference_len, $FF
+
+   ; set vera address (to 0)
+   set_vera_address 0, 0, VERA_increment_1, 0
+   
    ; decompress
    mow #lzsa_input, R0
-   mow #lzsa_output, R1
+   mow #lzsa_output, VERA_data0
    jsr KRNL_MEM_DECOMPRESS
+
+   ; check number of bytes output
+   lda VERA_addr_low
+   cmp #LZSA_reference_len
+   ut_exp_equal
+
    ; compare and print result
+   print msg
+   prints " - memcmp"
    compare_memory lzsa_output, lzsa_reference, LZSA_reference_len
-   ut_exp_pass
+   ut_exp_equal
    rts
 msg:
+.byte "krnl decompress vram",0
 .endproc
 
 
@@ -70,14 +84,14 @@ msg:
    print msg
    prints "1"
    compare_memory memory_1, memory_1, MEMORY_len
-   ut_exp_pass
+   ut_exp_equal
 
    print msg
    prints "2"
    fill_memory memory_1, MEMORY_len, $AB
    fill_memory lzsa_output, MEMORY_len, $AB
    compare_memory memory_1, lzsa_output, MEMORY_len
-   ut_exp_pass
+   ut_exp_equal
    rts
 msg:
 .byte "mem same ",0
@@ -86,7 +100,7 @@ msg:
 .proc test_mem_different
    prints "mem different"
    compare_memory memory_1, memory_2, lzsa_output
-   ut_exp_fail  ; we expect compary to report difference!
+   ut_exp_neq  ; we expect compary to report difference!
    rts
 msg:
 
