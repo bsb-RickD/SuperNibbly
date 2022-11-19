@@ -43,6 +43,20 @@ HELPERS_INCLUDED = 1
    .endif
 .endmacro
 
+; lxy - load word to x,y
+.macro lxy source
+   .if (.match (.left (1,{source}),#))
+      ; immediate mode
+      ldx #<(.right (.tcount ({source})-1, {source}))
+      ldy #>(.right (.tcount ({source})-1, {source}))
+   .else
+      ; assume absolute oder zero page
+      ldx source
+      ldy source+1
+   .endif
+.endmacro
+
+
 ; phw - push word
 .macro phw word
    .if (.match (.left (1,{word}),#))

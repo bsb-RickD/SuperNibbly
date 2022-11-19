@@ -1,5 +1,5 @@
 str_ut_welcome:
-.byte "=== unit test framework ===", CHR_NL, 0
+.byte "=== unit test framework ===", CHR_NL, CHR_NL, 0
 
 str_ut_result_separator:
 .byte ": ",0
@@ -20,6 +20,24 @@ str_ut_failed:
    lda #value
    jsr KRNL_MEM_FILL
 .endmacro
+
+.macro compare_memory mem1, mem2, len
+   mow #mem1, R11
+   mow #mem2, R12
+   lxy #len
+   jsr compare_memory_
+.endmacro
+
+; it is a pass if carry is clear
+.macro ut_exp_pass
+   jsr ut_pass_on_cc
+.endmacro
+
+; it is a pass if carry is set
+.macro ut_exp_fail
+   jsr ut_pass_on_cs
+.endmacro
+
 
 ; print unit test result - passed if carry is clear
 .proc ut_pass_on_cc
@@ -65,18 +83,18 @@ done:
 ;
 ; carry clear: memory equal
 ; carry set: memory different (R11, R12 point to differing memory)
-.proc compare_memory
-   lda R11
-   cmp R12
+.proc compare_memory_
+   lda (R11)
+   cmp (R12)
    bne different
    IncW R11
    IncW R12
    dex
-   bne compare_memory
+   bne compare_memory_
    dey
    bmi same
    ldx #$FF
-   bra compare_memory
+   bra compare_memory_
 different:
    sec
    rts

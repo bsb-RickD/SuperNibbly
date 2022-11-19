@@ -18,26 +18,35 @@ str_mem_test_equal:
 str_mem_test_different:
 .byte "memory different",0
 
+str_krnl_decompress:
+.byte "krnl decompress",0
+
+
 .proc main   
    print str_ut_welcome
 
    print str_mem_test_equal
-   mow #memory_1, R11
-   mow #memory_1, R12
-   ldx #10
-   ldy #0
-   jsr compare_memory
-   jsr ut_pass_on_cc   
+   compare_memory memory_1, memory_1, 10
+   ut_exp_pass
 
    print str_mem_test_different
-   mow #memory_1, R11
-   mow #memory_2, R12
-   ldx #10
-   ldy #0
-   jsr compare_memory
-   jsr ut_pass_on_cs          ; we expect compary to report difference!
+   compare_memory memory_1, memory_2, 10
+   ut_exp_fail  ; we expect compary to report difference!
 
+   ; == test kernal decompress ============================
+   print str_krnl_decompress   
+   ; init memory to ff
    fill_memory lzsa_output, LZSA_reference_len, $FF
+   ; decompress
+   mow #lzsa_input, R0
+   mow #lzsa_output, R1
+   jsr KRNL_MEM_DECOMPRESS
+   ; compare output with reference
+   compare_memory lzsa_output, lzsa_reference, LZSA_reference_len
+   ; print result
+   ut_exp_pass
+   ; ======================================================
+
 
    jsr wait_key
    rts
