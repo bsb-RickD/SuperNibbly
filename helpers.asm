@@ -69,5 +69,14 @@ HELPERS_INCLUDED = 1
    sta word
 .endmacro
 
+; inc word
+.macro IncW addr
+   .local @j
+   inc addr
+   bne @j
+   inc addr+1
+   @j:
+.endmacro
+
 
 .endif
