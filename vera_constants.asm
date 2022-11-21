@@ -62,4 +62,7 @@ VERA_increment_256   = 9 << 4
 VERA_increment_320   = 14 << 4
 VERA_increment_512   = 10 << 4
 VERA_increment_640   = 15 << 4
+
+VERA_port_0 = 0
+VERA_port_1 = 1
 .endif

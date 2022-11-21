@@ -53,7 +53,7 @@ filename_out: .byte  "out.bin",0
 
 repeat:   
    jsr KRNL_GETIN    ; read key
-   cmp #$51          ; Q
+   cmp KEY_Q         
    beq done
    jsr KRNL_CHROUT   ; print to screen
 .ifdef USE_IRQ   

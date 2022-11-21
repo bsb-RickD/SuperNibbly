@@ -16,7 +16,7 @@
    mob #((((addr) >> 16) & $1) | increment | direction), VERA_addr_bank
 .endmacro   
 
-.proc push_vera_address
+.proc push_current_vera_address
    ; pull return address from stack, and insert it into jump at the end
    ; return address -1 is stored on the stack.. so add 1
    pla
@@ -37,10 +37,56 @@
    lda VERA_addr_bank
    pha
 return:
-   jmp $0000
+   jmp $AAAA
 .endproc
 
-.proc pop_vera_address
+.proc push_both_vera_addresses
+   ; pull return address from stack, and insert it into jump at the end
+   ; return address -1 is stored on the stack.. so add 1
+   pla
+   clc
+   adc #1
+   sta return+1
+   pla 
+   adc #0
+   sta return+2
+
+   ; first push the control byte
+   lda VERA_ctrl
+   pha
+
+   ; switch to address 0
+   and #$FE
+   tax
+   sta VERA_ctrl   
+
+   ; push the 3 address bytes
+   lda VERA_addr_low
+   pha
+   lda VERA_addr_high
+   pha
+   lda VERA_addr_bank
+   pha
+
+   ; switch to address 1
+   txa
+   ora #$01
+   sta VERA_ctrl
+
+   ; push the 3 address bytes
+   lda VERA_addr_low
+   pha
+   lda VERA_addr_high
+   pha
+   lda VERA_addr_bank
+   pha
+
+return:
+   jmp $AAAA
+.endproc
+
+
+.proc pop_current_vera_address
    ; pull return address from stack, and insert it into jump at the end
    ; return address -1 is stored on the stack.. so add 1
    pla
@@ -63,6 +109,52 @@ return:
 return:
    jmp $0000
 .endproc
+
+.proc pop_both_vera_addresses
+   ; pull return address from stack, and insert it into jump at the end
+   ; return address -1 is stored on the stack.. so add 1
+   pla
+   clc
+   adc #1               
+   sta return+1
+   pla 
+   adc #0
+   sta return+2
+
+   ; switch to address 1
+   lda VERA_ctrl
+   ora #$01
+   tax
+   sta VERA_ctrl
+
+   ; now pop the 3 address bytes
+   pla
+   sta VERA_addr_bank
+   pla
+   sta VERA_addr_high
+   pla
+   sta VERA_addr_low
+
+   ; switch to address 0
+   txa 
+   and #$FE
+   sta VERA_ctrl
+
+   ; now pop the 3 address bytes
+   pla
+   sta VERA_addr_bank
+   pla
+   sta VERA_addr_high
+   pla
+   sta VERA_addr_low
+
+   ; finally restore control word
+   pla
+   sta VERA_ctrl
+return:
+   jmp $AAAA
+.endproc
+
 
 ; a = palette index / color# to access
 .proc set_vera_data_to_palette

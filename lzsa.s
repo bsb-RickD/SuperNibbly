@@ -42,27 +42,21 @@ memory_decompress:
 memory_decompress_internal:
 	PushW r2
 	PushW r3
+	PushW r5
+	PushW r6
 
 	lda r1H
 	cmp #IO_PAGE
 	beq @1
 	LoadW r3, putdst_ram
+	LoadW r5, add_match_offset_ram
+	LoadW r6, copy_backreference_ram
 	bra @2
 @1:	
-	; copy vera address from VERA_ADDR_L, VERA_ADDR_M, VERA_ADDR_H to r1L, r1H, r2L 
-	; to remember the base address
-	MoveW VERA_ADDR_L, r1
-	ldx	VERA_ADDR_H
-	stx r2L
-
-	; copy same pointer to address1
-	lda VERA_CTRL
-	ora #1
-	stx VERA_ADDR_H
-	MoveW r1, VERA_ADDR_L
-
 	; use different methods for put, get
 	LoadW r3, putdst_io
+	LoadW r5, add_match_offset_io
+	LoadW r6, copy_backreference_io
 @2:
 
 	ldy #$00
@@ -171,26 +165,9 @@ rep_match:
 
 ; Forward decompression - add match offset
 
+	clc                             ; prepare add
+	jsr add_match_offset			; add for ram or io
 
-	clc                             ; add dest + match offset
-	lda r1L                         ; low 8 bits
-	adc offslo
-	sta r2L                         ; store back reference address
-	lda offshi                      ; high 8 bits
-	adc r1H
-	sta r2H                         ; store high 8 bits of address
-/*	
-	clc                             ; add dest + match offset
-	lda r1L                         ; low 8 bits
-	adc offslo
-	sta VERA_ADDR_L                 ; store back reference address
-	lda offshi                      ; high 8 bits
-	adc r1H
-	sta VERA_ADDR_M                 ; store high 8 bits of address
-	lda #0
-	adc r2L
-	sta VERA_ADDR_H                 ; store last bit of address
-*/
 	pla                             ; retrieve token from stack again
 	and #$07                        ; isolate match len (MMM)
 	adc #$01                        ; add MIN_MATCH_SIZE_V2 and carry
@@ -224,30 +201,15 @@ prepare_copy_match_y:
 
 copy_match_loop:
 
-	lda (r2)                        ; get one byte of backreference
-	jsr putdst                      ; copy to destination
+	; Forward decompression -- put backreference bytes forward
 
-; Forward decompression -- put backreference bytes forward
-
-	inc r2L
-	beq getmatch_adj_hi
-
-/*
-	; copy from vram to vram, autoincrementing
-	lda VERA_DATA1
-	sta VERA_DATA0
-*/	
-getmatch_done:
+	jsr copy_backreference
 
 	dex
 	bne copy_match_loop
 	dey
 	bne copy_match_loop
 	jmp decode_token
-
-getmatch_adj_hi:
-	inc r2H
-	jmp getmatch_done
 
 getcombinedbits:
 	eor #$80
@@ -261,6 +223,8 @@ combinedbitz:
 	rts
 
 decompression_done:
+	PopW r6
+	PopW r5
 	PopW r3
 	PopW r2
 	rts
@@ -304,10 +268,76 @@ putdst_io:
 	sta VERA_DATA0
 	rts
 
+add_match_offset:
+	jmp (r5)			; dispatch RAM vs. I/O
+
+add_match_offset_ram:
+
+	lda r1L             ; add dest + match offset
+	adc offslo 			; low 8 bits
+	sta r2L             ; store back reference address
+	lda offshi          ; high 8 bits
+	adc r1H
+	sta r2H             ; store high 8 bits of address
+	rts
+
+add_match_offset_io:
+	lda VERA_CTRL
+	and #$FE
+	sta VERA_CTRL					; switch to port 0
+
+	lda VERA_ADDR_L                 ; add dest + match offset
+	adc offslo 						; low 8 bits
+	sta r1L                         ; remember
+	lda VERA_ADDR_M
+	adc offshi 						; mid 8 bits
+	sta r1H                         ; remember
+	php
+	lda VERA_ADDR_H
+	adc #1 							; high last bit
+	sta r2L 						; remember
+	plp
+	
+	lda VERA_CTRL
+	ora #$01
+	sta VERA_CTRL					; switch to port 1 - this is the port we'll read from
+
+	lda r1L
+	sta VERA_ADDR_L                 ; store back reference address to vera address 1
+	lda r1H
+	sta VERA_ADDR_M
+	lda r2L
+	sta VERA_ADDR_H
+	rts
+
+copy_backreference:
+	jmp (r6)
+
+copy_backreference_ram:
+	lda (r2)                        ; get one byte of backreference
+	jsr putdst                      ; copy to destination
+	inc r2L 						; increment source ptr
+	bne getmatch_done
+	inc r2H
+getmatch_done:
+	rts
+
+copy_backreference_io:
+	; copy from vram to vram, autoincrementing
+	lda VERA_DATA1					; get one byte of backreference
+	sta VERA_DATA0					; copy to destination
+
+	; pump address register to ensure vera data 1 has the right value
+	; only needed on overlapping memory copies that are 1 byte apart
+	; but these happen often when decompressing
+	lda VERA_ADDR_L					
+	sta VERA_ADDR_L					
+	rts
+
 getlargesrc:
 	jsr getsrc                      ; grab low 8 bits
 	tax                             ; move to X
-				; fall through grab high 8 bits
+	; fall through grab high 8 bits
 
 getsrc:
 	jmp (r4)

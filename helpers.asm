@@ -83,6 +83,7 @@ HELPERS_INCLUDED = 1
    sta word
 .endmacro
 
+/*
 ; inc word
 .macro IncW addr
    .local @j
@@ -91,6 +92,6 @@ HELPERS_INCLUDED = 1
    inc addr+1
    @j:
 .endmacro
-
+*/
 
 .endif

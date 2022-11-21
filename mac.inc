@@ -4,6 +4,10 @@
 ; (C)2020 Michael Steil, License: 2-clause BSD
 ; based on GEOS 64, edited by Maciej 'YTM/Alliance' Witkowiak
 
+.ifndef MACINC
+
+MACINC = 1
+
 .macro LoadB dest, value
 	.if .const(value) .and value=0
 		stz dest
@@ -316,3 +320,5 @@
 	lda addr
 	ora addr+1
 .endmacro
+
+.endif
