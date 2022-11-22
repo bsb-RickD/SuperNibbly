@@ -1,4 +1,6 @@
-.ifndef r0
+.ifndef REGSINC
+
+REGSINC=1
 
 r0		= $02
 r0L		= $02

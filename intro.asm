@@ -10,21 +10,16 @@
 ; to switch vsync irq and palette fading on or off
 ;USE_IRQ = 1 ; comment the line to turn off
 
-; to use compressed assets or not
-DECOMPRESS_BG = 1
-DECOMPRESS_TO_MEM = 1
-
+.include "regs.inc"
 .include "kernal_constants.asm"
 .include "helpers.asm"
 .include "vera.asm"
 .ifdef USE_IRQ
 .include "irq.asm"
 .endif
-
    
 ; constants
 FramesToWait      = 5
-
 
 color:   .byte 0
 inc_dec: .byte 1
@@ -53,7 +48,7 @@ filename_out: .byte  "out.bin",0
 
 repeat:   
    jsr KRNL_GETIN    ; read key
-   cmp KEY_Q         
+   cmp #KEY_Q         
    beq done
    jsr KRNL_CHROUT   ; print to screen
 .ifdef USE_IRQ   
@@ -156,29 +151,7 @@ done:
    set_vera_address 0,0,VERA_increment_1,0   
    mow #screen, R0         ; screendata to R0 (source)        
    mow #VERA_data0, R1     ; vera data #0 to R1 (destination)
-.ifdef DECOMPRESS_BG
-.ifdef DECOMPRESS_TO_MEM
-   mow #decompress, R1     ; decompress to mem R1 (destination)
-.endif
-   ;jsr KRNL_MEM_DECOMPRESS
    jsr memory_decompress
-.ifdef DECOMPRESS_TO_MEM   
-   sec                     ; r1 now points to output+1
-   lda R1
-   sbc #<decompress        ; subtract start of buffer to get length of data to copy
-   sta R2                  ; store it in r2
-   lda R1+1
-   sbc #>decompress
-   sta R2+1
-   mow #decompress, R0     ; source
-   mow #VERA_data0, R1     ; vera data #0 to R1 (destination)
-   jsr KRNL_MEM_COPY
-.endif   
-.else   
-   mow #SCREEN_SIZE, R2
-   jsr KRNL_MEM_COPY
-.endif
-
    rts   
 .endproc
 
@@ -223,19 +196,8 @@ vsync_count: .word 0
 .include "lzsa.s"
 
 screen:
-.ifdef DECOMPRESS_BG
-   .incbin "test.cpr"
-.else
-   .incbin "test.bin"
-.endif
+.incbin "intro_bg.bin"
 
-/*
-.ifdef DECOMPRESS_BG
-   .incbin "intro_bg.bin"
-.else
-   .incbin "intro_back.bin"
-.endif
-*/
 SCREEN_SIZE = *-screen
 
 screen_pal:
