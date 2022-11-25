@@ -104,8 +104,6 @@ print_next_char:
    rts
 .endproc
 
-
-
 ; R11 points to mem1
 ; R12 points to mem2
 ; x,y bytes to compare (low, high)
