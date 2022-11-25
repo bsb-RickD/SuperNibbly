@@ -18,6 +18,11 @@ str_ut_failed:
 @end:
 .endmacro
 
+; switch vera back to data port 0 - CHROUT depends on that
+.macro switch_vera_to_dataport_0
+   stz VERA_ctrl
+.endmacro
+
 .macro print str
    mow #str, R11
    jsr print_zero_terminated

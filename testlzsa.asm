@@ -56,17 +56,15 @@ test_vram_buffer:
 .proc test_vram_copy_krnl
    prints "kernal memcopy vram -> ram"
 
-   jsr push_both_vera_addresses
-
    jsr test_helper_init_vram
 
    ; copy back
    mow #VERA_data1, R0         ; vera data #1 to R0 (source)
    mow #test_vram_buffer, R1   ; vram buffert to  R1 (destination)
    jsr KRNL_MEM_COPY
-   
-   jsr pop_both_vera_addresses
 
+   switch_vera_to_dataport_0   ; CHROUT needs this to work   
+   
    ; compare
    compare_memory test_vram_buffer, test_vram_reference, 10
    ut_exp_equal
@@ -77,8 +75,6 @@ test_vram_buffer:
 ; fill vram with distinct pattern, copy back to ram (manually), test equality
 .proc test_vram_copy
    prints "manual memcopy vram -> ram"
-
-   jsr push_both_vera_addresses
 
    jsr test_helper_init_vram
 
@@ -95,7 +91,7 @@ loop:
    mow #VERA_data1, R0         ; vera data #1 to R0 (source)
    mow #test_vram_buffer, R1   ; vram buffert to  R1 (destination)
 
-   jsr pop_both_vera_addresses
+   switch_vera_to_dataport_0   ; CHROUT needs this to work   
 
    ; compare
    compare_memory test_vram_buffer, test_vram_reference, 10
@@ -109,12 +105,9 @@ loop:
 .proc test_vram_overlapping_copy
    prints "manual overl. copy vram d1 -> vram d0"
 
-   jsr push_both_vera_addresses
-
    jsr test_helper_init_vram
 
    ; VRAM is now $BB, $AA, $AA, $AA, $AA
-
 
    ; set vera address (to 1) on dataport 0 - we're gonna write here
    set_vera_address 1, 0, VERA_increment_1, 0
@@ -146,8 +139,6 @@ loop:
    mow #VERA_data1, R0         ; vera data #1 to R0 (source)
    mow #test_vram_buffer, R1   ; vram buffert to  R1 (destination)
 
-   jsr pop_both_vera_addresses
-
    ; compare
    compare_memory test_vram_buffer, buffer, 10
    ut_exp_equal
@@ -160,8 +151,6 @@ buffer:
 ; copy overlapping from d0 -> d1
 .proc test_vram_overlapping_copy_d0d1
    prints "manual overl. copy vram d0 -> vram d1"
-
-   jsr push_both_vera_addresses
 
    jsr test_helper_init_vram
 
@@ -200,7 +189,7 @@ loop:
    mow #VERA_data1, R0         ; vera data #1 to R0 (source)
    mow #test_vram_buffer, R1   ; vram buffert to  R1 (destination)
 
-   jsr pop_both_vera_addresses
+   switch_vera_to_dataport_0   ; CHROUT needs this to work   
 
    ; compare
    compare_memory test_vram_buffer, buffer, 10
@@ -214,8 +203,6 @@ buffer:
 ; copy overlapping from d0 -> d1
 .proc test_vram_overlapping_copy_d0d1_manual_inc
    prints "address refreshing vram d0 -> vram d1"
-
-   jsr push_both_vera_addresses
 
    jsr test_helper_init_vram
 
@@ -252,8 +239,8 @@ loop:
    mow #VERA_data1, R0         ; vera data #1 to R0 (source)
    mow #test_vram_buffer, R1   ; vram buffert to  R1 (destination)
 
-   jsr pop_both_vera_addresses
-
+   switch_vera_to_dataport_0   ; CHROUT needs this to work   
+   
    ; compare
    compare_memory test_vram_buffer, reference_buffer, 10
    ut_exp_equal
@@ -268,7 +255,6 @@ reference_buffer:
 .proc test_helper_init_vram
    ; set vera address (to 0) on dataport 0
    set_vera_address 0, 0, VERA_increment_1, 0
-
    
    ; fill the memory
    fill_memory VERA_data0, 10, $AA
@@ -280,8 +266,6 @@ reference_buffer:
    set_vera_address 0, 1, VERA_increment_1, 0
    rts
 .endproc
-
-
 
 
 .proc test_krnl_decompress
@@ -316,8 +300,6 @@ reference_buffer:
    print msg
    prints " - #output bytes"
 
-   jsr push_both_vera_addresses  ; save vera state to not fuck up kernal   
-
    ; set vera address (to 0)
    set_vera_address 0, 0, VERA_increment_1, 0
 
@@ -337,8 +319,6 @@ reference_buffer:
    and #$FE
    sta VERA_ctrl
    ldy VERA_addr_low
-
-   jsr pop_both_vera_addresses      ; restore vera state
 
    ; compare and print result
    cpy #LZSA_reference_len
@@ -364,6 +344,8 @@ loop:
    dex
    bne loop
 
+   switch_vera_to_dataport_0   ; CHROUT needs this to work   
+   
    ; compare and print result
    compare_memory lzsa_output, lzsa_reference, LZSA_reference_len
    ut_exp_equal   
