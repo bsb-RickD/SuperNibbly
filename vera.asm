@@ -4,12 +4,28 @@
 .include "vera_constants.asm"
 .include "helpers.asm"
 
-; addr = 17 bit address, dataport = 0/1, increment = data increment, direction = 1 for decrement
+; addr = 17 bit address, 
+; optional: (default 0) dataport = 0/1
+; optional: (default 1) increment = data increment 
+; optional: (default 0) direction = 1 for decrement
 .macro set_vera_address addr, dataport, increment, direction
+.if .paramcount = 1
+   set_vera_address_ addr, VERA_port_0, VERA_increment_1, VERA_increment_addresses
+.elseif .paramcount = 2
+   set_vera_address_ addr, dataport, VERA_increment_1, VERA_increment_addresses
+.elseif .paramcount = 3
+   set_vera_address_ addr, dataport, increment, VERA_increment_addresses
+.elseif .paramcount = 4
+   set_vera_address_ addr, dataport, increment, direction
+.endif
+.endmacro
+
+; addr = 17 bit address, dataport = 0/1, increment = data increment, direction = 1 for decrement
+.macro set_vera_address_ addr, dataport, increment, direction
 .assert (addr) < $1FFFF, error, "when setting vera address, address must be smaller than $1FFFF"
-.assert (dataport) = 0 || (dataport) = 1, error, "when setting vera address, dataport must be 0 or 1"
+.assert (dataport) = VERA_port_0 || (dataport) = VERA_port_1, error, "when setting vera address, dataport must be 0 or 1"
 .assert ((increment) >= VERA_increment_0) && ((increment) <= VERA_increment_640), error, "when setting vera address, increment must be between 0 and 15"
-.assert (direction) = 0 || (direction) = 1, error, "when setting vera address, direction must be 0 or 1"
+.assert (direction) = VERA_increment_addresses || (direction) = VERA_decrement_addresses, error, "when setting vera address, direction must be 0 or 1"
    mob #dataport, VERA_ctrl
    mob #((addr) & $FF), VERA_addr_low
    mob #(((addr) >> 8) & $FF), VERA_addr_high

@@ -30,7 +30,8 @@ str_mem_test_different:
    jsr test_krnl_decompress_vram
    jsr test_lzsa_decompress   
    jsr test_lzsa_decompress_vram
-   jsr test_vram_copy_krnl
+   jsr test_vram_copy_krnl_d0
+   jsr test_vram_copy_krnl_d1
    jsr test_vram_copy
    jsr test_vram_overlapping_copy
    jsr test_vram_overlapping_copy_d0d1   
@@ -53,13 +54,34 @@ test_vram_buffer:
    .res 10, 0
 
 ; fill vram with distinct pattern, copy back to ram, test equality
-.proc test_vram_copy_krnl
-   prints "kernal memcopy vram -> ram"
+.proc test_vram_copy_krnl_d0
+   prints "kernal memcopy vram(d0) -> ram"
+
+   jsr test_helper_init_vram
+
+   ; we'll read back from d0
+   set_vera_address 0
+
+   ; copy back
+   mow #VERA_data0, R0         ; vera data #0 to R0 (source)
+   mow #test_vram_buffer, R1   ; vram buffert to  R1 (destination)
+   jsr KRNL_MEM_COPY
+
+   ; compare
+   compare_memory test_vram_buffer, test_vram_reference, 10
+   ut_exp_equal
+
+   rts
+.endproc 
+
+; fill vram with distinct pattern, copy back to ram, test equality
+.proc test_vram_copy_krnl_d1
+   prints "kernal memcopy vram(d1) -> ram"
 
    jsr test_helper_init_vram
 
    ; copy back
-   mow #VERA_data1, R0         ; vera data #1 to R0 (source)
+   mow #VERA_data1, R0         ; vera data #0 to R0 (source)
    mow #test_vram_buffer, R1   ; vram buffert to  R1 (destination)
    jsr KRNL_MEM_COPY
 
@@ -71,6 +93,7 @@ test_vram_buffer:
 
    rts
 .endproc 
+
 
 ; fill vram with distinct pattern, copy back to ram (manually), test equality
 .proc test_vram_copy
@@ -110,7 +133,7 @@ loop:
    ; VRAM is now $BB, $AA, $AA, $AA, $AA
 
    ; set vera address (to 1) on dataport 0 - we're gonna write here
-   set_vera_address 1, 0, VERA_increment_1, 0
+   set_vera_address 1
 
    ; vera adddress 1 is set to 0 - so we copy the $BB from 0 to one
    ; and then we read the the just copied $BB from 1 and copy it to 2, etc.
@@ -254,7 +277,7 @@ reference_buffer:
 ; helper: fill vram with distinct pattern
 .proc test_helper_init_vram
    ; set vera address (to 0) on dataport 0
-   set_vera_address 0, 0, VERA_increment_1, 0
+   set_vera_address 0
    
    ; fill the memory
    fill_memory VERA_data0, 10, $AA
@@ -263,7 +286,7 @@ reference_buffer:
    sta VERA_data0
 
    ; set vera address (to 0) on dataport 1 - we're gonna read from here
-   set_vera_address 0, 1, VERA_increment_1, 0
+   set_vera_address 0, VERA_port_1
    rts
 .endproc
 
@@ -301,7 +324,7 @@ reference_buffer:
    prints " - #output bytes"
 
    ; set vera address (to 0)
-   set_vera_address 0, 0, VERA_increment_1, 0
+   set_vera_address 0
 
    ; fill the memory
    fill_memory VERA_data0, LZSA_reference_len, $FF
@@ -331,7 +354,7 @@ reference_buffer:
    fill_memory lzsa_output, LZSA_reference_len, $FF
 
    ; set vera address (to 0) on dataport 0 - we're gonna read here
-   set_vera_address 0, VERA_port_0, VERA_increment_1, 0
+   set_vera_address 0
 
    ; copy back to RAM
    ldx #LZSA_reference_len
@@ -364,7 +387,7 @@ msg:
    fill_memory lzsa_output, LZSA_reference_len, $FF
 
    ; set vera address (to 0)
-   set_vera_address 0, 0, VERA_increment_1, 0
+   set_vera_address 0
    
    ; decompress
    mow #lzsa_input, R0

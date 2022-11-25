@@ -148,7 +148,7 @@ done:
 
 .proc fill_screen
    ; vera address0 set to 0, increment 1
-   set_vera_address 0,0,VERA_increment_1,0   
+   set_vera_address 0   
    mow #screen, R0         ; screendata to R0 (source)        
    mow #VERA_data0, R1     ; vera data #0 to R1 (destination)
    jsr memory_decompress

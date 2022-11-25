@@ -65,4 +65,7 @@ VERA_increment_640   = 15 << 4
 
 VERA_port_0 = 0
 VERA_port_1 = 1
+
+VERA_increment_addresses = 0
+VERA_decrement_addresses = 1
 .endif
