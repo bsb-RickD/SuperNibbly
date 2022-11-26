@@ -1,11 +1,17 @@
+; define a string with leading length
+.define lstr(message) .byte .strlen(message), message
+
 str_ut_welcome:
-.byte "=== unit test framework ===", CHR_NL, CHR_NL, 0
+.byte (str_ut_passed-1-*),"=== unit test framework ===", CHR_NL, CHR_NL
 
 str_ut_passed:
-.byte CHR_COLOR_GREEN, "passed", CHR_COLOR_WHITE, CHR_NL, 0
-str_ut_failed:
-.byte CHR_COLOR_RED, "failed", CHR_COLOR_WHITE, CHR_NL, 0
+.byte (str_ut_failed-1-*), CHR_COLOR_GREEN, "passed", CHR_COLOR_WHITE, CHR_NL
 
+str_ut_failed:
+.byte (str_ut_failed_end-1-*), CHR_COLOR_RED, "failed", CHR_COLOR_WHITE, CHR_NL
+str_ut_failed_end:
+
+; print a string that was passed as parameter: prints "erik was here"
 .macro prints str
    .local @msg
    .local @end
@@ -18,14 +24,21 @@ str_ut_failed:
 @end:
 .endmacro
 
+; print a string at addr that has a leading length
+.macro printl addr
+   mow #addr, R11
+   jsr print_length_leading
+.endmacro
+
+; print a string at addr that is zero terminated
+.macro printz addr
+   mow #addr, R11
+   jsr print_zero_terminated
+.endmacro
+
 ; switch vera back to data port 0 - CHROUT depends on that
 .macro switch_vera_to_dataport_0
    stz VERA_ctrl
-.endmacro
-
-.macro print str
-   mow #str, R11
-   jsr print_zero_terminated
 .endmacro
 
 .macro fill_memory start, count, value
@@ -71,10 +84,10 @@ str_ut_failed:
    jsr KRNL_PLOT
    plp
    bne failed
-   print str_ut_passed
+   printl str_ut_passed
    rts
 failed:
-   print str_ut_failed
+   printl str_ut_failed
    rts
 .endproc
 
@@ -104,6 +117,14 @@ print_next_char:
 done:
    rts
 .endproc
+
+; R11 points to string, which has the length as first byte
+.proc print_length_leading
+   ldy #1
+   lda (R11)
+   tax
+   bra print_x_length+2
+.endproc   
 
 ; R11 points to string, x holds length
 .proc print_x_length

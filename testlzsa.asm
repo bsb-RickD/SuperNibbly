@@ -16,7 +16,7 @@
 .include "lzsa.s"
 
 .proc main   
-   print str_ut_welcome
+   printl str_ut_welcome
    
    jsr test_mem_different
    jsr test_mem_equal
@@ -27,7 +27,7 @@
    jsr test_vram_copy_krnl_d0
    jsr test_vram_copy_krnl_d1
    jsr test_vram_copy
-   jsr test_vram_overlapping_copy_d0d1_manual_inc
+   jsr test_vram_overlapping_copy_d0d1_manual_inc   
 
    rts
 .endproc
@@ -209,7 +209,7 @@ reference_buffer:
 .endproc
 
 .proc test_lzsa_decompress_vram
-   print msg
+   printl msg
    prints " - #output bytes"
 
    ; set vera address (to 0)
@@ -226,6 +226,8 @@ reference_buffer:
    mow #VERA_data0, R1
    jsr memory_decompress
 
+   switch_vera_to_dataport_0        ; output address is on port 0
+
    ; get result - how many bytes have been written?
    ldy VERA_addr_low
 
@@ -233,7 +235,7 @@ reference_buffer:
    cpy #LZSA_reference_len
    ut_exp_equal
 
-   print msg
+   printl msg
    prints " - comparison"
 
    ; fill the memory, just to initialize it
@@ -248,12 +250,11 @@ reference_buffer:
    ut_exp_equal   
 
    rts
-msg:
-.byte "lzsa decompress vram",0
+msg: lstr "lzsa decompress vram"
 .endproc
 
 .proc test_krnl_decompress_vram
-   print msg
+   printl msg
    prints " - #output bytes"
    ; setup - init memory to ff
    fill_memory lzsa_output, LZSA_reference_len, $FF
@@ -279,26 +280,24 @@ msg:
    ut_exp_equal
    */
    rts
-msg:
-.byte "krnl decompress vram",0
+msg: lstr "krnl decompress vram"
 .endproc
 
 
 .proc test_mem_equal
-   print msg
+   printl msg
    prints "1"
    compare_memory memory_1, memory_1, MEMORY_len
    ut_exp_equal
 
-   print msg
+   printl msg
    prints "2"
    fill_memory memory_1, MEMORY_len, $AB
    fill_memory lzsa_output, MEMORY_len, $AB
    compare_memory memory_1, lzsa_output, MEMORY_len
    ut_exp_equal
    rts
-msg:
-.byte "mem same ",0
+msg: lstr "mem same "
 .endproc
 
 .proc test_mem_different
@@ -309,8 +308,6 @@ msg:
 msg:
 
 .endproc
-
-
 
 memory_1: .byte 1,2,3,4,5,6,7,8,9,10
 MEMORY_len = *-memory_1
