@@ -35,6 +35,14 @@ str_ut_failed:
    jsr KRNL_MEM_FILL
 .endmacro
 
+.macro copy_memory source, dest, count
+   mow #source, R0
+   mow #dest, R1
+   mow #count, R2
+   jsr KRNL_MEM_COPY
+.endmacro
+
+
 .macro compare_memory mem1, mem2, len
    mow #mem1, R11
    mow #mem2, R12

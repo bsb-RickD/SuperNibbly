@@ -15,14 +15,8 @@
 .include "vera.asm"
 .include "lzsa.s"
 
-
-str_mem_test_different:
-.byte "memory different",0
-
-
 .proc main   
    print str_ut_welcome
-
    
    jsr test_mem_different
    jsr test_mem_equal
@@ -33,8 +27,6 @@ str_mem_test_different:
    jsr test_vram_copy_krnl_d0
    jsr test_vram_copy_krnl_d1
    jsr test_vram_copy
-   jsr test_vram_overlapping_copy
-   jsr test_vram_overlapping_copy_d0d1   
    jsr test_vram_overlapping_copy_d0d1_manual_inc
 
    rts
@@ -50,25 +42,23 @@ str_mem_test_different:
 
 test_vram_reference:
    .byte $BB, $AA, $AA, $AA, $AA, $AA, $AA, $AA, $AA, $AA
+TEST_vram_reference_len = *-test_vram_reference;
 test_vram_buffer:
-   .res 10, 0
+   .res TEST_vram_reference_len, $FF
 
 ; fill vram with distinct pattern, copy back to ram, test equality
 .proc test_vram_copy_krnl_d0
    prints "kernal memcopy vram(d0) -> ram"
 
+   ; init the VRAM, and ram buffer
    jsr test_helper_init_vram
-
-   ; we'll read back from d0
-   set_vera_address 0
-
+   
    ; copy back
-   mow #VERA_data0, R0         ; vera data #0 to R0 (source)
-   mow #test_vram_buffer, R1   ; vram buffert to  R1 (destination)
-   jsr KRNL_MEM_COPY
+   set_vera_address 0               ; we'll read back from d0
+   copy_memory VERA_data0, test_vram_buffer, TEST_vram_reference_len
 
    ; compare
-   compare_memory test_vram_buffer, test_vram_reference, 10
+   compare_memory test_vram_buffer, test_vram_reference, TEST_vram_reference_len
    ut_exp_equal
 
    rts
@@ -81,14 +71,13 @@ test_vram_buffer:
    jsr test_helper_init_vram
 
    ; copy back
-   mow #VERA_data1, R0         ; vera data #0 to R0 (source)
-   mow #test_vram_buffer, R1   ; vram buffert to  R1 (destination)
-   jsr KRNL_MEM_COPY
+   set_vera_address 0, VERA_port_1  ; data port 1 ready for reading
+   copy_memory VERA_data1, test_vram_buffer, TEST_vram_reference_len
 
-   switch_vera_to_dataport_0   ; CHROUT needs this to work   
+   switch_vera_to_dataport_0        ; CHROUT needs this to work   
    
    ; compare
-   compare_memory test_vram_buffer, test_vram_reference, 10
+   compare_memory test_vram_buffer, test_vram_reference, TEST_vram_reference_len
    ut_exp_equal
 
    rts
@@ -101,126 +90,25 @@ test_vram_buffer:
 
    jsr test_helper_init_vram
 
+   ; set vera address (to 0) on dataport 0 - we're gonna read from here
+   set_vera_address 0
+
    ; copy back
-   ldx #10
+   ldx #TEST_vram_reference_len
    ldy #0
    mow #test_vram_buffer, R11
-loop:   
-   lda VERA_data1
-   sta (R11),y
-   iny
-   dex
-   bne loop
-   mow #VERA_data1, R0         ; vera data #1 to R0 (source)
-   mow #test_vram_buffer, R1   ; vram buffert to  R1 (destination)
-
-   switch_vera_to_dataport_0   ; CHROUT needs this to work   
-
-   ; compare
-   compare_memory test_vram_buffer, test_vram_reference, 10
-   ut_exp_equal
-
-   rts
-.endproc 
-
-
-; copy overlapping from d1 -> d0
-.proc test_vram_overlapping_copy
-   prints "manual overl. copy vram d1 -> vram d0"
-
-   jsr test_helper_init_vram
-
-   ; VRAM is now $BB, $AA, $AA, $AA, $AA
-
-   ; set vera address (to 1) on dataport 0 - we're gonna write here
-   set_vera_address 1
-
-   ; vera adddress 1 is set to 0 - so we copy the $BB from 0 to one
-   ; and then we read the the just copied $BB from 1 and copy it to 2, etc.
-   ; so after 9 copies, the first 10 bytes of VRAM should be $BB
-
-   ldx #9
-vram_loop:   
-   lda VERA_data1
-   sta VERA_data0
-   dex
-   bne vram_loop
-
-   ; set vera data1 to 0
-   stz VERA_addr_low
-
-   ; copy back to RAM
-   ldx #10
-   ldy #0
-   mow #test_vram_buffer, R11
-loop:   
-   lda VERA_data1
-   sta (R11),y
-   iny
-   dex
-   bne loop
-   mow #VERA_data1, R0         ; vera data #1 to R0 (source)
-   mow #test_vram_buffer, R1   ; vram buffert to  R1 (destination)
-
-   ; compare
-   compare_memory test_vram_buffer, buffer, 10
-   ut_exp_equal
-
-   rts
-buffer:
-.res 10, $BB
-.endproc 
-
-; copy overlapping from d0 -> d1
-.proc test_vram_overlapping_copy_d0d1
-   prints "manual overl. copy vram d0 -> vram d1"
-
-   jsr test_helper_init_vram
-
-   ; VRAM is now $BB, $AA, $AA, $AA, $AA
-
-   ; set vera address (to 1) on dataport 1 - we're gonna write here
-   set_vera_address 1, VERA_port_1, VERA_increment_1, 0
-
-   ; set vera address (to 1) on dataport 1 - we're gonna write here
-   set_vera_address 0, VERA_port_0, VERA_increment_1, 0
-
-   ; vera adddress 1 is set to 0 - so we copy the $BB from 0 to one
-   ; and then we read the the just copied $BB from 1 and copy it to 2, etc.
-   ; so after 9 copies, the first 10 bytes of VRAM should be $BB
-
-   ldx #9
-vram_loop:   
+ loop:   
    lda VERA_data0
-   sta VERA_data1
-   dex
-   bne vram_loop
-
-   ; set vera data1 to 0
-   stz VERA_addr_low
-
-   ; copy back to RAM
-   ldx #10
-   ldy #0
-   mow #test_vram_buffer, R11
-loop:   
-   lda VERA_data1
    sta (R11),y
    iny
    dex
    bne loop
-   mow #VERA_data1, R0         ; vera data #1 to R0 (source)
-   mow #test_vram_buffer, R1   ; vram buffert to  R1 (destination)
-
-   switch_vera_to_dataport_0   ; CHROUT needs this to work   
 
    ; compare
-   compare_memory test_vram_buffer, buffer, 10
+   compare_memory test_vram_buffer, test_vram_reference, TEST_vram_reference_len
    ut_exp_equal
 
    rts
-buffer:
-.res 10, $BB
 .endproc 
 
 ; copy overlapping from d0 -> d1
@@ -238,7 +126,7 @@ buffer:
    set_vera_address 0, VERA_port_0, VERA_increment_1, 0
 
    ldx #9
-vram_loop:   
+ vram_loop:   
    lda VERA_data0
    sta VERA_data1
    lda VERA_addr_low
@@ -250,10 +138,10 @@ vram_loop:
    set_vera_address 0, VERA_port_0, VERA_increment_1, 0
 
    ; copy back to RAM
-   ldx #10
+   ldx #TEST_vram_reference_len
    ldy #0
    mow #test_vram_buffer, R11
-loop:   
+ loop:   
    lda VERA_data0
    sta (R11),y
    iny
@@ -265,7 +153,7 @@ loop:
    switch_vera_to_dataport_0   ; CHROUT needs this to work   
    
    ; compare
-   compare_memory test_vram_buffer, reference_buffer, 10
+   compare_memory test_vram_buffer, reference_buffer, TEST_vram_reference_len
    ut_exp_equal
 
    rts
@@ -274,19 +162,20 @@ reference_buffer:
 .endproc 
 
 
-; helper: fill vram with distinct pattern
+; helper: fill vram with distinct pattern $BB, $AA, $AA, $AA, $AA, $AA, $AA, $AA, $AA, $AA
 .proc test_helper_init_vram
-   ; set vera address (to 0) on dataport 0
-   set_vera_address 0
+   ; initialize the buffer used during test to a value not used in the test
+   fill_memory test_vram_buffer, LZSA_reference_len, $FF
+
+   ; set vera address (to 1) on dataport 0
+   set_vera_address 1
    
    ; fill the memory
-   fill_memory VERA_data0, 10, $AA
+   fill_memory VERA_data0, TEST_vram_reference_len-1, $AA
    stz VERA_addr_low
    lda #$BB
    sta VERA_data0
 
-   ; set vera address (to 0) on dataport 1 - we're gonna read from here
-   set_vera_address 0, VERA_port_1
    rts
 .endproc
 
@@ -337,10 +226,7 @@ reference_buffer:
    mow #VERA_data0, R1
    jsr memory_decompress
 
-   ; get result 
-   lda VERA_ctrl
-   and #$FE
-   sta VERA_ctrl
+   ; get result - how many bytes have been written?
    ldy VERA_addr_low
 
    ; compare and print result
@@ -353,22 +239,10 @@ reference_buffer:
    ; fill the memory, just to initialize it
    fill_memory lzsa_output, LZSA_reference_len, $FF
 
-   ; set vera address (to 0) on dataport 0 - we're gonna read here
-   set_vera_address 0
+   ; copy back
+   set_vera_address 0               ; we'll read back from d0
+   copy_memory VERA_data0, lzsa_output, LZSA_reference_len
 
-   ; copy back to RAM
-   ldx #LZSA_reference_len
-   ldy #0
-   mow #lzsa_output, R11
-loop:   
-   lda VERA_data0
-   sta (R11),y
-   iny
-   dex
-   bne loop
-
-   switch_vera_to_dataport_0   ; CHROUT needs this to work   
-   
    ; compare and print result
    compare_memory lzsa_output, lzsa_reference, LZSA_reference_len
    ut_exp_equal   
@@ -377,8 +251,6 @@ loop:
 msg:
 .byte "lzsa decompress vram",0
 .endproc
-
-
 
 .proc test_krnl_decompress_vram
    print msg
