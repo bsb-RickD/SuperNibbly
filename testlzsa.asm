@@ -18,16 +18,19 @@
 .proc main   
    printl str_ut_welcome
    
+   
    jsr test_mem_different
    jsr test_mem_equal
    jsr test_krnl_decompress
    jsr test_krnl_decompress_vram
    jsr test_lzsa_decompress   
-   jsr test_lzsa_decompress_vram
+   jsr test_lzsa_decompress_vram   
+   jsr test_lzsa_decompress_vram_moving
    jsr test_vram_copy_krnl_d0
    jsr test_vram_copy_krnl_d1
    jsr test_vram_copy
    jsr test_vram_overlapping_copy_d0d1_manual_inc   
+   
 
    rts
 .endproc
@@ -252,6 +255,118 @@ reference_buffer:
    rts
 msg: lstr "lzsa decompress vram"
 .endproc
+
+
+lzsam_count:
+.byte $01
+
+lzsam_addr:
+.dword $FFFF-31
+
+; set vera address (to lzsam_addr) for data port 0
+.proc set_vaddr
+   stz VERA_ctrl
+   mob lzsam_addr, VERA_addr_low
+   mob lzsam_addr+1, VERA_addr_high
+   lda lzsam_addr+2
+   and #1
+   ora #VERA_increment_1
+   sta VERA_addr_bank
+   rts
+.endproc
+
+.proc print_hex_digit
+   and #$0f
+   adc #$30    ; $30 = "0"
+   cmp #$3A    ; did we exceed 0..9?
+   bcc print_char
+   adc #$26    ; bring it to the "A".."F" range
+print_char:
+   jsr KRNL_CHROUT
+   rts
+.endproc
+
+.proc print_hex
+   pha
+   ror
+   ror
+   ror
+   ror
+   clc
+   jsr print_hex_digit
+   pla
+   bra print_hex_digit
+.endproc
+
+
+.proc test_lzsa_decompress_vram_moving
+   lda #01
+   sta lzsam_count
+   ldx #$09
+next_round:   
+   phx
+
+   printl msg
+   lda lzsam_count
+   ;jsr KRNL_CHROUT
+   jsr print_hex
+   
+   ; set vera address (to lzsam_addr) for data port 0
+   jsr set_vaddr
+
+   ; fill the memory
+   fill_memory VERA_data0, LZSA_reference_len, $FF
+
+   ; reset vera address (to lzsam_addr) for data port 0
+   jsr set_vaddr
+
+   ; decompress
+   mow #lzsa_input, R0
+   mow #VERA_data0, R1
+   jsr memory_decompress
+
+   ; fill the memory, just to initialize it
+   fill_memory lzsa_output, LZSA_reference_len, $FF
+
+   ; copy back
+   jsr set_vaddr     ; again, set address on data port0 - we'll copy from here
+   copy_memory VERA_data0, lzsa_output, LZSA_reference_len
+
+   ; compare and print result
+   compare_memory lzsa_output, lzsa_reference, LZSA_reference_len
+   ut_exp_equal
+
+   ; increase address by 7
+   clc
+   lda lzsam_addr
+   adc #7
+   sta lzsam_addr
+   lda lzsam_addr+1
+   adc #0
+   sta lzsam_addr+1
+   lda lzsam_addr+2
+   adc #0
+   sta lzsam_addr+2
+
+   ; increase count (as bcd)
+   sed
+   lda lzsam_count
+   clc
+   adc #1
+   sta lzsam_count
+   cld
+
+   ; pull x and loop
+   plx
+   dex
+   beq done
+   jmp next_round
+done:   
+
+   rts
+msg: lstr "lzsa decompress vram moving dest "
+.endproc
+
 
 .proc test_krnl_decompress_vram
    printl msg
