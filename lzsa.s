@@ -2,10 +2,15 @@
 ; LZSA2 Decompression
 ;----------------------------------------------------------------------
 ; (C)2019 Emmanuel Marty, Peter Ferrie, M. Steil; License: 3-clause BSD
+; decompression to VRAM fix: Erik Pojar
 
 .include "regs.inc"
 .include "io.inc"
 .include "mac.inc"
+
+;.export memory_decompress, memory_decompress_internal
+;
+;.segment "KVAR"
 
 nibcount:
 	.res 1
@@ -13,6 +18,8 @@ nibbles:
 	.res 1
 offslo:	.res 1
 offshi:	.res 1
+
+;.segment "LZSA"
 
 ;---------------------------------------------------------------
 ; memory_decompress
@@ -53,7 +60,11 @@ memory_decompress_internal:
 	LoadW r6, copy_backreference_ram
 	bra @2
 @1:	
-	; use different methods for put, get
+	; use io methods for put, match offset calc and backref copying
+	;
+	; the assumption here is that r1 points to VERA_DATA0 (for writing)
+	; during decompression VERA_DATA1 is being used (for reading / copying)
+	;
 	LoadW r3, putdst_io
 	LoadW r5, add_match_offset_io
 	LoadW r6, copy_backreference_io
@@ -165,8 +176,8 @@ rep_match:
 
 ; Forward decompression - add match offset
 
-	clc                             ; prepare add
-	jsr add_match_offset			; add for ram or io
+	clc
+	jsr add_match_offset		; add dest + match offset for ram or io
 
 	pla                             ; retrieve token from stack again
 	and #$07                        ; isolate match len (MMM)
@@ -181,8 +192,8 @@ rep_match:
 	bcc prepare_copy_match          ; if less, match length is complete
 
 	jsr getsrc                      ; get extra byte of variable match length
-									; the carry is always set by the CMP above
-									; GETSRC doesn't change it
+					; the carry is always set by the CMP above
+					; GETSRC doesn't change it
 	sbc #$e8                        ; overflow?
 
 prepare_copy_match:
@@ -190,7 +201,7 @@ prepare_copy_match:
 	bcc prepare_copy_match_y        ; if not, the match length is complete
 	beq decompression_done          ; if EOD code, bail
 
-									; Handle 16 bits match length
+					; Handle 16 bits match length
 	jsr getlargesrc                 ; grab low 8 bits in X, high 8 bits in A
 	tay                             ; put high 8 bits in Y
 
@@ -201,7 +212,7 @@ prepare_copy_match_y:
 
 copy_match_loop:
 
-	; Forward decompression -- put backreference bytes forward
+; Forward decompression -- put backreference bytes forward
 
 	jsr copy_backreference
 
@@ -223,6 +234,7 @@ combinedbitz:
 	rts
 
 decompression_done:
+	stz VERA_CTRL			; could also push/pull, but this is shorter, KERNAL assumes D0..
 	PopW r6
 	PopW r5
 	PopW r3
@@ -265,7 +277,9 @@ putdst_ram:
 
 ; Store into port in I/O area, assume device auto-increments
 putdst_io:
-	sta VERA_DATA0
+	sta VERA_DATA0			; could do "sta (r1)" here instead, but that takes 1 cycle more 
+					; and the whole code only really works under the assumption of 
+					; writing to VERA_DATA0 and reading from VERA_DATA1
 	rts
 
 add_match_offset:
@@ -273,50 +287,42 @@ add_match_offset:
 
 add_match_offset_ram:
 
-	lda r1L             ; add dest + match offset
-	adc offslo 			; low 8 bits
-	sta r2L             ; store back reference address
-	lda offshi          ; high 8 bits
+	lda r1L				; add dest + match offset
+	adc offslo			; low 8 bits
+	sta r2L				; store back reference address
+	lda offshi			; high 8 bits
 	adc r1H
-	sta r2H             ; store high 8 bits of address
+	sta r2H				; store high 8 bits of address
 	rts
 
 add_match_offset_io:
-	lda VERA_CTRL
-	and #$FE
-	sta VERA_CTRL					; switch to port 0
+	stz VERA_CTRL			; switch to port 0
+	lda VERA_ADDR_L			; add dest + match offset
+	adc offslo              	; low 8 bits
+	sta r2L
+	lda offshi			; high 8 bits
+	adc VERA_ADDR_M
+	sta r2H
+	lda VERA_ADDR_H			; 17th bit in 
+	adc #1				
+	sec
 
-	lda VERA_ADDR_L                 ; add dest + match offset
-	adc offslo 						; low 8 bits
-	sta r1L                         ; remember
-	lda VERA_ADDR_M
-	adc offshi 						; mid 8 bits
-	sta r1H                         ; remember
-	php
-	lda VERA_ADDR_H
-	adc #1 							; high last bit
-	sta r2L 						; remember
-	plp
-	
-	lda VERA_CTRL
-	ora #$01
-	sta VERA_CTRL					; switch to port 1 - this is the port we'll read from
+	inc VERA_CTRL			; switch to port 1 - this is the port we'll read from
 
-	lda r1L
-	sta VERA_ADDR_L                 ; store back reference address to vera address 1
-	lda r1H
-	sta VERA_ADDR_M
-	lda r2L
 	sta VERA_ADDR_H
+	lda r2L
+	sta VERA_ADDR_L                 ; store back reference address to vera address 1
+	lda r2H
+	sta VERA_ADDR_M
 	rts
 
 copy_backreference:
 	jmp (r6)
 
 copy_backreference_ram:
-	lda (r2)                        ; get one byte of backreference
-	jsr putdst                      ; copy to destination
-	inc r2L 						; increment source ptr
+	lda (r2)			; get one byte of backreference
+	jsr putdst			; copy to destination
+	inc r2L				; increment source ptr
 	bne getmatch_done
 	inc r2H
 getmatch_done:
@@ -324,12 +330,12 @@ getmatch_done:
 
 copy_backreference_io:
 	; copy from vram to vram, autoincrementing
-	lda VERA_DATA1					; get one byte of backreference
-	sta VERA_DATA0					; copy to destination
+	lda VERA_DATA1			; get one byte of backreference
+	sta VERA_DATA0			; copy to destination
 
 	; pump address register to ensure vera data 1 has the right value
 	; only needed on overlapping memory copies that are 1 byte apart
-	; but these happen often when decompressing
+	; but these happen often when decompressing, so we have to be on the safe side here
 	lda VERA_ADDR_L					
 	sta VERA_ADDR_L					
 	rts
@@ -337,7 +343,7 @@ copy_backreference_io:
 getlargesrc:
 	jsr getsrc                      ; grab low 8 bits
 	tax                             ; move to X
-	; fall through grab high 8 bits
+					; fall through grab high 8 bits
 
 getsrc:
 	jmp (r4)
