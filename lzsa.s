@@ -47,10 +47,10 @@ memory_decompress:
 	rts
 
 memory_decompress_internal:
-	; push registers r5-r8 in reverse order, this is shorter than 4x PushW
+	; push registers r2-r3 in reverse order, this is shorter than 2x PushW
 	ldx #8
 pushloop:	
-	lda r4H,x
+	lda r1H,x
 	pha
 	dex
 	bne pushloop
@@ -59,18 +59,10 @@ pushloop:
 	cmp #IO_PAGE
 	beq @1
 	LoadW r3, putdst_ram
-	LoadW r7, add_match_offset_ram
-	LoadW r8, copy_backreference_ram
 	bra @2
 @1:	
-	; use io methods for put, match offset calc and backref copying
-	;
-	; the assumption here is that r1 points to VERA_DATA0 (for writing)
-	; during decompression VERA_DATA1 is being used (for reading / copying)
-	;
+	; use io methods for put, autoincrement is assumed
 	LoadW r3, putdst_io
-	LoadW r7, add_match_offset_io
-	LoadW r8, copy_backreference_io
 @2:
 
 	ldy #$00
@@ -271,7 +263,7 @@ need_nibbles:
 getput:
 	jsr getsrc
 putdst:
-	jmp (r3)			; dispatch RAM vs. I/O
+	jmp (r3)			; dispatch RAM vs. I/O	
 
 ; Store in RAM and increment
 putdst_ram:
@@ -287,27 +279,30 @@ putdst_io:
 	sta (r1)
 	rts
 
-add_match_offset:
-	jmp (r7)			; dispatch RAM vs. I/O
+add_match_offset:	
+	lda r1H
+	cmp #IO_PAGE			
+	beq add_match_offset_io	; dispatch RAM vs. I/O			
 
 add_match_offset_ram:
-
+	clc  
 	lda r1L				; add dest + match offset
 	adc offslo			; low 8 bits
-	sta r5L				; store back reference address
+	sta r2L				; store back reference address
 	lda offshi			; high 8 bits
 	adc r1H
-	sta r5H				; store high 8 bits of address
+	sta r2H				; store high 8 bits of address
 	rts
 
 add_match_offset_io:
+	clc
 	stz VERA_CTRL			; switch to port 0
 	lda VERA_ADDR_L			; add dest + match offset
 	adc offslo              	; low 8 bits
-	sta r5L
+	sta r2L
 	lda offshi			; high 8 bits
 	adc VERA_ADDR_M
-	sta r5H
+	sta r2H
 	lda VERA_ADDR_H			; 17th bit in 
 	adc #1				
 	sec
@@ -315,26 +310,30 @@ add_match_offset_io:
 	inc VERA_CTRL			; switch to port 1 - this is the port we'll read from
 
 	sta VERA_ADDR_H
-	lda r5L
+	lda r2L
 	sta VERA_ADDR_L                 ; store back reference address to vera address 1
-	lda r5H
+	lda r2H
 	sta VERA_ADDR_M
 	rts
 
 copy_backreference:
-	jmp (r8)
+	lda r1H
+	cmp #IO_PAGE			
+	beq copy_backreference_io ; dispatch RAM vs. I/O			
 
 copy_backreference_ram:
-	lda (r5)			; get one byte of backreference
+	lda (r2)			; get one byte of backreference
 	jsr putdst			; copy to destination
-	inc r5L				; increment source ptr
+	inc r2L				; increment source ptr
 	bne getmatch_done
-	inc r5H
+	inc r2H
 getmatch_done:
 	rts
 
 copy_backreference_io:
 	; copy from vram to vram, autoincrementing
+	; the assumption here is that r1 points to VERA_DATA0 (for writing)
+	; during decompression VERA_DATA1 is being used (for reading / copying)
 	lda VERA_DATA1			; get one byte of backreference
 	sta (r1)			; copy to destination
 
