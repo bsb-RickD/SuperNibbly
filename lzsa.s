@@ -47,17 +47,20 @@ memory_decompress:
 	rts
 
 memory_decompress_internal:
-	PushW r2
-	PushW r3
-	PushW r5
-	PushW r6
+	; push registers r5-r8 in reverse order, this is shorter than 4x PushW
+	ldx #8
+pushloop:	
+	lda r4H,x
+	pha
+	dex
+	bne pushloop
 
 	lda r1H
 	cmp #IO_PAGE
 	beq @1
 	LoadW r3, putdst_ram
-	LoadW r5, add_match_offset_ram
-	LoadW r6, copy_backreference_ram
+	LoadW r7, add_match_offset_ram
+	LoadW r8, copy_backreference_ram
 	bra @2
 @1:	
 	; use io methods for put, match offset calc and backref copying
@@ -66,8 +69,8 @@ memory_decompress_internal:
 	; during decompression VERA_DATA1 is being used (for reading / copying)
 	;
 	LoadW r3, putdst_io
-	LoadW r5, add_match_offset_io
-	LoadW r6, copy_backreference_io
+	LoadW r7, add_match_offset_io
+	LoadW r8, copy_backreference_io
 @2:
 
 	ldy #$00
@@ -235,10 +238,14 @@ combinedbitz:
 
 decompression_done:
 	stz VERA_CTRL			; could also push/pull, but this is shorter, KERNAL assumes D0..
-	PopW r6
-	PopW r5
-	PopW r3
-	PopW r2
+	; pull registers r5-r8 in reverse order
+	ldy #8 			; x is always zero when we end up here, so use x as offset and y for the loop
+poploop:		
+	pla
+	lda r5L,x
+	inx
+	dey
+	bne poploop
 	rts
 
 getnibble:
@@ -277,32 +284,30 @@ putdst_ram:
 
 ; Store into port in I/O area, assume device auto-increments
 putdst_io:
-	sta VERA_DATA0			; could do "sta (r1)" here instead, but that takes 1 cycle more 
-					; and the whole code only really works under the assumption of 
-					; writing to VERA_DATA0 and reading from VERA_DATA1
+	sta (r1)
 	rts
 
 add_match_offset:
-	jmp (r5)			; dispatch RAM vs. I/O
+	jmp (r7)			; dispatch RAM vs. I/O
 
 add_match_offset_ram:
 
 	lda r1L				; add dest + match offset
 	adc offslo			; low 8 bits
-	sta r2L				; store back reference address
+	sta r5L				; store back reference address
 	lda offshi			; high 8 bits
 	adc r1H
-	sta r2H				; store high 8 bits of address
+	sta r5H				; store high 8 bits of address
 	rts
 
 add_match_offset_io:
 	stz VERA_CTRL			; switch to port 0
 	lda VERA_ADDR_L			; add dest + match offset
 	adc offslo              	; low 8 bits
-	sta r2L
+	sta r5L
 	lda offshi			; high 8 bits
 	adc VERA_ADDR_M
-	sta r2H
+	sta r5H
 	lda VERA_ADDR_H			; 17th bit in 
 	adc #1				
 	sec
@@ -310,28 +315,28 @@ add_match_offset_io:
 	inc VERA_CTRL			; switch to port 1 - this is the port we'll read from
 
 	sta VERA_ADDR_H
-	lda r2L
+	lda r5L
 	sta VERA_ADDR_L                 ; store back reference address to vera address 1
-	lda r2H
+	lda r5H
 	sta VERA_ADDR_M
 	rts
 
 copy_backreference:
-	jmp (r6)
+	jmp (r8)
 
 copy_backreference_ram:
-	lda (r2)			; get one byte of backreference
+	lda (r5)			; get one byte of backreference
 	jsr putdst			; copy to destination
-	inc r2L				; increment source ptr
+	inc r5L				; increment source ptr
 	bne getmatch_done
-	inc r2H
+	inc r5H
 getmatch_done:
 	rts
 
 copy_backreference_io:
 	; copy from vram to vram, autoincrementing
 	lda VERA_DATA1			; get one byte of backreference
-	sta VERA_DATA0			; copy to destination
+	sta (r1)			; copy to destination
 
 	; pump address register to ensure vera data 1 has the right value
 	; only needed on overlapping memory copies that are 1 byte apart
