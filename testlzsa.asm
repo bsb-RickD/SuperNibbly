@@ -168,7 +168,7 @@ reference_buffer:
 ; helper: fill vram with distinct pattern $BB, $AA, $AA, $AA, $AA, $AA, $AA, $AA, $AA, $AA
 .proc test_helper_init_vram
    ; initialize the buffer used during test to a value not used in the test
-   fill_memory test_vram_buffer, LZSA_reference_len, $FF
+   fill_memory test_vram_buffer, TEST_vram_reference_len, $FF
 
    ; set vera address (to 1) on dataport 0
    set_vera_address 1

@@ -48,15 +48,6 @@ memory_decompress:
 
 memory_decompress_internal:
 	PushW r2
-/*
-	; push registers r2-r3 in reverse order, this is shorter than 2x PushW
-	ldx #8
-pushloop:	
-	lda r1H,x
-	pha
-	dex
-	bne pushloop
-*/	
 
 	ldy #$00
 	sty nibcount
@@ -223,16 +214,6 @@ combinedbitz:
 
 decompression_done:
 	stz VERA_CTRL			; could also push/pull, but this is shorter, KERNAL assumes D0..
-	/*
-	; pull registers r5-r8 in reverse order
-	ldy #8 			; x is always zero when we end up here, so use x as offset and y for the loop
-poploop:		
-	pla
-	lda r5L,x
-	inx
-	dey
-	bne poploop
-	*/
 	PopW r2
 	rts
 
