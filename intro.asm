@@ -10,12 +10,10 @@
 ; to switch vsync irq and palette fading on or off
 ;USE_IRQ = 1 ; comment the line to turn off
 
-.include "regs.inc"
-.include "kernal_constants.asm"
-.include "helpers.asm"
-.include "vera.asm"
+.include "inc/common.inc"
+.include "lib/vera.asm"
 .ifdef USE_IRQ
-.include "irq.asm"
+.include "lib/irq.asm"
 .endif
    
 ; constants
@@ -33,13 +31,13 @@ filename_out: .byte  "out.bin",0
 .proc main
    ; init state for multiple runs to be consistent
    stz color
-   mob #1,inc_dec
+   LoadB inc_dec, 1
    stz bgcol
    stz bgcol+1
 
 .ifdef USE_IRQ
    ; save irq, and install our custom_irq
-   mow #custom_irq, R0
+   LoadW R0, custom_irq
    jsr init_irq
 .endif
 
@@ -96,21 +94,19 @@ done:
 
 .proc switch_to_tiled_mode
    lda VERA_dc_video
-   and #7                  ; keep video and chroma mode
-   ora #$10                ; layer 0 = on, sprites = off, layer 1 = off
-   sta VERA_dc_video       ; set it
-   stz VERA_ctrl           ; dcsel and adrsel both to 0
-   mob #64, VERA_dc_hscale ; 2 pixel output     
-   sta VERA_dc_vscale      ; 320 x 240   
+   and #7                     ; keep video and chroma mode
+   ora #$10                   ; layer 0 = on, sprites = off, layer 1 = off
+   sta VERA_dc_video          ; set it
+   stz VERA_ctrl              ; dcsel and adrsel both to 0
+   LoadW VERA_dc_hscale,64    ; 2 pixel output     
+   sta VERA_dc_vscale         ; 320 x 240   
    ; map 64x32, 16 colors, starting at 0, tiles start at 4k, 8x8
-   mob #VERA_map_height_32 + \
-      VERA_map_width_64 + \
-      VERA_colors_16, VERA_L0_config
+   LoadW VERA_L0_config, VERA_map_height_32 + VERA_map_width_64 + VERA_colors_16
    stz VERA_L0_mapbase   
-   mob #((4096/2048) << 2) + VERA_tile_width_8 + VERA_tile_height_8, VERA_L0_tilebase     
+   LoadB VERA_L0_tilebase, ((4096/2048) << 2) + VERA_tile_width_8 + VERA_tile_height_8
 
    ; set palette
-   mow #screen_pal, R11
+   LoadW R11, screen_pal
    ldx #(PALETTE_SIZE/2)-1
    lda #0
    sei
@@ -126,15 +122,13 @@ done:
    ora #$20                   ; layer 1 = on, sprites = off, layer 1 = off
    sta VERA_dc_video          ; set it
    stz VERA_ctrl              ; dcsel and adrsel both to 0
-   mob #128, VERA_dc_hscale   ; 1 pixel output 
+   LoadW VERA_dc_hscale, 128  ; 1 pixel output 
    sta VERA_dc_vscale         ; 640 x 480   
    ; map 128x64, 1bpp colors (textmode)
-   mob #VERA_map_height_64 + \
-       VERA_map_width_128 + \
-       VERA_colors_2, VERA_L1_config   
+   LoadB VERA_L1_config, VERA_map_height_64 + VERA_map_width_128 + VERA_colors_2
 
    ; restore default palette   
-   mow #c64_pal, R11
+   LoadW R11, c64_pal
    ldx #15
    lda #0
    sei
@@ -149,8 +143,8 @@ done:
 .proc fill_screen
    ; vera address0 set to 0, increment 1
    set_vera_address 0   
-   mow #screen, R0         ; screendata to R0 (source)        
-   mow #VERA_data0, R1     ; vera data #0 to R1 (destination)
+   LoadW R0, screen           ; screendata to R0 (source)        
+   LoadW R1, VERA_data0       ; vera data #0 to R1 (destination)
    jsr memory_decompress
    rts   
 .endproc
@@ -172,7 +166,7 @@ vsync_count: .word 0
  custom_code:   
    ; here comes the custom code   
    jsr push_vera_address               ; save the state
-   mow #bgcol, R11                     ; write address of bgcol to R0
+   LoadW R11, bgcol                    ; write address of bgcol to R0
    ldx #0                              ; copy only 1 color
    lda #6                              ; color 6 is start index
    jsr write_to_palette                
@@ -193,7 +187,7 @@ vsync_count: .word 0
 .endproc
 .endif
 
-.include "lzsa.s"
+.include "lib/lzsa.asm"
 
 screen:
 .incbin "intro_bg.bin"

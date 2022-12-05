@@ -7,13 +7,10 @@
 
    jmp main
 
-.include "mac.inc"
-.include "kernal_constants.asm"
-.include "regs.inc"
-.include "helpers.asm"
-.include "ut.asm"
-.include "vera.asm"
-.include "lzsa.s"
+.include "inc/common.inc"
+.include "lib/ut.asm"
+.include "lib/vera.asm"
+.include "lib/lzsa.asm"
 
 .proc main   
    printl str_ut_welcome
@@ -30,7 +27,6 @@
    jsr test_vram_copy_krnl_d1
    jsr test_vram_copy
    jsr test_vram_overlapping_copy_d0d1_manual_inc   
-   
 
    rts
 .endproc
@@ -99,7 +95,7 @@ test_vram_buffer:
    ; copy back
    ldx #TEST_vram_reference_len
    ldy #0
-   mow #test_vram_buffer, R11
+   LoadW R11, test_vram_buffer
  loop:   
    lda VERA_data0
    sta (R11),y
@@ -143,15 +139,15 @@ test_vram_buffer:
    ; copy back to RAM
    ldx #TEST_vram_reference_len
    ldy #0
-   mow #test_vram_buffer, R11
+   LoadW R11, test_vram_buffer
  loop:   
    lda VERA_data0
    sta (R11),y
    iny
    dex
    bne loop
-   mow #VERA_data1, R0         ; vera data #1 to R0 (source)
-   mow #test_vram_buffer, R1   ; vram buffert to  R1 (destination)
+   LoadW R0, VERA_data1        ; vera data #1 to R0 (source)
+   LoadW R1, test_vram_buffer  ; vram buffert to  R1 (destination)
 
    switch_vera_to_dataport_0   ; CHROUT needs this to work   
    
@@ -188,8 +184,8 @@ reference_buffer:
    ; setup - init memory to ff
    fill_memory lzsa_output, LZSA_reference_len, $FF
    ; decompress
-   mow #lzsa_input, R0
-   mow #lzsa_output, R1
+   LoadW R0, lzsa_input
+   LoadW R1, lzsa_output
    jsr KRNL_MEM_DECOMPRESS
    ; compare and print result
    compare_memory lzsa_output, lzsa_reference, LZSA_reference_len
@@ -202,8 +198,8 @@ reference_buffer:
    ; setup - init memory to ff
    fill_memory lzsa_output, LZSA_reference_len, $FF
    ; decompress
-   mow #lzsa_input, R0
-   mow #lzsa_output, R1
+   LoadW R0, lzsa_input
+   LoadW R1, lzsa_output
    jsr memory_decompress
    ; compare and print result
    compare_memory lzsa_output, lzsa_reference, LZSA_reference_len
@@ -225,8 +221,8 @@ reference_buffer:
    stz VERA_addr_low
 
    ; decompress
-   mow #lzsa_input, R0
-   mow #VERA_data0, R1
+   LoadW R0, lzsa_input
+   LoadW R1, VERA_data0
    jsr memory_decompress
 
    switch_vera_to_dataport_0        ; output address is on port 0
@@ -266,49 +262,28 @@ lzsam_addr:
 ; set vera address (to lzsam_addr) for data port 0
 .proc set_vaddr
    stz VERA_ctrl
-   mob lzsam_addr, VERA_addr_low
-   mob lzsam_addr+1, VERA_addr_high
+   MoveB lzsam_addr, VERA_addr_low
+   MoveB lzsam_addr+1, VERA_addr_med
    lda lzsam_addr+2
    and #1
    ora #VERA_increment_1
-   sta VERA_addr_bank
+   sta VERA_addr_high
    rts
 .endproc
-
-.proc print_hex_digit
-   and #$0f
-   adc #$30    ; $30 = "0"
-   cmp #$3A    ; did we exceed 0..9?
-   bcc print_char
-   adc #$26    ; bring it to the "A".."F" range
-print_char:
-   jsr KRNL_CHROUT
-   rts
-.endproc
-
-.proc print_hex
-   pha
-   ror
-   ror
-   ror
-   ror
-   clc
-   jsr print_hex_digit
-   pla
-   bra print_hex_digit
-.endproc
-
 
 .proc test_lzsa_decompress_vram_moving
+   ; init counter to 1
    lda #01
    sta lzsam_count
+   ; init address to start pos
+   LoadW lzsam_addr,$FFFF-31
+   stz lzsam_addr+2
    ldx #$09
 next_round:   
    phx
 
    printl msg
    lda lzsam_count
-   ;jsr KRNL_CHROUT
    jsr print_hex
    
    ; set vera address (to lzsam_addr) for data port 0
@@ -321,8 +296,8 @@ next_round:
    jsr set_vaddr
 
    ; decompress
-   mow #lzsa_input, R0
-   mow #VERA_data0, R1
+   LoadW R0, lzsa_input
+   LoadW R1, VERA_data0
    jsr memory_decompress
 
    ; fill the memory, just to initialize it
@@ -378,22 +353,27 @@ msg: lstr "lzsa decompress vram moving dest "
    set_vera_address 0
    
    ; decompress
-   mow #lzsa_input, R0
-   mow #VERA_data0, R1
+   LoadW R0, lzsa_input
+   LoadW R1, VERA_data0
    jsr KRNL_MEM_DECOMPRESS
 
    ; check number of bytes output
    lda VERA_addr_low
    cmp #LZSA_reference_len
    ut_exp_equal
-
-   /*
+   
    ; compare and print result
-   print msg
+   printl msg
    prints " - memcmp"
+
+   ; copy back
+   set_vera_address 0
+   copy_memory VERA_data0, lzsa_output, LZSA_reference_len
+
+   ; actual comparison
    compare_memory lzsa_output, lzsa_reference, LZSA_reference_len
    ut_exp_equal
-   */
+   
    rts
 msg: lstr "krnl decompress vram"
 .endproc

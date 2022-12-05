@@ -4,22 +4,17 @@
 ; (C)2019 Emmanuel Marty, Peter Ferrie, M. Steil; License: 3-clause BSD
 ; decompression to VRAM fix: Erik Pojar
 
-.include "regs.inc"
-.include "io.inc"
-.include "mac.inc"
+.include "../inc/regs.inc"
+.include "../inc/mac.inc"
+.include "../inc/vera.inc"
 
-;.export memory_decompress, memory_decompress_internal
-;
-;.segment "KVAR"
 
-nibcount:
+lzsa_nibcount:
 	.res 1
-nibbles:
+lzsa_nibbles:
 	.res 1
-offslo:	.res 1
-offshi:	.res 1
-
-;.segment "LZSA"
+lzsa_offslo:	.res 1
+lzsa_offshi:	.res 1
 
 ;---------------------------------------------------------------
 ; memory_decompress
@@ -50,7 +45,7 @@ memory_decompress_internal:
 	PushW r2
 
 	ldy #$00
-	sty nibcount
+	sty lzsa_nibcount
 
 decode_token:
 	jsr getsrc                      ; read token byte: XYZ|LL|MMM
@@ -148,8 +143,8 @@ got_offset_hi:
 	tax
 	jsr getsrc                      ; grab low 8 bits
 got_offset_lo:
-	sta offslo                      ; store low byte of match offset
-	stx offshi                      ; store high byte of match offset
+	sta lzsa_offslo                      ; store low byte of match offset
+	stx lzsa_offshi                      ; store high byte of match offset
 
 rep_match:
 
@@ -213,21 +208,21 @@ combinedbitz:
 	rts
 
 decompression_done:
-	stz VERA_CTRL			; could also push/pull, but this is shorter, KERNAL assumes D0..
+	stz VERA_ctrl			; could also push/pull, but this is shorter, KERNAL assumes D0..
 	PopW r2
 	rts
 
 getnibble:
-	lda nibbles
-	lsr nibcount
-	bcc need_nibbles
+	lda lzsa_nibbles
+	lsr lzsa_nibcount
+	bcc need_lzsa_nibbles
 	and #$0f                        ; isolate low 4 bits of nibble
 	rts
 
-need_nibbles:
-	inc nibcount
-	jsr getsrc                      ; get 2 nibbles
-	sta nibbles
+need_lzsa_nibbles:
+	inc lzsa_nibcount
+	jsr getsrc                      ; get 2 lzsa_nibbles
+	sta lzsa_nibbles
 	lsr
 	lsr
 	lsr
@@ -259,33 +254,33 @@ add_match_offset:
 add_match_offset_ram:
 	clc  
 	lda r1L				; add dest + match offset
-	adc offslo			; low 8 bits
+	adc lzsa_offslo			; low 8 bits
 	sta r2L				; store back reference address
-	lda offshi			; high 8 bits
+	lda lzsa_offshi			; high 8 bits
 	adc r1H
 	sta r2H				; store high 8 bits of address
 	rts
 
 add_match_offset_io:
 	clc
-	stz VERA_CTRL			; switch to port 0
-	lda VERA_ADDR_L			; add dest + match offset
-	adc offslo              	; low 8 bits
+	stz VERA_ctrl			; switch to port 0
+	lda VERA_addr_low			; add dest + match offset
+	adc lzsa_offslo              	; low 8 bits
 	sta r2L
-	lda offshi			; high 8 bits
-	adc VERA_ADDR_M
+	lda lzsa_offshi			; high 8 bits
+	adc VERA_addr_med
 	sta r2H
-	lda VERA_ADDR_H			; 17th bit in 
+	lda VERA_addr_high			; 17th bit in 
 	adc #1				
 	sec
 
-	inc VERA_CTRL			; switch to port 1 - this is the port we'll read from
+	inc VERA_ctrl			; switch to port 1 - this is the port we'll read from
 
-	sta VERA_ADDR_H
+	sta VERA_addr_high
 	lda r2L
-	sta VERA_ADDR_L                 ; store back reference address to vera address 1
+	sta VERA_addr_low                 ; store back reference address to vera address 1
 	lda r2H
-	sta VERA_ADDR_M
+	sta VERA_addr_med
 	rts
 
 copy_backreference:
@@ -306,14 +301,14 @@ copy_backreference_io:
 	; copy from vram to vram, autoincrementing
 	; the assumption here is that r1 points to VERA_DATA0 (for writing)
 	; during decompression VERA_DATA1 is being used (for reading / copying)
-	lda VERA_DATA1			; get one byte of backreference
+	lda VERA_data1			; get one byte of backreference
 	sta (r1)			; copy to destination
 
 	; pump address register to ensure vera data 1 has the right value
 	; only needed on overlapping memory copies that are 1 byte apart
 	; but these happen often when decompressing, so we have to be on the safe side here
-	lda VERA_ADDR_L					
-	sta VERA_ADDR_L					
+	lda VERA_addr_low
+	sta VERA_addr_low
 	rts
 
 getlargesrc:

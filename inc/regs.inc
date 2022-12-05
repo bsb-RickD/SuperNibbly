@@ -1,7 +1,13 @@
-.ifndef REGSINC
+.ifndef R0
 
-REGSINC=1
+; Zero page scratch area
+SCRATCH     = $22
+SCRATCH_END = $80
 
+;r0-r5: 	argument registers
+;r11-r15: 	scratch registers
+
+; Zero page pseudo registers
 r0		= $02
 r0L		= $02
 r0H		= $03

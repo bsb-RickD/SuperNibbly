@@ -1,4 +1,5 @@
 
 *.map
 *.list
+*.o
 out.prg

@@ -3,6 +3,7 @@
 ;----------------------------------------------------------------------
 ; (C)2020 Michael Steil, License: 2-clause BSD
 ; based on GEOS 64, edited by Maciej 'YTM/Alliance' Witkowiak
+; Modified / extended by Erik 'RickDangerous/S!P' Pojar
 
 .ifndef MACINC
 
@@ -320,5 +321,33 @@ MACINC = 1
 	lda addr
 	ora addr+1
 .endmacro
+
+; --------------- Eriks stuff starts here -------------------------
+
+; expands to as many asl commands as specified by shift
+.macro asln shift
+   .if (shift) = 0
+      .exitmacro
+   .endif
+   .assert ((shift) >= 1) && ((shift) < 8), error, "asln can only take 1 to 7 as parameter"
+      asln ((shift)-1)
+      asl
+.endmacro
+
+; lxy - load word to x,y
+.macro lxy source
+   .if (.match (.left (1,{source}),#))
+      ; immediate mode
+      ldx #<(.right (.tcount ({source})-1, {source}))
+      ldy #>(.right (.tcount ({source})-1, {source}))
+   .else
+      ; assume absolute oder zero page
+      ldx source
+      ldy source+1
+   .endif
+.endmacro
+
+; define a string with leading length
+.define lstr(message) .byte .strlen(message), message
 
 .endif
