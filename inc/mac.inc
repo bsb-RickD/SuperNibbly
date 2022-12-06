@@ -3,9 +3,12 @@
 ;----------------------------------------------------------------------
 ; (C)2020 Michael Steil, License: 2-clause BSD
 ; based on GEOS 64, edited by Maciej 'YTM/Alliance' Witkowiak
-; Modified / extended by Erik 'RickDangerous/S!P' Pojar
+; Modified / extended by Erik 'Rick Dangerous/S!P' Pojar
 
 .ifndef MACINC
+
+; also bring in jeq, jne, jmi, jpl, jcs, jcc, jvs, jvc
+.macpack longbranch
 
 MACINC = 1
 
@@ -333,6 +336,18 @@ MACINC = 1
       asln ((shift)-1)
       asl
 .endmacro
+
+; expands to as many ror commands as specified by shift
+.macro rorn shift
+   .if (shift) = 0
+      .exitmacro
+   .endif
+   .assert ((shift) >= 1) && ((shift) < 8), error, "rorn can only take 1 to 7 as parameter"
+      rorn ((shift)-1)
+      ror
+.endmacro
+
+
 
 ; lxy - load word to x,y
 .macro lxy source
