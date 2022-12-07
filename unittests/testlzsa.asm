@@ -7,10 +7,10 @@
 
    jmp main
 
-.include "inc/common.inc"
-.include "lib/ut.asm"
-.include "lib/vera.asm"
-.include "lib/lzsa.asm"
+.include "common.inc"
+.include "ut.asm"
+.include "vera.asm"
+.include "lzsa.asm"
 
 .proc main   
    printl str_ut_welcome

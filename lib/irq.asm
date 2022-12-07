@@ -1,8 +1,8 @@
 .ifndef init_irq
 
-.include "../inc/kernal.inc"
-.include "../inc/mac.inc"
-.include "../inc/regs.inc"
+.include "kernal.inc"
+.include "mac.inc"
+.include "regs.inc"
 
 ; globals
 default_irq:   .addr 0

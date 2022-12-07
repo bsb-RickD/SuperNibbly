@@ -4,9 +4,9 @@
 ; (C)2019 Emmanuel Marty, Peter Ferrie, M. Steil; License: 3-clause BSD
 ; decompression to VRAM fix: Erik Pojar
 
-.include "../inc/regs.inc"
-.include "../inc/mac.inc"
-.include "../inc/vera.inc"
+.include "regs.inc"
+.include "mac.inc"
+.include "vera.inc"
 
 
 lzsa_nibcount:

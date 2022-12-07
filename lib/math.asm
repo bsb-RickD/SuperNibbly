@@ -1,7 +1,7 @@
 .ifndef div88
 
-.include "../inc/regs.inc"
-.include "../inc/mac.inc"
+.include "regs.inc"
+.include "mac.inc"
 
 
 ; 8 bit negate + add
@@ -90,6 +90,8 @@ mad88 = mul88+9
 
 ; lerp 4 bit numbers from x to y in 16 steps, a holds step 0..16
 ; result in a
+;
+; clobbers R11 and R12L
 .proc lerp416
 	; the original lerp factor from a will be called f in the comments below
 	pha

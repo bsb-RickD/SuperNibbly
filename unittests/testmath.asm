@@ -7,8 +7,8 @@
 
    jmp main
 
-.include "lib/ut.asm"
-.include "lib/math.asm"
+.include "ut.asm"
+.include "math.asm"
 
 .proc main   
    printl str_ut_welcome

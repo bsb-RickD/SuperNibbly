@@ -1,6 +1,6 @@
 .ifndef ut_pass_on_equal
 
-.include "../inc/common.inc"
+.include "common.inc"
 .include "print.asm"
 
 str_ut_welcome:

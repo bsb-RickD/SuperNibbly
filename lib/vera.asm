@@ -1,8 +1,8 @@
 .ifndef set_vera_data_to_palette
 
-.include "../inc/regs.inc"
-.include "../inc/mac.inc"
-.include "../inc/vera.inc"
+.include "regs.inc"
+.include "mac.inc"
+.include "vera.inc"
 
 ; addr = 17 bit address, 
 ; optional: (default 0) dataport = 0/1

@@ -1,6 +1,6 @@
 .ifndef print_zero_terminated
 
-.include "../inc/common.inc"
+.include "common.inc"
 .include "math.asm"
 
 .macro print_push_state
