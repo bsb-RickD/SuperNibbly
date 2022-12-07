@@ -4,6 +4,18 @@
 .include "../inc/mac.inc"
 
 
+; 8 bit negate + add
+;
+; a = value - a
+;
+; so to negate a, use "nad 0"
+.macro nad value
+	eor #$FF
+	sec
+	adc #value
+.endmacro
+
+
 ; 8 bit division, unsigned
 ;
 ; taken from http://6502org.wikidot.com/software-math-intdiv
@@ -68,8 +80,32 @@
 
 ; 8 bit multiply
 ; a = r11H*r11L
-.proc mul88
+mul88:
 	mul88_ r11H, r11L
+	rts
+
+; 8 bit multiply add
+; a = a+r11H*r11L
+mad88 = mul88+9
+
+; lerp 4 bit numbers from x to y in 16 steps, a holds step 0..16
+; result in a
+.proc lerp416
+	; the original lerp factor from a will be called f in the comments below
+	pha
+	nad 16
+	sta R11H
+	stx R11L
+	jsr mul88
+	sta	R12L		; R12L = (16-f)*x
+	sty R11L
+	pla
+	sta R11H 
+	jsr mul88       ; a = f*y
+	add R12L        ; a = (16-f)*x+f*y
+	adc #8          ; add rounding
+	rorn 4
+	and #$0f 
 	rts
 .endproc
 
