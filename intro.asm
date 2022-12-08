@@ -15,6 +15,7 @@
 .ifdef USE_IRQ
 .include "irq.asm"
 .endif
+.include "palettefader.asm"
    
 ; constants
 FramesToWait      = 5
@@ -23,12 +24,47 @@ color:   .byte 0
 inc_dec: .byte 1
 bgcol:   .byte 0,0
 
-c64_pal: .byte $00,$0,$ff,$f,$00,$8,$fe,$a,$4c,$c,$c5,$0,$0a,$0,$e7,$e,$85,$d,$40,$6,$77,$f,$33,$3,$77,$7,$f6,$a,$8f,$0,$bb,$b
+c64_pal: .byte $00,$0, $ff,$f, $00,$8, $fe,$a, $4c,$c, $c5,$0, $0a,$0, $e7,$e,$85,$d,$40,$6,$77,$f,$33,$3,$77,$7,$f6,$a,$8f,$0,$bb,$b
 
 filename_in: .byte   "in.bin",0
 filename_out: .byte  "out.bin",0
 
+; num colors to fade       1 byte   (+1, 0 meaning 1, etc.)    offset 0
+; pointer to palette       2 bytes                             offset 1
+; target color             2 bytes                             offset 3
+; state                    1 byte   (up/down/done)             offset 5
+; current f                1 byte   (0..16)                    offset 6
+palfade:
+   .byte 16
+   .word c64_pal
+   .byte $0a, $0
+   .byte 0
+   .byte 0
+
+; this is where we fade into
+fadebuffer:
+   .res 32, 0
+
 .proc main
+   LoadW R15, palfade
+   clc
+   jsr palettefader_start_fade
+
+continue_fading:
+   jsr set_palette_from_buffer
+
+   LoadW R0, fadebuffer
+   jsr palettefader_step_fade
+   bcs fade_complete
+
+   jsr waitkey
+
+   bra continue_fading
+fade_complete:
+   jsr set_palette_from_buffer
+
+   jsr waitkey
+
    ; init state for multiple runs to be consistent
    stz color
    LoadB inc_dec, 1
@@ -89,6 +125,24 @@ done:
    
    rts
 .endproc
+
+.proc waitkey
+   wai
+   jsr KRNL_GETIN    ; read key
+   cmp #0
+   beq waitkey
+   rts
+.endproc   
+
+.proc set_palette_from_buffer
+   MoveW R0, R11 
+   ldx #15
+   lda #0
+   sei
+   jsr write_to_palette
+   cli
+   rts
+.endproc   
 
 .proc switch_to_tiled_mode
    lda VERA_dc_video

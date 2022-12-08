@@ -48,9 +48,13 @@ MACINC = 1
 	MoveB source+1, dest+1
 .endmacro
 
-.macro add source
+.macro add source, reg
 	clc
+.if .paramcount = 1
 	adc source
+.elseif	.paramcount = 2
+	adc source,reg
+.endif	
 .endmacro
 
 .macro AddB source, dest
@@ -346,8 +350,6 @@ MACINC = 1
       rorn ((shift)-1)
       ror
 .endmacro
-
-
 
 ; lxy - load word to x,y
 .macro lxy source
