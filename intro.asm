@@ -13,7 +13,7 @@
 .include "common.inc"
 .include "vera.asm"
 .ifdef USE_IRQ
-.include "irq.asm"
+.include "vsync.asm"
 .endif
 .include "palettefader.asm"
 .include "print.asm"
@@ -47,6 +47,7 @@ fadebuffer:
    .res 32, 0
 
 .proc main
+   /*
    LoadW R15, palfade
    clc
    jsr palettefader_start_fade
@@ -69,7 +70,7 @@ fade_complete:
    jsr set_palette_from_buffer
 
    jsr waitkey
-
+   */
    ; init state for multiple runs to be consistent
    stz color
    LoadB inc_dec, 1
@@ -77,9 +78,7 @@ fade_complete:
    stz bgcol+1
 
 .ifdef USE_IRQ
-   ; save irq, and install our custom_irq
-   LoadW R0, custom_irq
-   jsr init_irq
+   init_vsync_irq
 .endif
 
    jsr switch_to_tiled_mode
@@ -123,9 +122,11 @@ write2pal:
 
    bra repeat   
 done:
+
 .ifdef USE_IRQ
-   jsr reset_irq
+   clear_vsync_irq
 .endif   
+
    jsr switch_to_textmode   
    
    rts
@@ -207,41 +208,6 @@ done:
 .endproc
 
 .ifdef USE_IRQ
-vsync_count: .word 0
-
-.proc custom_irq
-   php                                 ; save flags
-   sei                                 ; disable interrupts
-   lda VERA_isr
-   and #1                              ; check vsync bit
-   beq done                            ; bit 1 not set - no vsync
-
-   ; we have a vsync - increase the vsync_count
-   inc vsync_count
-   bne custom_code
-   inc vsync_count+1                   ; overflow into second byte
- custom_code:   
-   ; here comes the custom code   
-   jsr push_vera_address               ; save the state
-   LoadW R11, bgcol                    ; write address of bgcol to R0
-   ldx #0                              ; copy only 1 color
-   lda #6                              ; color 6 is start index
-   jsr write_to_palette                
-   jsr pop_vera_address                ; pop the state
- done:
-   plp                                 ; don't re-enable interrupts, the flag knows the prev state anyhow
-   jmp (default_irq)
-.endproc   
-
-.proc wait_for_vsync
-   cmp vsync_count
-   beq wait_irq          ; vsync_count still zero? must have been some other IRQ
-   stz vsync_count
-   rts
- wait_irq:
-   wai
-   bra wait_for_vsync
-.endproc
 .endif
 
 .include "lib/lzsa.asm"

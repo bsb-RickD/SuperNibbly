@@ -5,7 +5,7 @@
 .include "regs.inc"
 
 ; globals
-default_irq:   .addr 0
+default_irq:      .addr 0   
 
 ; R0 points to custom IRQ handler, previous IRQ vector is saved in default_irq
 .proc init_irq   
