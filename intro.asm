@@ -27,7 +27,7 @@ filename_out: .byte  "out.bin",0
 palfade_out:
    .byte 16
    .word c64_pal
-   .byte $00, $0
+   .byte $0a, $0
    .byte 0
    .byte 0
 
@@ -39,7 +39,7 @@ palfade_out:
 palfade_in:
    .byte PALETTE_SIZE/2
    .word screen_pal
-   .byte $00, $0
+   .byte $0a, $0
    .byte 0
    .byte 0
 
@@ -69,7 +69,7 @@ show_screen:
    ; set all colors to fade target
    ldx #(PALETTE_SIZE/2)-1
    lda #0
-   MoveW R11, palfade_out+3
+   MoveW palfade_out+3, R11
    jsr write_to_palette_const_color
 
    ; show screen
