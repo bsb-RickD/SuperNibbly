@@ -3,3 +3,4 @@
 *.list
 *.o
 out.prg
+dump.bin

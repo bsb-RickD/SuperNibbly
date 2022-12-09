@@ -160,11 +160,15 @@ lerp_loop:
    bne lerp_loop
 
    lda R3L
-   beq reached_zero
+   beq fade_complete
    cmp #16                 ; 0..15: C = 0, 16: C = 1
+   beq fade_complete
    rts
-reached_zero:
-   sec
+fade_complete:
+   ldy #5
+   lda #0
+   sta (R15),y             ; set state to zero
+   sec                     ; set carry flag, to further indicate we're done!
    rts
 .endproc
 

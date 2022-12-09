@@ -39,7 +39,7 @@ VSYNC_worker_ptr = ZEROPAGE_SCRATCH
 ; vsync count is zero afterwards
 ; 
 .proc wait_for_vsync
-   cmp vsync_count
+   lda vsync_count
    beq wait_irq          ; vsync_count still zero? must have been some other IRQ
    stz vsync_count
    rts
