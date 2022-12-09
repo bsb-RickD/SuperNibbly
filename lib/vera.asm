@@ -193,14 +193,6 @@ return:
 .proc write_to_palette   
    jsr set_vera_data_to_palette
    ldy #0
-   lda (R11),y
-   sta VERA_data1
-   iny 
-   lda (R11),y
-   sta VERA_data1
-   iny
-   txa
-   beq done
 for:   
    lda (R11),y
    sta VERA_data1
@@ -211,10 +203,31 @@ for:
    bne next
    inc R11+1
 next:
+   txa
+   beq done
    dex
    bne for
 done:   
    rts
 .endproc
+
+; a = palette index / color# to write to
+; x = # of colors-1 to write.. so to copy 1 color, set x = 0; to copy 256 colors set x = 255.
+; R11 = color to write to palette x times
+.proc write_to_palette_const_color   
+   jsr set_vera_data_to_palette
+for:   
+   lda R11L
+   sta VERA_data1
+   lda R11H
+   sta VERA_data1
+   txa
+   beq done
+   dex
+   bne for
+done:   
+   rts
+.endproc
+
 
 .endif

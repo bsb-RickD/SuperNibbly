@@ -65,6 +65,14 @@ wait_for_fade:
    bra wait_for_fade
 
 show_screen:
+   
+   ; set all colors to fade target
+   ldx #(PALETTE_SIZE/2)-1
+   lda #0
+   LoadW R11, palfade_out+3
+   jsr write_to_palette_const_color
+
+   ; show screen
    jsr switch_to_tiled_mode
 
    ; initialize pal fade
