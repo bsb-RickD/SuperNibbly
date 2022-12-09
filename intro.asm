@@ -16,6 +16,7 @@
 .include "irq.asm"
 .endif
 .include "palettefader.asm"
+.include "print.asm"
    
 ; constants
 FramesToWait      = 5
@@ -58,6 +59,10 @@ continue_fading:
    bcs fade_complete
 
    jsr waitkey
+
+   stz VERA_control
+
+   print_dec palfade+6
 
    bra continue_fading
 fade_complete:

@@ -49,14 +49,14 @@ loop:
    pha
    stx R0L
    prints "lerp 7 to 15 for: "
-   jsr print_dec
+   print_dec
    pla
    ldx #7
    ldy #15
    jsr lerp416
    pha
    prints " = "
-   jsr print_dec
+   print_dec
    pla 
    cmp R0L
    ut_exp_equal
@@ -79,14 +79,14 @@ loop:
    lda R0L
 
    pha
-   jsr print_dec
+   print_dec
    pla
 
    nad 16
 
    pha
    prints " = "
-   jsr print_dec
+   print_dec
    pla
 
    cmp R0H
@@ -139,11 +139,9 @@ next_test:
    phy
 
    ; print operands
-   lda R13L
-   jsr print_dec
+   print_dec R13L
    prints " * "
-   lda R13H
-   jsr print_dec
+   print_dec R13H
 
    ; do the actual multiplication
    MoveB R13L, R11L
@@ -153,7 +151,7 @@ next_test:
    ; print result of multiplication for visual inspection  
    pha
    prints " = "
-   jsr print_dec
+   print_dec
    pla
 
    ; do comparison and print unit test result

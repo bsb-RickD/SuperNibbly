@@ -107,9 +107,23 @@ print_char:
    bra print_hex_digit     ; will return to caller
 .endproc
 
+.macro print_dec number
+   .if .paramcount = 1
+      ; param passed, so load a
+      .if (.match (.left (1,{number}),#))
+         ; immediate mode
+         lda #(.right (.tcount ({number})-1, {number}))
+      .else
+         ; assume absolute oder zero page
+         lda number
+      .endif
+   .endif
+   jsr print_dec_
+.endmacro
+
 ; print accumulator as decimal number
 ; r11, a, x clobbered
-.proc print_dec
+.proc print_dec_
    cmp #0
    bne not_zero
    clc

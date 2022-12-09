@@ -6,6 +6,7 @@ VERA_addr_high    = $9F22
 VERA_data0        = $9F23
 VERA_data1        = $9F24
 VERA_ctrl         = $9F25
+VERA_control      = VERA_ctrl
 VERA_ien          = $9F26
 VERA_isr          = $9F27
 VERA_irqline_low  = $9F28
