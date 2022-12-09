@@ -8,7 +8,7 @@
    jmp main
 
 ; to switch vsync irq and palette fading on or off
-;USE_IRQ = 1 ; comment the line to turn off
+USE_IRQ = 1 ; comment the line to turn off
 
 .include "common.inc"
 .include "vera.asm"
@@ -79,16 +79,19 @@ fade_complete:
 
 .ifdef USE_IRQ
    init_vsync_irq
+   jsr wait_for_vsync
 .endif
 
-   jsr switch_to_tiled_mode
    jsr fill_screen
+   jsr switch_to_tiled_mode
 
 repeat:   
    jsr KRNL_GETIN    ; read key
    cmp #KEY_Q         
    beq done
    jsr KRNL_CHROUT   ; print to screen
+
+/*
 .ifdef USE_IRQ   
    wai
    lda #FramesToWait
@@ -119,6 +122,7 @@ write2pal:
    sta bgcol
    sta bgcol+1
 .endif   
+   */
 
    bra repeat   
 done:

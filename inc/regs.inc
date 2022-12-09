@@ -1,8 +1,8 @@
 .ifndef R0
 
 ; Zero page scratch area
-SCRATCH     = $22
-SCRATCH_END = $80
+ZEROPAGE_SCRATCH     = $22
+ZEROPAGE_SCRATCH_END = $80
 
 ;r0-r5: 	argument registers
 ;r11-r15: 	scratch registers

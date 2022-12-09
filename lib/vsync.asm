@@ -5,12 +5,12 @@
 ; globals
 vsync_count:      .word 0
 
-VSYNC_worker_ptr = $22
+VSYNC_worker_ptr = ZEROPAGE_SCRATCH
 
 ; use this macro to install code to be executed in the vsync
 ; at the end of the routine do a "jmp vsync_irq_exit"
 .macro set_vsync_worker ptr
-   MoveW ptr, VSYNC_worker_ptr
+   LoadW VSYNC_worker_ptr, ptr
 .endmacro
 
 
@@ -72,6 +72,7 @@ VSYNC_worker_ptr = $22
    bne custom_code
    inc vsync_count+1                   ; overflow into second byte
    ; here we jump to the custom code
+custom_code:   
    jmp (VSYNC_worker_ptr)
 .endproc   
 
