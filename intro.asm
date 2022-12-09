@@ -69,7 +69,7 @@ show_screen:
    ; set all colors to fade target
    ldx #(PALETTE_SIZE/2)-1
    lda #0
-   LoadW R11, palfade_out+3
+   MoveW R11, palfade_out+3
    jsr write_to_palette_const_color
 
    ; show screen
@@ -107,10 +107,7 @@ repeat:
 
    bra repeat   
 done:
-
-.ifdef USE_IRQ
    clear_vsync_irq
-.endif   
 
    jsr switch_to_textmode   
    
@@ -144,6 +141,7 @@ palfade_state:
    ; first time round, initialize everything..
    inc palfade_state
    clc
+   LoadW R0, fadebuffer
    jsr palettefader_start_fade
    bra write_the_pal
 init_done:
@@ -241,9 +239,6 @@ done:
    jsr memory_decompress
    rts   
 .endproc
-
-.ifdef USE_IRQ
-.endif
 
 .include "lib/lzsa.asm"
 
