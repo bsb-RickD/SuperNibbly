@@ -14,28 +14,59 @@
 .proc main   
    printl str_ut_welcome
       
-   jsr test_stub
+   jsr test_push_pop
 
    rts
 .endproc
 
-; bla
-.proc test_stub
-   prints "some test"
+push_pop_expected:
+.byte 0,1,2,3,0,0,6,7,0,0,$A,$B,0,0,$E,$F,0,0,0,0,$14,$15,$16,$17,0,0,0,0,$1C,$1D,$1E,$1F
 
-   /*
-   ; init the VRAM, and ram buffer
-   jsr test_helper_init_vram
-   
-   ; copy back
-   set_vera_address 0               ; we'll read back from d0
-   copy_memory VERA_data0, test_vram_buffer, TEST_vram_reference_len
+.proc test_push_pop
+   prints "push_registers"
 
-   ; compare
-   compare_memory test_vram_buffer, test_vram_reference, TEST_vram_reference_len
-   */
+   ldx #32
+   ldy #0
 
+   ; distinct pattern
+fill:
+   tya
+   sta R0,y
+   iny
+   dex
+   bne fill
+
+   ; push some
+   lda #%10101011
+   jsr push_registers_0_to_7
+   lda #%11001100
+   jsr push_registers_8_to_15
+
+   ; clear all
+   ldx #32
+   ldy #0
+   lda #0
+clear:
+   sta R0,y
+   iny
+   dex
+   bne clear
+
+   ; pop the pushed ones
+   lda #%11001100
+   jsr pop_registers_8_to_15   
+   lda #%10101011
+   jsr pop_registers_0_to_7
+
+   ldy #0
+compare:   
+   lda R0,y
+   cmp push_pop_expected,y
+   bne different
+   iny
+   cpy #32
+   bne compare
+different:   
    ut_exp_equal
-
    rts
 .endproc 

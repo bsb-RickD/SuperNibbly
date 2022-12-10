@@ -54,15 +54,9 @@
 .endproc
 
 .proc push_both_vera_addresses
-   ; pull return address from stack, and insert it into jump at the end
-   ; return address -1 is stored on the stack.. so add 1
-   pla
-   clc
-   adc #1
-   sta return+1
-   pla 
-   adc #0
-   sta return+2
+   ; save return address   
+   plx
+   ply
 
    ; first push the control byte
    lda VERA_ctrl
@@ -70,7 +64,6 @@
 
    ; switch to address 0
    and #$FE
-   tax
    sta VERA_ctrl   
 
    ; push the 3 address bytes
@@ -82,9 +75,7 @@
    pha
 
    ; switch to address 1
-   txa
-   ora #$01
-   sta VERA_ctrl
+   inc VERA_ctrl
 
    ; push the 3 address bytes
    lda VERA_addr_low
@@ -94,10 +85,11 @@
    lda VERA_addr_high
    pha
 
-return:
-   jmp $AAAA
+   ; restore return address   
+   phy
+   phx
+   rts
 .endproc
-
 
 .proc pop_current_vera_address
    ; save current return address
@@ -121,20 +113,13 @@ return:
 .endproc
 
 .proc pop_both_vera_addresses
-   ; pull return address from stack, and insert it into jump at the end
-   ; return address -1 is stored on the stack.. so add 1
-   pla
-   clc
-   adc #1               
-   sta return+1
-   pla 
-   adc #0
-   sta return+2
+   ; save current return address
+   plx
+   ply
 
    ; switch to address 1
    lda VERA_ctrl
    ora #$01
-   tax
    sta VERA_ctrl
 
    ; now pop the 3 address bytes
@@ -146,9 +131,7 @@ return:
    sta VERA_addr_low
 
    ; switch to address 0
-   txa 
-   and #$FE
-   sta VERA_ctrl
+   dec VERA_ctrl
 
    ; now pop the 3 address bytes
    pla
@@ -161,8 +144,11 @@ return:
    ; finally restore control word
    pla
    sta VERA_ctrl
-return:
-   jmp $AAAA
+
+   ; restore return address   
+   phy
+   phx
+   rts
 .endproc
 
 

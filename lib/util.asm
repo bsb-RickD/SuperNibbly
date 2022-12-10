@@ -27,9 +27,9 @@
 .proc push_registers_internal
    ; save return address   
    ply
-   sta restore_return_address+4
+   sty restore_return_address+4
    ply
-   sta restore_return_address+1
+   sty restore_return_address+1
 
    ; update base register address
    stx update_here+1
@@ -85,9 +85,9 @@ restore_return_address:
 .proc pop_registers_internal
    ; save return address   
    ply
-   sta restore_return_address+4
+   sty restore_return_address+4
    ply
-   sta restore_return_address+1
+   sty restore_return_address+1
 
    ; update base register address
    stx update_here+1
