@@ -12,7 +12,7 @@
 .include "vera.asm"
 .include "vsync.asm"
 .include "palettefader.asm"
-.include "print.asm"
+.include "util.asm"
    
 c64_pal: .byte $00,$0, $ff,$f, $00,$8, $fe,$a, $4c,$c, $c5,$0, $0a,$0, $e7,$e,$85,$d,$40,$6,$77,$f,$33,$3,$77,$7,$f6,$a,$8f,$0,$bb,$b
 
@@ -126,13 +126,10 @@ palfade_state:
    .byte 0
 .proc initial_fade_out
    jsr push_current_vera_address
-   PushW R0
-   PushW R1
-   PushW R2
-   PushW R3
-   PushW R11
-   PushW R12
-   PushW R15
+   lda #%00001111                   ; R0,R1,R2,R3
+   jsr push_registers_0_to_7 
+   lda #%10011000                   ; R11,R12,R15
+   jsr push_registers_8_to_15 
 
    LoadW R15, palfade_out
    lda palfade_state
@@ -169,13 +166,10 @@ write_the_pal:
    clear_vsync_worker
 
 done:
-   PopW R15
-   PopW R12
-   PopW R11
-   PopW R3
-   PopW R2
-   PopW R1
-   PopW R0
+   lda #%10011000                   ; R11,R12,R15
+   jsr pop_registers_8_to_15 
+   lda #%00001111                   ; R0,R1,R2,R3
+   jsr pop_registers_0_to_7 
    jsr pop_current_vera_address
 
    jmp vsync_irq_exit
