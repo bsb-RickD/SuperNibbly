@@ -33,15 +33,9 @@
 .endmacro   
 
 .proc push_current_vera_address
-   ; pull return address from stack, and insert it into jump at the end
-   ; return address -1 is stored on the stack.. so add 1
-   pla
-   clc
-   adc #1
-   sta return+1
-   pla 
-   adc #0
-   sta return+2
+   ; save return address   
+   plx
+   ply
 
    ; now push the 4 address bytes
    lda VERA_ctrl
@@ -52,8 +46,11 @@
    pha
    lda VERA_addr_high
    pha
-return:
-   jmp $AAAA
+
+   ; restore return address   
+   phy
+   phx
+   rts
 .endproc
 
 .proc push_both_vera_addresses
@@ -103,15 +100,9 @@ return:
 
 
 .proc pop_current_vera_address
-   ; pull return address from stack, and insert it into jump at the end
-   ; return address -1 is stored on the stack.. so add 1
-   pla
-   clc
-   adc #1               
-   sta return+1
-   pla 
-   adc #0
-   sta return+2
+   ; save current return address
+   plx
+   ply
 
    ; now pop the 4 address bytes
    pla
@@ -122,8 +113,11 @@ return:
    sta VERA_addr_low
    pla
    sta VERA_ctrl
-return:
-   jmp $0000
+
+   ; restore return address, go back
+   phy
+   phx
+   rts
 .endproc
 
 .proc pop_both_vera_addresses
