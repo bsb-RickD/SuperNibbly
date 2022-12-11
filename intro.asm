@@ -237,7 +237,7 @@ done:
 .include "lib/lzsa.asm"
 
 screen:
-.incbin "intro_bg.bin"
+.incbin "intro_data.bin"
 
 SCREEN_SIZE = *-screen
 
