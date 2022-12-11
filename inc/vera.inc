@@ -24,6 +24,7 @@ IO_PAGE = $9F
 
 ; VRAM Addresses
 VRAM_palette      = $1FA00
+VRAM_sprites      = $1FC00
 
 ; map & tile width/height constants
 VERA_map_height_32   = %00 << 6
@@ -71,6 +72,23 @@ VERA_port_1 = 1
 
 VERA_increment_addresses = 0
 VERA_decrement_addresses = 1
+
+; sprite height constants
+VERA_sprite_height_8    = 0 << 6
+VERA_sprite_height_16   = 1 << 6
+VERA_sprite_height_32   = 2 << 6
+VERA_sprite_height_64   = 3 << 6
+
+; sprite width constants
+VERA_sprite_width_8     = 0 << 4
+VERA_sprite_width_16    = 1 << 4
+VERA_sprite_width_32    = 2 << 4
+VERA_sprite_width_64    = 3 << 4
+
+; sprite color constants
+VERA_sprite_colors_16   = 0 << 7
+VERA_sprite_colors_266  = 1 << 7
+
 
 ; switch vera back to data port 0 - CHROUT depends on that
 .macro switch_vera_to_dataport_0

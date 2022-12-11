@@ -236,6 +236,8 @@ done:
 
 .include "lib/lzsa.asm"
 
+.include "sprites.inc"
+
 screen:
 .incbin "intro_data.bin"
 
