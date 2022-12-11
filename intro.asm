@@ -57,6 +57,15 @@ fadebuffer:
 
    jsr fill_screen
 
+   set_vera_address VRAM_sprites
+   ldx #0
+init_sprite:
+   lda sprite_smoke_0+2,x
+   sta VERA_data0
+   inx
+   cpx #8
+   bne init_sprite
+
 wait_for_fade:
    lda palfade_state
    cmp #2
@@ -186,11 +195,12 @@ done:
 .endproc   
 
 .proc switch_to_tiled_mode
+   stz VERA_ctrl              ; dcsel and adrsel both to 0
    lda VERA_dc_video
    and #7                     ; keep video and chroma mode
-   ora #$10                   ; layer 0 = on, sprites = off, layer 1 = off
+   ; layer 0 = on, sprites = on, layer 1 = off
+   ora #VERA_enable_layer_0 + VERA_enable_sprites                   
    sta VERA_dc_video          ; set it
-   stz VERA_ctrl              ; dcsel and adrsel both to 0
    LoadW VERA_dc_hscale,64    ; 2 pixel output     
    sta VERA_dc_vscale         ; 320 x 240   
    ; map 64x32, 16 colors, starting at 0, tiles start at 4k, 8x8

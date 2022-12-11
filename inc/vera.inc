@@ -23,8 +23,14 @@ VERA_L1_tilebase  = $9F36
 IO_PAGE = $9F
 
 ; VRAM Addresses
+VRAM_psg          = $1F9C0
 VRAM_palette      = $1FA00
 VRAM_sprites      = $1FC00
+
+; enable / disable flags
+VERA_enable_layer_0  = 1 << 4
+VERA_enable_layer_1  = 1 << 5
+VERA_enable_sprites  = 1 << 6
 
 ; map & tile width/height constants
 VERA_map_height_32   = %00 << 6
