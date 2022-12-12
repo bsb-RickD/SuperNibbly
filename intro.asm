@@ -57,14 +57,9 @@ fadebuffer:
 
    jsr fill_screen
 
-   set_vera_address VRAM_sprites
-   ldx #0
-init_sprite:
-   lda sprite_smoke_0+2,x
-   sta VERA_data0
-   inx
-   cpx #8
-   bne init_sprite
+   LoadW R0,sprite_smoke_0
+   LoadW R1,smoke_pos
+   jsr animate_sprite
 
 wait_for_fade:
    lda palfade_state
@@ -120,6 +115,44 @@ done:
 
    jsr switch_to_textmode   
    
+   rts
+.endproc
+
+; r0 = sprite to update
+; r1 = points to position of sprite (x,y as 16 bit numbers)
+.proc animate_sprite
+   ; set up R2 to point to sprite position
+   MoveW R0,R2
+   AddVW 4,R2
+
+   ldy #1
+   lda (r0),y
+   tax               ; x = y offset
+   dey 
+   lda (r0),y        ; a = x offset
+   add (r1),y
+   sta (r2),y
+   iny   
+   lda (r1),y
+   adc #0
+   sta (r2),y
+   iny
+   txa
+   add (r1),y
+   sta (r2),y
+   iny
+   lda (r1),y
+   adc #0
+   sta (r2),y
+   
+   set_vera_address VRAM_sprites
+   ldy #2
+init_sprite:
+   lda (r0),y
+   sta VERA_data0
+   iny
+   cpy #10
+   bne init_sprite
    rts
 .endproc
 
@@ -245,6 +278,9 @@ done:
 .endproc
 
 .include "lib/lzsa.asm"
+
+smoke_pos:
+.word 240,87
 
 .include "sprites.inc"
 
