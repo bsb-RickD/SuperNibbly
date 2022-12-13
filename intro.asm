@@ -263,12 +263,17 @@ done:
    rts
 .endproc   
 
-; r0 = sprite to update
+; r0 = sprite-frame to update
 ; r1 = points to "virtual screen position" of sprite (x,y as 16 bit numbers)
 .proc add_sprite_offset_to_virtual_pos
-   ; set up R2 to point to position field in the sprite structure
-   MoveW R0,R2
-   AddVW 4,R2
+   ; set up R2 to point to position field in the sprite-frame structure
+   lda R0L
+   clc
+   adc #4
+   sta R2L
+   lda R0H
+   adc #0
+   sta R2H
 
    ldy #1
    lda (r0),y
@@ -307,7 +312,7 @@ init_sprite:
    lda (R15),y
    sta R0H
 
-   ; make R1 point to the position
+   ; make R1 point to the position (to update the sprite-frame with)
    lda R15L
    adc #6
    sta R1L
