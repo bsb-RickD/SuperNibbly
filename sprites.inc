@@ -1,4 +1,4 @@
-; Sprite smoke, frame 0
+; Sprite-frame smoke, frame 0
 sprite_smoke_0:
 .byte 4, 3	; x- and y-offset
 .word 681	; address/32 (+ 16/256 bit as MSB)

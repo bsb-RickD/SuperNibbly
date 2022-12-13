@@ -55,28 +55,29 @@ fadebuffer:
 
    init_vsync_irq initial_fade_out   
 
-   jsr fill_screen
+   ; prepare gfx data, while we fade out the text screen
+   jsr fill_screen               ; unpack data
 
-   LoadW R0,sprite_smoke_0
-   LoadW R1,smoke_pos
-   jsr animate_sprite
+   LoadW R15, animated_smoke
+   jsr update_sprite_positions_for_multiple_sprites
 
-wait_for_fade:
+wait_for_fadeout_to_complete:
    lda palfade_state
    cmp #2
    beq show_screen
    jsr wait_for_vsync
-   bra wait_for_fade
+   bra wait_for_fadeout_to_complete
+
+   ; at this point, the text screen has completely faded to the background color..
 
 show_screen:
-   
-   ; set all colors to fade target
+   ; set all used colors to fade target
    ldx #(PALETTE_SIZE/2)-1
    lda #0
    MoveW palfade_out+3, R11
    jsr write_to_palette_const_color
 
-   ; show screen
+   ; switch to the intro screen - but it's still "invisible" because it's all a single color
    jsr switch_to_tiled_mode
 
    ; initialize pal fade
@@ -101,8 +102,14 @@ write_the_pal:
    ldy #5
    lda (R15),y
    bne fade_further
+
+   ; intro image has faded in, "main loop" starts here..
    
 repeat:   
+   jsr wait_for_vsync
+   LoadW R15, animated_smoke
+   jsr animate_sprite
+
    jsr KRNL_GETIN    ; read key
    cmp #KEY_Q         
    beq done
@@ -118,51 +125,7 @@ done:
    rts
 .endproc
 
-; r0 = sprite to update
-; r1 = points to position of sprite (x,y as 16 bit numbers)
-.proc animate_sprite
-   ; set up R2 to point to sprite position
-   MoveW R0,R2
-   AddVW 4,R2
 
-   ldy #1
-   lda (r0),y
-   tax               ; x = y offset
-   dey 
-   lda (r0),y        ; a = x offset
-   add (r1),y
-   sta (r2),y
-   iny   
-   lda (r1),y
-   adc #0
-   sta (r2),y
-   iny
-   txa
-   add (r1),y
-   sta (r2),y
-   iny
-   lda (r1),y
-   adc #0
-   sta (r2),y
-   
-   set_vera_address VRAM_sprites
-   ldy #2
-init_sprite:
-   lda (r0),y
-   sta VERA_data0
-   iny
-   cpy #10
-   bne init_sprite
-   rts
-.endproc
-
-.proc waitkey
-   wai
-   jsr KRNL_GETIN    ; read key
-   cmp #0
-   beq waitkey
-   rts
-.endproc  
 
 palfade_state:
    .byte 0
@@ -277,12 +240,237 @@ done:
    rts   
 .endproc
 
+.proc waitkey
+   wai
+   jsr KRNL_GETIN    ; read key
+   cmp #0
+   beq waitkey
+   rts
+.endproc  
+
+; r1 points to "virtual screen position" of sprite
+; r2 points to the address to hold the actual pos (= virtual pos + offset)
+; a holds the offset to add
+; y = 0 or 2, depending on x or y component
+.proc add_sprite_offset_to_virtual_pos_compontent
+   add (r1),y
+   sta (r2),y
+   iny   
+   lda (r1),y
+   adc #0
+   sta (r2),y
+   iny
+   rts
+.endproc   
+
+; r0 = sprite to update
+; r1 = points to "virtual screen position" of sprite (x,y as 16 bit numbers)
+.proc add_sprite_offset_to_virtual_pos
+   ; set up R2 to point to position field in the sprite structure
+   MoveW R0,R2
+   AddVW 4,R2
+
+   ldy #1
+   lda (r0),y
+   tax               ; x = y offset
+   dey 
+   lda (r0),y        ; a = x offset
+
+   jsr add_sprite_offset_to_virtual_pos_compontent
+   txa
+   jsr add_sprite_offset_to_virtual_pos_compontent 
+   rts
+.endproc
+
+; r0 = sprite to update
+;
+.proc update_sprite_data
+   set_vera_address VRAM_sprites
+   ldy #2
+init_sprite:
+   lda (r0),y
+   sta VERA_data0
+   iny
+   cpy #10
+   bne init_sprite
+   rts
+.endproc
+
+; R15 this pointer to a sprite class
+; c is expected to be 0
+.proc update_sprite_positions_for_single_sprite
+   ; make R0 point to the sprite-frame-data (by copying the pointer at offset 4 to R0)
+   ldy #4
+   lda (R15),y
+   sta R0L
+   iny
+   lda (R15),y
+   sta R0H
+
+   ; make R1 point to the position
+   lda R15L
+   adc #6
+   sta R1L
+   lda R15H
+   adc #0
+   sta R1H
+
+   ; update the positions
+   bra add_sprite_offset_to_virtual_pos
+.endproc
+
+
+; R15 this pointer
+;
+.proc update_sprite_positions_for_multiple_sprites
+   ldy #2
+   lda (R15),y    ; load number of sprites to update
+   pha            ; push it
+   clc
+   jsr update_sprite_positions_for_single_sprite
+   ; now r0 points to the first sprite and we can simply advance it by 10 to get to the next sprite
+   plx
+   dex
+   beq all_updated
+loop:   
+   phx
+   ; advance R0 by 10 bytes to get to next sprite
+   lda R0L
+   adc #10
+   sta R0L
+   bcc update_next
+   inc R0H
+   clc
+update_next:
+   ; update the offset
+   jsr add_sprite_offset_to_virtual_pos
+   plx
+   dex
+   bne loop
+all_updated:   
+   rts
+.endproc
+
+; cycle trough sprite animation frames
+; call this every frame - will pause until the desired # of frames has passed
+; will then switch to the next frame
+;
+; this routine assumes that all frames have the correct position already updated
+; (see update_sprite_positions_for_multiple_sprites)
+;
+; R15 this pointer
+;
+.proc animate_sprite
+   ldy #0
+   lda (R15),y       ; load frame delay
+   tax               ; remember it
+   iny
+   lda (R15),y       ; load delay count
+   dec
+   beq switch_to_next_frame 
+   sta (R15),y       ; store decreased count
+   rts
+switch_to_next_frame:
+   ; we have counted down the delay, initialize counter again, and animate
+   txa
+   sta (R15),y       ; reset counter to delay count
+   iny  
+   ; y is now 2, and we can advance animation frames
+   lda (R15),y       ; load number of frames
+   tax               ; remember it
+   iny
+   lda (R15),y       ; current frame
+   inc
+   sta (R15),y       ; store increased frame count
+   dec 
+   asl
+   sta add_offset+1  ; times 2
+   asl
+   asl
+   clc
+   adc add_offset+1  ; times 10
+   sta add_offset+1  ; store as immediate value
+   iny
+   ; y is now 4, and we can calculate the sprite pointer
+   lda (R15),y 
+add_offset:   
+   adc #$aa          ; when we end up here, carry is clear for sure
+   sta R0L    
+   iny
+   lda (R15),y 
+   adc #0
+   sta R0H           ; copy pointer over
+
+   ldy #3
+   txa               ; a = max frame count
+   cmp (R15),y
+   bne not_looped_yet
+   lda #0
+   sta (R15),y
+not_looped_yet:   
+   jmp update_sprite_data
+.endproc
+
+
+; R15 this pointer
+.proc animate_sprite_plus_pos_update
+   ; make R1 point to the position
+   lda R15L
+   add #6
+   sta R1L
+   lda R15H
+   adc #0
+   sta R1H
+
+   ldy #0
+   lda (R15),y       ; load number of frames
+   tax               ; remember it number of frames
+   iny
+   lda (R15),y       ; current frame
+   inc
+   sta (R15),y
+   dec 
+   asl
+   sta add_offset+1  ; times 2
+   asl
+   asl
+   clc
+   adc add_offset+1  ; times 10
+   sta add_offset+1  ; store as immediate value
+   iny
+   ; y is now 4
+   lda (R15),y 
+add_offset:   
+   adc #$aa          ; when we end up here, carry is clear for sure
+   sta R0L    
+   iny
+   lda (R15),y 
+   adc #0
+   sta R0H           ; copy pointer over
+
+   ldy #1
+   txa               ; a = max frame count
+   cmp (R15),y
+   bne not_looped_yet
+   lda #0
+   sta (R15),y
+not_looped_yet:   
+   ;jmp update_sprite_pos
+.endproc
+
 .include "lib/lzsa.asm"
 
-smoke_pos:
-.word 240,87
-
 .include "sprites.inc"
+
+; this is the sprite class
+animated_smoke:
+.byte 9              ; 0: frames to wait before switching to next anim frame 
+.byte 7              ; 1: current delay count
+.byte 5              ; 2: number of anim-frames
+.byte 0              ; 3: current anim-frame
+.addr sprite_smoke_0 ; 4: sprite frame pointer
+.word 240,87         ; 6: position
+                     ; 10: size of struct
 
 screen:
 .incbin "intro_data.bin"
