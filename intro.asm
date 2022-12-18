@@ -104,6 +104,10 @@ repeat:
    LoadW R15, jumping_fish
    jsr animate_sprite
 
+   LoadW R15, animated_smoke
+   jsr animate_sprite
+
+
    jsr KRNL_GETIN    ; read key
    cmp #KEY_Q         
    bne repeat
@@ -249,21 +253,19 @@ animated_smoke:
 .byte 5              ; 1: current delay count
 .byte 6              ; 2: number of anim-frames
 .byte 0              ; 3: current anim-frame
-.addr sprite_smoke_0 ; 4: sprite frame pointer
-.word 240,87         ; 6: position
-.byte 17             ; 10: sprite# to use
-.byte 0              ; 11: state 
+.addr sprite_smoke_0 ; 4,5: sprite frame pointer
+.word 240,87         ; 6-9: position
+.word 17*8           ; 10,11: sprite# to use
                      ; 12: size of struct
 
 jumping_fish:
-.byte 6              ; 0: frames to wait before switching to next anim frame 
-.byte 6              ; 1: current delay count
-.byte 17             ; 2: number of anim-frames
-.byte 0              ; 3: current anim-frame
-.addr sprite_fish_0  ; 4: sprite frame pointer
-.word 40,100          ; 6: position
-.byte 16             ; 10: sprite# to use
-.byte 0              ; 11: state 
+.byte 6              ; 0:     frames to wait before switching to next anim frame 
+.byte 6              ; 1:     current delay count
+.byte 17             ; 2:     number of anim-frames
+.byte 0              ; 3:     current anim-frame
+.addr sprite_fish_0  ; 4,5:   sprite frame pointer
+.word 40,100         ; 6-9:   position
+.word 16*8           ; 10,11: sprite# to use
                      ; 12: size of struct
 
 

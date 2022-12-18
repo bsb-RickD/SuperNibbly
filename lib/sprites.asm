@@ -43,10 +43,24 @@
    rts
 .endproc
 
+; R15 this pointer to a sprite class
 ; r0 = sprite-frame to update
 ;
 .proc update_sprite_data
-   set_vera_address VRAM_sprites
+   
+   ; calculate sprite data block address - add address at offset 10 to VRAM_sprites
+   stz VERA_ctrl
+   ldy #10   
+   lda (R15),y
+   sta VERA_addr_low                ; lo byte
+   iny
+   lda (R15),y   
+   add #((VRAM_sprites >> 8) & $FF)
+   sta VERA_addr_med                ; high byte
+   lda #(1+ VERA_increment_1 + VERA_increment_addresses) ; this value is constant for all sprites
+   sta VERA_addr_high
+   
+   ; now copy the actual data
    ldy #2
 init_sprite:
    lda (r0),y
