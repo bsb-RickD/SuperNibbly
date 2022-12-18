@@ -43,11 +43,6 @@ palfade_in:
    .byte 0
    .byte 0
 
-
-; this is where we fade into
-fadebuffer:
-   .res 148, 0
-
 .proc main
    
    ; restore state for multiple runs
@@ -80,6 +75,7 @@ show_screen:
    ; switch to the intro screen - but it's still "invisible" because it's all a single color
    jsr switch_to_tiled_mode
 
+
    ; initialize pal fade
    LoadW R15, palfade_in
    LoadW R0, fadebuffer
@@ -91,6 +87,7 @@ fade_further:
    ; second time round, fade..
    LoadW R0, fadebuffer
    jsr palettefader_step_fade
+
    
 write_the_pal:
    jsr wait_for_vsync
@@ -107,16 +104,13 @@ write_the_pal:
    
 repeat:   
    jsr wait_for_vsync
-   LoadW R15, animated_smoke
+   LoadW R15, jumping_fish
    jsr animate_sprite
 
    jsr KRNL_GETIN    ; read key
    cmp #KEY_Q         
-   beq done
-   jsr KRNL_CHROUT   ; print to screen
+   bne repeat
 
-
-   bra repeat   
 done:
    clear_vsync_irq
 
@@ -287,7 +281,7 @@ done:
    rts
 .endproc
 
-; r0 = sprite to update
+; r0 = sprite-frame to update
 ;
 .proc update_sprite_data
    set_vera_address VRAM_sprites
@@ -302,6 +296,32 @@ init_sprite:
 .endproc
 
 ; R15 this pointer to a sprite class
+; r0 = sprite-frame to update
+;
+.proc update_sprite_data_and_position
+   phx
+   jsr point_r1_to_sprite_position
+   jsr add_sprite_offset_to_virtual_pos
+   jsr update_sprite_data
+   plx
+   rts
+.endproc
+
+; make R1 point to the position field of the sprite class 
+; (effectively, R1 = R15+6)
+;
+; R15 this pointer to a sprite class
+.proc point_r1_to_sprite_position
+   lda R15L
+   adc #6
+   sta R1L
+   lda R15H
+   adc #0
+   sta R1H
+   rts
+.endproc   
+
+; R15 this pointer to a sprite class
 ; c is expected to be 0
 .proc update_sprite_positions_for_single_sprite
    ; make R0 point to the sprite-frame-data (by copying the pointer at offset 4 to R0)
@@ -313,12 +333,7 @@ init_sprite:
    sta R0H
 
    ; make R1 point to the position (to update the sprite-frame with)
-   lda R15L
-   adc #6
-   sta R1L
-   lda R15H
-   adc #0
-   sta R1H
+   jsr point_r1_to_sprite_position
 
    ; update the positions
    bra add_sprite_offset_to_virtual_pos
@@ -334,6 +349,7 @@ init_sprite:
    clc
    jsr update_sprite_positions_for_single_sprite
    ; now r0 points to the first sprite and we can simply advance it by 10 to get to the next sprite
+   ; and r1 
    plx
    dex
    beq all_updated
@@ -370,24 +386,35 @@ all_updated:
    lda (R15),y       ; load frame delay
    tax               ; remember it
    iny
+   cmp (R15),y       ; compare frame delay to current delay count
+   ; if they are equal, the anim frame was switched and we need to update to the new sprite
+   beq update_new_sprite_frame 
+decrase_frame_count:
    lda (R15),y       ; load delay count
    dec
    beq switch_to_next_frame 
    sta (R15),y       ; store decreased count
    rts
 switch_to_next_frame:
-   ; we have counted down the delay, initialize counter again, and animate
-   txa
-   sta (R15),y       ; reset counter to delay count
-   iny  
-   ; y is now 2, and we can advance animation frames
-   lda (R15),y       ; load number of frames
-   tax               ; remember it
+   ; we have counted down the delay, initialize counter again, and switch to next frame index
+   ;dey               ; y = 1 again, pointing to delay count 
+   txa               ; a = frame delay (was remembered in x)
+   sta (R15),y       ; current delay count initialized again
+   ldy #3            ; point to current frame
+   lda (R15),y       ; get current frame
+   inc               ; advance frame count
+   dey               ; point to max frame count
+   cmp (R15),y       
+   bne not_looped_yet ;we can just increase the frame count
+   lda #0            ; we have looped, set to zero
+not_looped_yet:
    iny
-   lda (R15),y       ; current frame
-   inc
-   sta (R15),y       ; store increased frame count
-   dec 
+   sta (R15),y       ; stored new frame count
+   rts
+update_new_sprite_frame:
+   ldy #3            ; point to current frame
+   lda (R15),y       ; get current frame
+multiply_frame_by_10:   
    asl
    sta add_offset+1  ; times 2
    asl
@@ -399,69 +426,19 @@ switch_to_next_frame:
    ; y is now 4, and we can calculate the sprite pointer
    lda (R15),y 
 add_offset:   
+   ; add offset of animation frame to sprite-frame base pointer
    adc #$aa          ; when we end up here, carry is clear for sure
    sta R0L    
    iny
    lda (R15),y 
    adc #0
    sta R0H           ; copy pointer over
-
-   ldy #3
-   txa               ; a = max frame count
-   cmp (R15),y
-   bne not_looped_yet
-   lda #0
-   sta (R15),y
-not_looped_yet:   
-   jmp update_sprite_data
-.endproc
-
-
-; R15 this pointer
-.proc animate_sprite_plus_pos_update
-   ; make R1 point to the position
-   lda R15L
-   add #6
-   sta R1L
-   lda R15H
-   adc #0
-   sta R1H
-
-   ldy #0
-   lda (R15),y       ; load number of frames
-   tax               ; remember it number of frames
-   iny
-   lda (R15),y       ; current frame
-   inc
-   sta (R15),y
-   dec 
-   asl
-   sta add_offset+1  ; times 2
-   asl
-   asl
-   clc
-   adc add_offset+1  ; times 10
-   sta add_offset+1  ; store as immediate value
-   iny
-   ; y is now 4
-   lda (R15),y 
-add_offset:   
-   adc #$aa          ; when we end up here, carry is clear for sure
-   sta R0L    
-   iny
-   lda (R15),y 
-   adc #0
-   sta R0H           ; copy pointer over
-
+   ;jsr update_sprite_data
+   jsr update_sprite_data_and_position
    ldy #1
-   txa               ; a = max frame count
-   cmp (R15),y
-   bne not_looped_yet
-   lda #0
-   sta (R15),y
-not_looped_yet:   
-   ;jmp update_sprite_pos
+   bra decrase_frame_count
 .endproc
+
 
 .include "lib/lzsa.asm"
 
@@ -469,13 +446,27 @@ not_looped_yet:
 
 ; this is the sprite class
 animated_smoke:
-.byte 9              ; 0: frames to wait before switching to next anim frame 
-.byte 7              ; 1: current delay count
-.byte 5              ; 2: number of anim-frames
+.byte 5              ; 0: frames to wait before switching to next anim frame 
+.byte 5              ; 1: current delay count
+.byte 6              ; 2: number of anim-frames
 .byte 0              ; 3: current anim-frame
 .addr sprite_smoke_0 ; 4: sprite frame pointer
 .word 240,87         ; 6: position
-                     ; 10: size of struct
+.byte 17             ; 10: sprite# to use
+.byte 0              ; 11: state 
+                     ; 12: size of struct
+
+jumping_fish:
+.byte 6              ; 0: frames to wait before switching to next anim frame 
+.byte 6              ; 1: current delay count
+.byte 17             ; 2: number of anim-frames
+.byte 0              ; 3: current anim-frame
+.addr sprite_fish_0  ; 4: sprite frame pointer
+.word 40,100          ; 6: position
+.byte 16             ; 10: sprite# to use
+.byte 0              ; 11: state 
+                     ; 12: size of struct
+
 
 screen:
 .incbin "intro_data.bin"
@@ -486,5 +477,6 @@ screen_pal:
 .incbin "palette.bin"
 PALETTE_SIZE = *-screen_pal
 
-decompress:
-.byte 255
+; this is where we fade into
+fadebuffer:
+.res PALETTE_SIZE, 0
