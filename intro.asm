@@ -255,7 +255,7 @@ animated_smoke:
 .byte 0              ; 3: current anim-frame
 .addr sprite_smoke_0 ; 4,5: sprite frame pointer
 .word 240,87         ; 6-9: position
-.word 17*8           ; 10,11: sprite# to use
+.word spritenum(17)  ; 10,11: sprite# to use
                      ; 12: size of struct
 
 jumping_fish:
@@ -265,7 +265,7 @@ jumping_fish:
 .byte 0              ; 3:     current anim-frame
 .addr sprite_fish_0  ; 4,5:   sprite frame pointer
 .word 40,100         ; 6-9:   position
-.word 16*8           ; 10,11: sprite# to use
+.word spritenum(16)  ; 10,11: sprite# to use
                      ; 12: size of struct
 
 

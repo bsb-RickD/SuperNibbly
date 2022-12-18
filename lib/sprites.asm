@@ -4,6 +4,9 @@
 .include "mac.inc"
 .include "vera.asm"
 
+; use this macro to calculate sprite number -> address in VRAM for parameters
+.define spritenum(n) (n*8)+$FC00
+
 ; r1 points to "virtual screen position" of sprite
 ; r2 points to the address to hold the actual pos (= virtual pos + offset)
 ; a holds the offset to add
@@ -47,15 +50,13 @@
 ; r0 = sprite-frame to update
 ;
 .proc update_sprite_data
-   
-   ; calculate sprite data block address - add address at offset 10 to VRAM_sprites
+   ; the address of the sprite block is stored at offset 10
    stz VERA_ctrl
    ldy #10   
    lda (R15),y
    sta VERA_addr_low                ; lo byte
    iny
    lda (R15),y   
-   add #((VRAM_sprites >> 8) & $FF)
    sta VERA_addr_med                ; high byte
    lda #(1+ VERA_increment_1 + VERA_increment_addresses) ; this value is constant for all sprites
    sta VERA_addr_high
