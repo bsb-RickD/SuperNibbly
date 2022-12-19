@@ -13,6 +13,7 @@
 .include "palettefader.asm"
 .include "util.asm"
 .include "sprites.asm"
+.include "array.asm"
    
 c64_pal: .byte $00,$0, $ff,$f, $00,$8, $fe,$a, $4c,$c, $c5,$0, $0a,$0, $e7,$e,$85,$d,$40,$6,$77,$f,$33,$3,$77,$7,$f6,$a,$8f,$0,$bb,$b
 
@@ -69,13 +70,13 @@ ptr_animate_smoke:                        ; 2 - smoke animation
    .word animate_sprite, animated_smoke
    no_commands_to_add
 
-events:
+work_queue:
    .res 64,0
 
-events_to_add:
+workers_to_add:
    .res 16,0
 
-events_to_remove:
+workers_to_remove:
    .res 16,0      
 
 return_to_basic:
@@ -87,9 +88,13 @@ return_to_basic:
    ; restore state for multiple runs
    LoadB palfade_state, 0
    LoadB return_to_basic, 0
-   LoadB events, 0
-   LoadB events_to_add, 0
-   LoadB events_to_remove, 0
+   LoadB work_queue, 0
+   LoadB workers_to_add, 0
+   LoadB workers_to_remove, 0
+
+   LoadW R15, work_queue
+   lda #0
+   jsr array_append              ; append check for exit to worker queue
 
    init_vsync_irq initial_fade_out   
 
@@ -146,12 +151,12 @@ repeat:
    jsr wait_for_vsync
 
    ; main game loop - iterate the objects and update them
-   lda events                    ; worker count
+   lda work_queue                ; worker count
    beq work_loop_empty
    ldx #1
 fetch_next_worker:
    pha                           ; push the number of workers to call
-   lda events,x                  ; get next function number
+   lda work_queue,x              ; get next function number
    asln 3                        ; multiply by 8
    tay
    ; load address to jump to and write it to jsr below
