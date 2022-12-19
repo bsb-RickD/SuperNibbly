@@ -119,15 +119,17 @@ expected_after_remove:
    prints "array_remove_more"
 
    LoadW R15, array
-   lda #0
-   jsr array_remove
    lda #3
+   jsr array_remove
+   lda #0
    jsr array_remove
    lda #17
    jsr array_remove
+   lda #0
+   jsr array_remove
    lda #1
    jsr array_remove
-   lda #8
+   lda #18
    jsr array_remove
    lda #2
    jsr array_remove
@@ -143,6 +145,8 @@ expected_after_remove:
    prints "array_remove_even_more"
 
    LoadW R15, array
+   lda #0
+   jsr array_remove
    lda #0
    jsr array_remove
    lda #3
