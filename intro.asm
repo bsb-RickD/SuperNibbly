@@ -40,10 +40,46 @@ palfade_in:
    .byte 0
    .byte 0
 
+function_ptrs:
+   .word 0,0                              ; 0 - nullptr
+   .word check_return_to_basic, 0         ; 1 - check for exit
+   .word animate_sprite, jumping_fish     ; 2 - fish animation
+   .word animate_sprite, animated_smoke   ; 3 - smoke animation
+
+events:
+   .res 64,0
+
+events_to_add:
+   .res 16,0
+
+events_to_remove:
+   .res 16,0      
+
+return_to_basic:
+   .byte 0
+
+; R15 - pointer to the array
+; a - the value to add
+.proc array_append
+   tax
+   ldy #0
+   lda (R15),y
+   inc 
+   sta (R15),y
+   tay
+   txa 
+   sta (R15),y
+   rts
+.endproc
+
 .proc main
    
    ; restore state for multiple runs
    LoadB palfade_state, 0
+   LoadB return_to_basic, 0
+   LoadB events, 0
+   LoadB events_to_add, 0
+   LoadB events_to_remove, 0
 
    init_vsync_irq initial_fade_out   
 
@@ -101,18 +137,41 @@ write_the_pal:
    
 repeat:   
    jsr wait_for_vsync
-   LoadW R15, jumping_fish
-   jsr animate_sprite
 
-   LoadW R15, animated_smoke
-   jsr animate_sprite
+   ; main game loop - iterate the objects and update them
+   ldx #0
+fetch_next_event:   
+   lda events,x                  ; get next function number
+   beq event_loop_complete
+   asln 2                        ; multiply by 4                       
+   tay
+   ; load address to jump to and write it to jsr below
+   lda function_ptrs,y
+   sta jsr_to_patch+1
+   iny 
+   lda function_ptrs,y
+   sta jsr_to_patch+2
+   ; load this pointer and copy it to R15
+   iny
+   lda function_ptrs,y
+   sta R15L
+   iny
+   lda function_ptrs,y
+   sta R15H
+   ; save counter
+   inx
+   phx
+jsr_to_patch:   
+   jsr $DEAD                     ; dispatch the call
+   plx
+   bra fetch_next_event
 
+event_loop_complete:
 
-   jsr KRNL_GETIN    ; read key
-   cmp #KEY_Q         
-   bne repeat
+   lda return_to_basic
+   beq repeat
 
-done:
+   ; cleanup
    clear_vsync_irq
 
    jsr switch_to_textmode   
@@ -120,6 +179,16 @@ done:
    rts
 .endproc
 
+.proc check_return_to_basic
+   jsr KRNL_GETIN    ; read key
+   cmp #KEY_Q         
+   bne carry_on
+   ; q pressed - signal that we want to return to basic
+   lda #1
+   sta return_to_basic
+carry_on:   
+   rts
+.endproc   
 
 
 palfade_state:
