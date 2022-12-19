@@ -40,11 +40,34 @@ palfade_in:
    .byte 0
    .byte 0
 
+.macro commands_to_add p1, p2, p3, p4
+.if .paramcount = 0
+   .byte 0,0,0
+.elseif .paramcount = 1
+   .byte p1,0,0,0
+.elseif .paramcount = 2
+   .byte p1,p2,0,0
+.elseif .paramcount = 3
+   .byte p1,p2,p3,0
+.elseif .paramcount = 4
+   .byte p1,p2,p3,p4
+.endif
+.endmacro 
+
+.define no_commands_to_add commands_to_add
+
 function_ptrs:
-   .word 0,0                              ; 0 - nullptr
-   .word check_return_to_basic, 0         ; 1 - check for exit
-   .word animate_sprite, jumping_fish     ; 2 - fish animation
-   .word animate_sprite, animated_smoke   ; 3 - smoke animation
+ptr_check_return_to_basic:                ; 0 - check for exit
+   .word check_return_to_basic, 0         
+   no_commands_to_add
+
+ptr_animate_fish:                         ; 1 - fish animation
+   .word animate_sprite, jumping_fish     
+   no_commands_to_add
+
+ptr_animate_smoke:                        ; 2 - smoke animation
+   .word animate_sprite, animated_smoke
+   no_commands_to_add
 
 events:
    .res 64,0
@@ -58,19 +81,6 @@ events_to_remove:
 return_to_basic:
    .byte 0
 
-; R15 - pointer to the array
-; a - the value to add
-.proc array_append
-   tax
-   ldy #0
-   lda (R15),y
-   inc 
-   sta (R15),y
-   tay
-   txa 
-   sta (R15),y
-   rts
-.endproc
 
 .proc main
    
@@ -85,9 +95,6 @@ return_to_basic:
 
    ; prepare gfx data, while we fade out the text screen
    jsr fill_screen               ; unpack data
-
-   LoadW R15, animated_smoke
-   jsr update_sprite_positions_for_multiple_sprites
 
 wait_for_fadeout_to_complete:
    lda palfade_state
@@ -139,11 +146,13 @@ repeat:
    jsr wait_for_vsync
 
    ; main game loop - iterate the objects and update them
-   ldx #0
-fetch_next_event:   
+   lda events                    ; worker count
+   beq work_loop_empty
+   ldx #1
+fetch_next_worker:
+   pha                           ; push the number of workers to call
    lda events,x                  ; get next function number
-   beq event_loop_complete
-   asln 2                        ; multiply by 4                       
+   asln 3                        ; multiply by 8
    tay
    ; load address to jump to and write it to jsr below
    lda function_ptrs,y
@@ -164,12 +173,14 @@ fetch_next_event:
 jsr_to_patch:   
    jsr $DEAD                     ; dispatch the call
    plx
-   bra fetch_next_event
-
-event_loop_complete:
+   pla
+   dec
+   bne fetch_next_worker
 
    lda return_to_basic
    beq repeat
+
+work_loop_empty:
 
    ; cleanup
    clear_vsync_irq
