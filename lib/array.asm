@@ -5,21 +5,30 @@
 
 ; R15 - pointer to the array
 ; a - the value to add
+;
+; a gets changed, R15,x,y are unchanged
 .proc array_append
-   tax
+   phy
+   pha
    ; incrase size counter
    lda (R15)
    inc 
    sta (R15)
    tay                  ; y = index where to store the new item to.
-   txa                  ; pull the item to add
+   pla                  ; pull the item to add
    sta (R15),y          ; finally, store it..
+   ply   
    rts
 .endproc
 
 ; R15 - pointer to the array
 ; a - the value to remove (only the first found occurrence gets removed)
+;
+; a,R14 gets changed, R15,x,y are unchanged
 .proc array_remove
+   phx                  ; save x
+   phy                  ; and y 
+
    tay                  ; remember what to remove
    lda (R15)
    beq nothing_found    ; array empty? get out of here
@@ -34,7 +43,7 @@ loop:
    cpx #0
    bne loop             ; repeat until we're done
 nothing_found:   
-   rts                  ; nothing found - return
+   bra exit             ; nothing found - return
 remove_it:
    cpx #1              
    beq decrease_size    ; only one item from end? - this means we're removing the last item. No need to copy data around, just decrease the size
@@ -55,6 +64,10 @@ decrease_size:
    lda (R15)            ; decrease the length attribute at index 0
    dec
    sta (R15)   
+
+exit:
+   ply                  ; restore y
+   plx                  ; and x
    rts
 .endproc
 

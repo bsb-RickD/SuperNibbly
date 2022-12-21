@@ -317,7 +317,10 @@ jsr_to_patch:
 
 ; take all workers from workers_to_remove and remove them from work_queue
 .proc remove_expired_workers
+   ldx workers_to_remove
+   beq empty 
    stz workers_to_remove         ; mark list as empty
+empty:   
    rts
 .endproc
 
