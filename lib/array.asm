@@ -21,7 +21,7 @@
    rts
 .endproc
 
-; append all the element of another array to this array
+; append all the elements of another array to this array
 ;
 ; R15 - pointer to the array to append to ("this")
 ; R14 - pointer to the array to append
@@ -50,7 +50,7 @@ copy_loop:
 next:   
    cpx #$CC
    bne copy_loop
-done:   
+done:
    rts
 .endproc
 
@@ -102,6 +102,26 @@ decrease_size:
 exit:
    ply                  ; restore y
    plx                  ; and x
+   rts
+.endproc
+
+; remove all the elements of another array from this array
+;
+; R15 - pointer to the array to append to ("this")
+; R14 - pointer to the array that holds the items to remove
+;
+.proc array_remove_array
+   lda (R14)            ; a = number of elements to remove
+   beq done
+   tax
+   ldy #1
+remove_loop:   
+   lda (R14),y
+   jsr array_remove
+   iny
+   dex
+   bne remove_loop
+done:
    rts
 .endproc
 

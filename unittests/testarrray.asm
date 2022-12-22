@@ -25,6 +25,8 @@
    jsr test_array_append_array
    jsr test_array_append_array_again
    jsr test_array_append_array_empty
+   jsr test_array_remove_array
+   jsr test_array_remove_array_empty
 
    rts
 .endproc
@@ -176,7 +178,6 @@ array_to_append:
    rts
 array_to_append:
    .byte 4,109,0,252,29
-
 .endproc
 
 .proc test_array_append_array_empty
@@ -191,6 +192,33 @@ array_to_append:
    rts
 array_to_append:
    .byte 0,17,18
+.endproc
 
+.proc test_array_remove_array
+   prints "array_remove_array"
+
+   LoadW R15, array
+   LoadW R14, array_to_remove
+   jsr array_remove_array
+   
+   check_array_content {3, 67,109,252}
+
+   rts
+array_to_remove:
+   .byte 4, 99,55,0,29
+.endproc
+
+
+.proc test_array_remove_array_empty
+   prints "array_remove_array_empty"
+   
+   LoadW R15, array
+   LoadW R14, array_to_remove
+   jsr array_remove_array
+   
+   check_array_content {3, 67,109,252}
+   rts
+array_to_remove:
+   .byte 0
 .endproc
 
