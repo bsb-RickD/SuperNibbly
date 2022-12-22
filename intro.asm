@@ -189,11 +189,7 @@ append_workers:
    iny                           ; advance to next worker to load
    lda function_ptrs,y           ; get the 1 byte pseudo pointer
    beq no_more_workers_2_append  ; null ptr found - stop evaluation workers to add
-   phx                           ; remember x, y
-   phy
    jsr array_append              ; add it to the list of pointers to add 
-   ply
-   plx                           ; restore x,y
    dex                           ; dec the counter of allowed pointers to add
    bne append_workers            ; try one more
 no_more_workers_2_append:
@@ -208,11 +204,10 @@ call_worker_next_frame:
    dec
    bne fetch_next_worker         ; not at zero? get next worker
 
-   jsr remove_expired_workers    ; update the workers list by removing old..
-   jsr add_new_workers           ; and adding new workers
+   jsr update_work_queue         ; update the workers list by removing old and adding new workers
 
-   lda return_to_basic
-   beq repeat
+   lda return_to_basic           ; shall we quit?
+   beq repeat                    ; no, continue
 
 work_loop_empty:
 
@@ -308,29 +303,26 @@ complete:
    sta R15H      
    phy                           ; save index to worker data
 jsr_to_patch:   
-   jsr $DEAD                     ; dispatch the call
+   jsr $CA11                     ; dispatch the call
    ply
 
    rts
 .endproc
 
+; take remove / add workers to queue
+.proc update_work_queue
+   LoadW R15, work_queue
+   
+   LoadW R14, workers_to_remove
+   jsr array_remove_array
 
-; take all workers from workers_to_remove and remove them from work_queue
-.proc remove_expired_workers
-   ldx workers_to_remove
-   beq empty 
-   stz workers_to_remove         ; mark list as empty
-empty:   
+   LoadW R14, workers_to_add
+   jsr array_append_array   
+
    rts
 .endproc
 
-; take all workers from workers_to_add and add them to work_queue
-.proc add_new_workers
-   stz workers_to_add            ; mark list as empty
-   rts
-.endproc
-
-
+; worker procedure to check whether we shall quit or not
 .proc check_return_to_basic
    jsr KRNL_GETIN    ; read key
    cmp #KEY_Q         
@@ -338,6 +330,8 @@ empty:
    ; q pressed - signal that we want to return to basic
    lda #1
    sta return_to_basic
+   sec
+   rts
 carry_on:  
    clc 
    rts
