@@ -331,6 +331,36 @@ MACINC = 1
 
 ; --------------- Eriks stuff starts here -------------------------
 
+; branch greater equal
+.macro  bge     Arg
+        bcs     Arg
+.endmacro
+
+; branch less than
+.macro  blt     Arg
+        bcc     Arg
+.endmacro
+
+; branch greater than
+.macro  bgt     Arg
+        .local  L
+        beq     L
+        bcs     Arg
+L:
+.endmacro
+
+; branch less equal
+.macro  ble     Arg
+        beq     Arg
+        bcc     Arg
+.endmacro
+
+; arithmetic shift right
+.macro  asr             ; Arithmetic shift right
+        cmp     #$80    ; Put bit 7 into carry
+        ror             ; Rotate right with carry
+.endmacro
+
 ; expands to as many asl commands as specified by shift
 .macro asln shift
    .if (shift) = 0

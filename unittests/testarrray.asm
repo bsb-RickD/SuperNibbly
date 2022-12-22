@@ -22,6 +22,9 @@
    jsr test_array_remove_not_found
    jsr test_array_remove_more
    jsr test_array_remove_even_more
+   jsr test_array_append_array
+   jsr test_array_append_array_again
+   jsr test_array_append_array_empty
 
    rts
 .endproc
@@ -29,33 +32,45 @@
 array:
 .res 32, 0
 
-expected_after_add:
-.byte 5,0,0,17,2,1
 
-expected_after_add_more:
-.byte 10,0,0,17,2,1,17,18,19,3,3
+; some helper macros for the unit tests ---------------------------
 
-expected_after_remove:
-.byte 7,0,0,2,1,17,18,3
+; append to the array
+.macro append p
+   lda #p
+   jsr array_append
+.endmacro
+
+; remove from the array
+.macro remove p
+   lda #p
+   jsr array_remove
+.endmacro
+
+; check array content
+.macro check_array_content c 
+   bra do_comparison
+expected:
+.byte c
+Array_size = *-expected
+do_comparison:
+   compare_memory array, expected, Array_size
+   ut_exp_equal
+.endmacro
+
 
 
 .proc test_array_add
    prints "array_add"
 
    LoadW R15, array
-   lda #0
-   jsr array_append
-   lda #0
-   jsr array_append
-   lda #17
-   jsr array_append
-   lda #2
-   jsr array_append
-   lda #1
-   jsr array_append
+   append 0
+   append 0
+   append 17
+   append 2
+   append 1
 
-   compare_memory array, expected_after_add, 6
-   ut_exp_equal
+   check_array_content {5, 0,0,17,2,1}
 
    rts
 .endproc 
@@ -64,19 +79,13 @@ expected_after_remove:
    prints "array_add_more"
 
    LoadW R15, array
-   lda #17
-   jsr array_append
-   lda #18
-   jsr array_append
-   lda #19
-   jsr array_append
-   lda #3
-   jsr array_append
-   lda #3
-   jsr array_append
+   append 17
+   append 18
+   append 19
+   append 3
+   append 3
 
-   compare_memory array, expected_after_add_more, 11
-   ut_exp_equal
+   check_array_content {10, 0,0,17,2,1,17,18,19,3,3}
 
    rts
 .endproc 
@@ -85,15 +94,11 @@ expected_after_remove:
    prints "array_remove"
 
    LoadW R15, array
-   lda #17
-   jsr array_remove
-   lda #19
-   jsr array_remove
-   lda #3
-   jsr array_remove
+   remove 17
+   remove 19
+   remove 3
 
-   compare_memory array, expected_after_remove, 8
-   ut_exp_equal
+   check_array_content {7, 0,0,2,1,17,18,3}
 
    rts
 .endproc 
@@ -102,15 +107,11 @@ expected_after_remove:
    prints "array_remove_not_found"
 
    LoadW R15, array
-   lda #25
-   jsr array_remove
-   lda #99
-   jsr array_remove
-   lda #33
-   jsr array_remove
+   remove 25
+   remove 99
+   remove 33
 
-   compare_memory array, expected_after_remove, 8
-   ut_exp_equal
+   check_array_content {7, 0,0,2,1,17,18,3}
 
    rts
 .endproc 
@@ -119,24 +120,15 @@ expected_after_remove:
    prints "array_remove_more"
 
    LoadW R15, array
-   lda #3
-   jsr array_remove
-   lda #0
-   jsr array_remove
-   lda #17
-   jsr array_remove
-   lda #0
-   jsr array_remove
-   lda #1
-   jsr array_remove
-   lda #18
-   jsr array_remove
-   lda #2
-   jsr array_remove
+   remove 3
+   remove 0
+   remove 17
+   remove 0
+   remove 1
+   remove 18
+   remove 2
 
-
-   lda (R15)
-   ut_exp_equal
+   check_array_content {0}
 
    rts
 .endproc 
@@ -145,24 +137,60 @@ expected_after_remove:
    prints "array_remove_even_more"
 
    LoadW R15, array
-   lda #0
-   jsr array_remove
-   lda #0
-   jsr array_remove
-   lda #3
-   jsr array_remove
-   lda #17
-   jsr array_remove
-   lda #1
-   jsr array_remove
-   lda #8
-   jsr array_remove
-   lda #2
-   jsr array_remove
+   remove 0
+   remove 0
+   remove 3
+   remove 17
+   remove 1
+   remove 8
+   remove 2
 
-
-   lda (R15)
-   ut_exp_equal
+  check_array_content {0}
 
    rts
 .endproc 
+
+.proc test_array_append_array
+   prints "array_append_array"
+
+   LoadW R15, array
+   LoadW R14, array_to_append
+   jsr array_append_array
+
+   check_array_content {3, 99,67,55}
+   rts
+
+array_to_append:
+   .byte 3,99,67,55
+.endproc
+
+.proc test_array_append_array_again
+   prints "array_append_array_again"
+
+   LoadW R15, array
+   LoadW R14, array_to_append
+   jsr array_append_array
+
+   check_array_content {7, 99,67,55,109,0,252,29}
+
+   rts
+array_to_append:
+   .byte 4,109,0,252,29
+
+.endproc
+
+.proc test_array_append_array_empty
+   prints "array_append_array_empty"
+
+   LoadW R15, array
+   LoadW R14, array_to_append
+   jsr array_append_array
+
+   check_array_content {7, 99,67,55,109,0,252,29}
+
+   rts
+array_to_append:
+   .byte 0,17,18
+
+.endproc
+

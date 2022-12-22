@@ -21,10 +21,44 @@
    rts
 .endproc
 
+; append all the element of another array to this array
+;
+; R15 - pointer to the array to append to ("this")
+; R14 - pointer to the array to append
+;
+.proc array_append_array
+   lda (R14)            ; a = number of elements to append
+   beq done
+   inc
+   sta next+1           ; number of elements to append written to the compare constant
+   ldx R14L
+   stx copy_loop+1
+   ldx R14H
+   stx copy_loop+2      ; transfer (R14) to code to store to
+   lda (R15)
+   tay
+   iny                  ; y = position in target array to append to
+   lda (R14)
+   add (R15)            ; a = new array length
+   sta (R15)            ; store it
+   ldx #1               ; need to start at 1 - 0 is the length
+copy_loop:
+   lda $AAAA,x
+   sta (R15),y          ; copy the items
+   iny
+   inx                  ; counter update
+next:   
+   cpx #$CC
+   bne copy_loop
+done:   
+   rts
+.endproc
+
+
 ; R15 - pointer to the array
 ; a - the value to remove (only the first found occurrence gets removed)
 ;
-; a,R14 gets changed, R15,x,y are unchanged
+; a gets changed, R15,x,y are unchanged
 .proc array_remove
    phx                  ; save x
    phy                  ; and y 
@@ -49,22 +83,22 @@ remove_it:
    beq decrease_size    ; only one item from end? - this means we're removing the last item. No need to copy data around, just decrease the size
    lda R15L
    sub #1               
-   sta R14L
+   sta r15_decreased+1
    lda R15H
    sbc #0
-   sta R14H             ; R14 = R15-1
+   sta r15_decreased+2  ; address = R15-1
 remove_loop:   
    iny
    dex
    lda (R15),y          ; read from R15
-   sta (R14),y          ; copy it to the byte before
+r15_decreased:   
+   sta $DEC1,y          ; copy it to the byte before
    cpx #1
    bne remove_loop
 decrease_size:
    lda (R15)            ; decrease the length attribute at index 0
    dec
-   sta (R15)   
-
+   sta (R15)
 exit:
    ply                  ; restore y
    plx                  ; and x
