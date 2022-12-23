@@ -84,11 +84,11 @@ ptr_check_return_to_basic:                ; 1 - check for exit
    .word check_return_to_basic, 0         
    no_commands_to_add
 
-ptr_check_fill_screen:                    ; 2 - unpack screen data
+ptr_unpack_intro:                         ; 2 - unpack screen data
    .word fill_screen, 0         
    commands_to_add 3                      ; after unpacking, wait for fadeout
 
-ptr_check_fade_out_done:                  ; 3 - wait for fading out the palette
+ptr_wait_for_fade_out:                    ; 3 - wait for fading out the palette
    .word fade_out_and_switch_to_tiled_mode, palfade_out         
    commands_to_add 4,5,6                  ; after fading out, fade back in and start the animations
 
@@ -99,6 +99,7 @@ ptr_fade_in:                              ; 4 - fade pal in
 ptr_animate_smoke:                        ; 5 - smoke animation
    .word animate_sprite, animated_smoke
    no_commands_to_add
+
 ptr_animate_fish:                         ; 6 - fish animation
    .word animate_sprite, jumping_fish     
    no_commands_to_add
@@ -132,60 +133,17 @@ return_to_basic:
    lda #1
    jsr array_append              ; append check for exit to worker queue
 
+   lda #2 
+   jsr array_append              ; append unpacking of intro data to work queue
+
    init_vsync_irq initial_fade_out   
 
-   ; prepare gfx data, while we fade out the text screen
-   jsr fill_screen               ; unpack data
-
-wait_for_fadeout_to_complete:
-   lda palfade_state
-   cmp #2
-   beq show_screen
-   jsr wait_for_vsync
-   bra wait_for_fadeout_to_complete
-
-   ; at this point, the text screen has completely faded to the background color..
-
-show_screen:
-   ; set all used colors to fade target
-   ldx #(PALETTE_SIZE/2)-1
-   lda #0
-   MoveW palfade_out+3, R11
-   jsr write_to_palette_const_color
-
-   ; switch to the intro screen - but it's still "invisible" because it's all a single color
-   jsr switch_to_tiled_mode
-
-   ; initialize pal fade
-   LoadW R15, palfade_in
-   LoadW R0, fadebuffer
-   sec
-   jsr palettefader_start_fade
-   bra write_the_pal
-
-fade_further:
-   ; second time round, fade..
-   LoadW R0, fadebuffer
-   jsr palettefader_step_fade
 
    
-write_the_pal:
-   jsr wait_for_vsync
-   MoveW R0, R11 
-   ldx #(PALETTE_SIZE/2)-1
-   lda #0
-   jsr write_to_palette
-
-   ldy #5
-   lda (R15),y
-   bne fade_further
-
-   ; intro image has faded in, "main loop" starts here..
-   
-repeat:   
-   jsr wait_for_vsync
-
    ; main game loop - iterate the objects and update them
+iterate_main_loop:   
+   jsr wait_for_vsync
+
    lda work_queue                ; worker count
    beq work_loop_empty
    ldx #1
@@ -194,10 +152,11 @@ fetch_next_worker:
    phx                           ; save worker index
 
    lda work_queue,x              ; get next function number
+   sta remove_this_fnum+1        ; remember it, in case we need to remove it on completion
    asln 3                        ; multiply by 8
    tay                           ; y holds the offset to the function_ptrs table
 
-   jsr call_worker               ; call the worker
+   jsr call_worker               ; call the worker (this y register is pushed and popped)
 
    ; carry clear? - nothing to do, call worker again next frame
    bcc call_worker_next_frame    
@@ -214,8 +173,8 @@ append_workers:
    bne append_workers            ; try one more
 no_more_workers_2_append:
    LoadW R15, workers_to_remove
-   pla                           ; pull worker index - this is the one we want to remove
-   pha                           ; push worker index back onto the stack
+remove_this_fnum:   
+   lda #$F2                      ; this is function num we want to remove - was stored upstream here
    jsr array_append              ; add the current
 call_worker_next_frame:   
    plx                           ; restore worker index   
@@ -227,7 +186,7 @@ call_worker_next_frame:
    jsr update_work_queue         ; update the workers list by removing old and adding new workers
 
    lda return_to_basic           ; shall we quit?
-   beq repeat                    ; no, continue
+   beq iterate_main_loop         ; no, continue
 
 work_loop_empty:
 
@@ -334,10 +293,14 @@ jsr_to_patch:
    LoadW R15, work_queue
    
    LoadW R14, workers_to_remove
-   jsr array_remove_array
+   jsr array_remove_array        ; remove the ones to remove
+   lda #0
+   sta (R14)                     ; empty remove array
 
    LoadW R14, workers_to_add
-   jsr array_append_array   
+   jsr array_append_array        ; append the ones to append
+   lda #0
+   sta (R14)                     ; empty append array
 
    rts
 .endproc

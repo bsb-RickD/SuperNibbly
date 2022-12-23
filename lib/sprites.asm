@@ -180,6 +180,7 @@ decrase_frame_count:
    dec
    beq switch_to_next_frame 
    sta (R15),y       ; store decreased count
+   clc
    rts
 switch_to_next_frame:
    ; we have counted down the delay, initialize counter again, and switch to next frame index
@@ -196,6 +197,7 @@ switch_to_next_frame:
 not_looped_yet:
    iny
    sta (R15),y       ; stored new frame count
+   clc
    rts
 update_new_sprite_frame:
    ldy #3            ; point to current frame
