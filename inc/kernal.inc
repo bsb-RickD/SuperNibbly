@@ -1,6 +1,9 @@
-.ifndef KRNL_GETIN
+.ifndef KERNAL_INC
+KERNAL_INC = 1
 
+.ifndef MAC_INC
 .include "mac.inc"
+.endif
 
 ; Kernal
 KRNL_GETIN          = $FFE4

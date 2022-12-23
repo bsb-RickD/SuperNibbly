@@ -1,6 +1,9 @@
-.ifndef push_registers_8_to_15
+.ifndef UTIL_ASM
+UTIL_ASM = 1
 
+.ifndef REGS_INC
 .include "regs.inc"
+.endif
 
 ; a = bitmaks of registers to push
 ; lsb = register 8

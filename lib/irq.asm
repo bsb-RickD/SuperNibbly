@@ -1,8 +1,17 @@
-.ifndef init_irq
+.ifndef IRQ_ASM
+IRQ_ASM = 1
 
+.ifndef KERNAL_INC
 .include "kernal.inc"
+.endif
+
+.ifndef MAC_INC
 .include "mac.inc"
+.endif
+
+.ifndef REGS_INC
 .include "regs.inc"
+.endif
 
 ; globals
 default_irq:      .addr 0   

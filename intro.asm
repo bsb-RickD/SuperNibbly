@@ -7,14 +7,34 @@
 
    jmp main
 
+.ifndef COMMON_INC
 .include "common.inc"
+.endif
+
+.ifndef VERA_ASM
 .include "vera.asm"
+.endif
+
+.ifndef VSYNC_ASM
 .include "vsync.asm"
+.endif
+
+.ifndef PALETTEFADER_ASM
 .include "palettefader.asm"
+.endif
+
+.ifndef UTIL_ASM
 .include "util.asm"
+.endif
+
+.ifndef SPRITES_ASM
 .include "sprites.asm"
+.endif
+
+.ifndef ARRAY_ASM
 .include "array.asm"
-   
+.endif
+
 c64_pal: .byte $00,$0, $ff,$f, $00,$8, $fe,$a, $4c,$c, $c5,$0, $0a,$0, $e7,$e,$85,$d,$40,$6,$77,$f,$33,$3,$77,$7,$f6,$a,$8f,$0,$bb,$b
 
 ; num colors to fade       1 byte   (+1, 0 meaning 1, etc.)    offset 0

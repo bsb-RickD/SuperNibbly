@@ -1,7 +1,13 @@
-.ifndef ut_pass_on_equal
+.ifndef UT_ASM
+UT_ASM = 1
 
+.ifndef COMMON_INC
 .include "common.inc"
+.endif
+
+.ifndef PRINT_ASM
 .include "print.asm"
+.endif
 
 str_ut_welcome:
 .byte (str_ut_passed-1-*),"=== unit test framework ===", CHR_NL, CHR_NL

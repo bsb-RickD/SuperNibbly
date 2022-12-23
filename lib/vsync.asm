@@ -1,6 +1,9 @@
-.ifndef init_vsync
+.ifndef VSYNC_ASM
+VSYNC_ASM = 1
 
+.ifndef IRQ_ASM
 .include "irq.asm"
+.endif
 
 ; globals
 vsync_count:      .word 0

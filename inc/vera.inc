@@ -1,4 +1,6 @@
-.ifndef VERA_addr_low
+.ifndef VERA_INC
+VERA_INC = 1
+
 ; VERA registers
 VERA_addr_low     = $9F20
 VERA_addr_med     = $9F21

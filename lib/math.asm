@@ -1,7 +1,13 @@
-.ifndef div88
+.ifndef MATH_ASM
+MATH_ASM = 1
 
+.ifndef REGS_INC
 .include "regs.inc"
+.endif
+
+.ifndef MAC_INC
 .include "mac.inc"
+.endif
 
 
 ; 8 bit negate + add

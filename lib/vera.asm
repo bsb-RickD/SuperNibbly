@@ -1,8 +1,17 @@
-.ifndef set_vera_data_to_palette
+.ifndef VERA_ASM
+VERA_ASM = 1
 
+.ifndef REGS_INC
 .include "regs.inc"
+.endif
+
+.ifndef REGS_INC
 .include "mac.inc"
+.endif
+
+.ifndef REGS_INC
 .include "vera.inc"
+.endif
 
 ; addr = 17 bit address, 
 ; optional: (default 0) dataport = 0/1

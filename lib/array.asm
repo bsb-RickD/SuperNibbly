@@ -1,7 +1,13 @@
-.ifndef array_append
+.ifndef ARRAY_ASM
+ARRAY_ASM = 1
 
+.ifndef REGS_INC
 .include "regs.inc"
+.endif
+
+.ifndef MAC_INC
 .include "mac.inc"
+.endif
 
 ; R15 - pointer to the array
 ; a - the value to add

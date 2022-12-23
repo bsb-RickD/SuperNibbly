@@ -1,7 +1,13 @@
-.ifndef print_zero_terminated
+.ifndef PRINT_ASM
+PRINT_ASM = 1
 
+.ifndef COMMON_INC
 .include "common.inc"
+.endif
+
+.ifndef MATH_ASM
 .include "math.asm"
+.endif
 
 .macro print_push_state
    pha

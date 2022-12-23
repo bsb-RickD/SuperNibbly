@@ -1,8 +1,17 @@
-.ifndef add_sprite_offset_to_virtual_pos_compontent
+.ifndef SPRITES_ASM
+SPRITES_ASM = 1
 
+.ifndef REGS_INC
 .include "regs.inc"
+.endif
+
+.ifndef MAC_INC
 .include "mac.inc"
+.endif
+
+.ifndef VERA_ASM
 .include "vera.asm"
+.endif
 
 ; use this macro to calculate sprite number -> address in VRAM for parameters
 .define spritenum(n) (n*8)+$FC00

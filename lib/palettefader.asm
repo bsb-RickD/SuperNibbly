@@ -1,7 +1,13 @@
-.ifndef palettefader_start_fade
+.ifndef PALETTEFADER_ASM
+PALETTEFADER_ASM = 1
 
+.ifndef COMMON_INC
 .include "common.inc"
+.endif
+
+.ifndef MATH_ASM
 .include "math.asm"
+.endif
 
 ; palette fader class layout
 ;

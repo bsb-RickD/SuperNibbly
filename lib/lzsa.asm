@@ -1,12 +1,24 @@
+.ifndef LZSA_ASM
+LZSA_ASM = 1
+
+.ifndef REGS_INC
+.include "regs.inc"
+.endif
+
+.ifndef MAC_INC
+.include "mac.inc"
+.endif
+
+.ifndef VERA_INC
+.include "vera.inc"
+.endif
+
+
 ;----------------------------------------------------------------------
 ; LZSA2 Decompression
 ;----------------------------------------------------------------------
 ; (C)2019 Emmanuel Marty, Peter Ferrie, M. Steil; License: 3-clause BSD
 ; decompression to VRAM fix: Erik Pojar
-
-.include "regs.inc"
-.include "mac.inc"
-.include "vera.inc"
 
 
 lzsa_nibcount:
@@ -349,3 +361,5 @@ ngetsrc:
 ;     misrepresented as being the original software.
 ;  3. This notice may not be removed or altered from any source distribution.
 ; -----------------------------------------------------------------------------
+
+.endif

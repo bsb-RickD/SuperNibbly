@@ -1,4 +1,5 @@
-.ifndef R0
+.ifndef REGS_INC
+REGS_INC = 1
 
 ; Zero page scratch area
 ZEROPAGE_SCRATCH     = $22
