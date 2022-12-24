@@ -127,6 +127,7 @@ print_char:
    jsr print_dec_
 .endmacro
 
+
 ; print accumulator as decimal number
 ; r11, a, x clobbered
 .proc print_dec_
@@ -147,13 +148,42 @@ divide_loop:
    inx                  ; inc number of digits to print
    lda r11H             ; are we done?
    bne divide_loop
-print_loop:
+.endproc
+
+; used by both print methods 
+;
+; x holds the number of digits to print
+; stack holds the digits
+print_dec_from_stack_loop:
    pla
    jsr print_hex_digit
    dex
-   bne print_loop
+   bne print_dec_from_stack_loop
    rts
-.endproc
 
+; print r0 as decimal number
+.proc print_dec_16
+   lda R0H
+   bne not_zero
+   lda R0L
+   beq print_dec_+4  ; special case - print 0 as single 0 (and reuse code from 8-bit print)
+not_zero:
+   stz R1H
+   lda #10
+   sta R1L
+   ldx #0
+divide_loop:
+   phx
+   jsr div1616
+   plx
+   lda R2L
+   pha
+   inx
+   lda R0L
+   bne divide_loop
+   lda R0H
+   bne divide_loop
+   bra print_dec_from_stack_loop
+.endproc   
 
 .endif

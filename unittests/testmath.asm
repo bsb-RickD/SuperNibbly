@@ -16,6 +16,7 @@
    jsr test_mul
    jsr test_mad
    jsr test_negadd
+   jsr test_mul816
    lda #0
    ldx #7
    jsr test_lerp
@@ -164,4 +165,87 @@ next_test:
    jne next_test
    rts
 msg: lstr "multiply "
+.endproc
+
+multiply_testcases_816:
+.word 1,1,1
+.word 2,2,4
+.word 255,255,255*255
+.word 523,17,523*17
+.word 0,16,0
+.word 16,0,0
+.word 4369,15,4369*15
+multiply_num_testcases_816:
+.byte (*-multiply_testcases_816)/6
+
+
+.macro move_word_y Source, Dest
+   lda (Source),y
+   sta Dest
+   iny 
+   lda (Source),y
+   sta Dest+1
+   iny 
+.endmacro   
+   
+
+.proc test_mul816
+   LoadW R12, multiply_testcases_816
+   ldy #0
+   ldx multiply_num_testcases_816
+next_test:   
+   phx
+   printl msg
+   ; load operands and result from tescase table to R0, R1, R2  .. R0*R1 = R2
+   move_word_y R12, R0
+
+   phy
+   jsr print_dec_16
+   prints " * "
+   ply
+
+   move_word_y R12, R0   
+
+   phy 
+   jsr print_dec_16
+   prints " = "
+   ply
+
+   move_word_y R12, R0
+
+   phy 
+   jsr print_dec_16
+   ply
+
+   tya
+   sub #6
+   tay
+
+   move_word_y R12, R0
+   move_word_y R12, R1
+   
+   ; do the actual multiplication
+   phy
+   jsr mul816
+   ply
+
+   ; do comparison and print unit test result
+   lda (R12),y
+   tax
+   iny
+   lda (R12),y
+   iny
+
+   cpx R2L
+   bne result
+   cmp R2H
+result:
+   phy
+   ut_exp_equal
+   ply
+   plx
+   dex
+   jne next_test
+   rts
+msg: lstr "multiply (16) "
 .endproc
