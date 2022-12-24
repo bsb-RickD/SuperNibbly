@@ -6,17 +6,20 @@ KERNAL_INC = 1
 .endif
 
 ; Kernal
-KRNL_GETIN          = $FFE4
-KRNL_CHROUT         = $FFD2
+KRNL_GETIN           = $FFE4
+KRNL_CHROUT          = $FFD2
 
-KRNL_MEM_FILL		= $FEE4
-KRNL_MEM_COPY       = $FEE7
+KRNL_MEM_FILL        = $FEE4
+KRNL_MEM_COPY        = $FEE7
 KRNL_MEM_DECOMPRESS	= $FEED
 
-KRNL_SETLFS   		= $FFBA
-KRNL_SETNAM  		= $FFBD
-KRNL_LOAD     		= $FFD5
-KRNL_SAVE     		= $FFD8
+KRNL_GET_DATE_TIME   = $FF50
+
+KRNL_SETLFS          = $FFBA
+KRNL_SETNAM  		   = $FFBD
+KRNL_LOAD            = $FFD5
+KRNL_SAVE            = $FFD8
+
 
 KRNL_SCREEN   		= $FFED
 KRNL_PLOT     		= $FFF0

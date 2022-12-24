@@ -39,6 +39,20 @@ PRINT_ASM = 1
    print_pop_state
 .endmacro
 
+; print as many newlines as specified by count
+; (specifying no count will yield one newline)
+.macro newline Count
+   .if .paramcount = 0
+      newline 1
+   .elseif (Count) = 0
+      .exitmacro
+   .else
+      lda #CHR_NL
+      jsr KRNL_CHROUT
+      newline Count-1
+   .endif
+.endmacro
+
 ; print a string at addr that has a leading length
 .macro printl addr
    print_push_state
