@@ -15,10 +15,9 @@
    
    jsr test_mul
    jsr test_mad
-   jsr test_negadd
    jsr test_mul816
-   lda #0
-   ldx #7
+   jsr test_mad816
+   jsr test_negadd   
    jsr test_lerp
 
    rts
@@ -107,6 +106,26 @@ loop:
 
    rts
 .endproc
+
+.proc test_mad816
+   prints "multiply add (16)"
+
+   LoadW R2, 1235
+   LoadW R0, 777
+   LoadB R1L, 13
+   jsr mad816      ; compute 777*13+1235 = 11336
+
+   lda R2L
+   cmp #(11336 & 255)
+   bne result
+   lda R2H
+   cmp #(11336 >> 8)
+result:   
+   ut_exp_equal
+
+   rts
+.endproc
+
 
 multiply_testcases:
 .byte 1,1,1
