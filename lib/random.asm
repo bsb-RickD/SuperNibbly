@@ -17,37 +17,94 @@ RANDOM_ASM = 1
 
 ; random range objects (16 bit) look like this:
 ;
-; word range start			; offset 0
-; byte range length         ; offset 2  
+; word range length         ; offset 0  
+; word range start			; offset 2
 
 
 ; R0: 	range start
 ; R1: 	range end
-; R15:	points to a 3 byte memory block to initialize the range object
+; R15:	points to a 4 byte memory block to initialize the range object
+;
+; notes - the random range must not exceed 255
 .proc rand_range_init
 	ldy #0
+	; subtract R0 from R1
+	lda R1L
+	sec
+	sbc R0L
+	sta (R15),y 		; store result low
+	iny
+	lda R1H
+	sbc R0H
+	sta (R15),y 		; store result high
+	iny
+
+	; now copy start over
 	lda R0L
-	tax
 	sta (R15),y
 	iny
 	lda R0H
-	pha
 	sta (R15),y
-	iny
-	txa
-	sub R1L
-	sta (R15),y
-	iny
-	pla
-	sbc R1H
-	sta (R15),y 
+	iny	
+	rts	
 .endproc
 
 
+; load a byte from (this),y and copy to dest
+;
+; offset is optional, if given, will initialize y to the offset
+; y is incremeted 
+;
+.macro ThisMoveB this, dest, offset
+.if .paramcount = 3
+	ldy #offset
+.endif
+	lda (this),y
+	sta dest
+	iny
+.endmacro
+
+
+; load a word from (this),y and copy to dest
+;
+; offset is optional, if given, will initialize y to the offset
+; y is incremeted 
+;
+.macro ThisMoveW this, dest, offset
+.if .paramcount = 3
+	ldy #offset
+.endif
+	ThisMoveB this, dest+0
+	ThisMoveB this, dest+1
+.endmacro
+
+
+; get next random number in the range
+; the retunred value will b in the range [start, end) 
+; so the values go from start to end-1
+;
+; R15: "this pointer" to random range object
+;
+; returns: R0 - the next random number in that range
 .proc rand_range
+	jsr rand8 				; get random number in a
+	sta R1L             	; store as scaler
+
+	ThisMoveW R15, R0, 0    ; load range length into R0
+	jsr mul816              ; multiply
+
+	; R2H is now the offset we want to add to the start
+	ldy #2
+	lda (R15),y
+	iny
+	add R2H
+	sta R0L
+	lda (R15),y
+	adc #0
+	sta R0H					; R0 now holds the result
+
+	rts
 .endproc
-
-
 
 
 ; X ABC Algorithm Random Number Generator for 8-Bit Devices

@@ -15,7 +15,14 @@
 .include "random.asm"
 .endif
 
-.proc main   
+.proc main      
+   jsr rand_test
+   jsr rand_range_test
+
+   rts
+.endproc
+
+.proc rand_test
    prints "random generator test."
    newline
    prints "the test will seed the random generator with the current date/time."
@@ -55,8 +62,58 @@ print_it:
    plx
    dex
    bne generate
-
+   
+   newline 2
    rts
 .endproc
 
+range_obj:
+.word 0,0
+
+.proc rand_range_test
+   prints "random generator test."
+   newline
+   prints "now 100 random numbers in the range 240 to 277"
+   newline 2
+
+   ; initialize range
+   LoadW R15, range_obj
+   LoadW R0,240
+   LoadW R1,277
+   jsr rand_range_init
+   
+   ldx #100
+generate:
+   phx
+
+   ; get next number in range
+   jsr rand_range
+
+   ; print result
+   CmpWI R0,240
+   ble green
+   CmpWI R0,276
+   bge red
+white:
+   lda #CHR_COLOR_WHITE
+   jsr KRNL_CHROUT
+   bra print_it
+green:
+   lda #CHR_COLOR_GREEN
+   jsr KRNL_CHROUT
+   bra print_it
+red:
+   lda #CHR_COLOR_RED
+   jsr KRNL_CHROUT
+print_it:      
+   jsr print_dec_16
+   prints " "
+
+   plx
+   dex
+   bne generate
+   
+   newline 2
+   rts
+.endproc
 
