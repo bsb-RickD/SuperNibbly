@@ -11,8 +11,8 @@
 .include "print.asm"
 .endif
 
-.ifndef MATH_ASM
-.include "math.asm"
+.ifndef RANDOM_ASM
+.include "random.asm"
 .endif
 
 .proc main   
