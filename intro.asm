@@ -86,6 +86,56 @@ palfade_in:
 
 .define no_commands_to_add commands_to_add
 
+; random range parameters
+fish_pause_range:
+.word 8*16, 15*16                   ; pause range (*16 = number of frames to wait between animations)
+.byte 16                            ; pause chunks
+.word fish_random_pause_object      ; object to initialize
+
+; random range object
+fish_random_pause_object:
+.res 5,0                            ; just needs 5 bytes of data
+
+; used for generating the actual pause value
+fish_generate_pause:
+.word fish_pause_counter            ; generate the random value into this location
+.word fish_random_pause_object      ; and use this generator
+
+; used for counting down the pause
+fish_pause_counter:
+.word 0,0
+
+; random range parameters
+fish_x_range:
+.word 0, 115                        ; x range
+.byte 16                            ; range chunks
+.word fish_random_x_object          ; object to initialize
+
+; random range object
+fish_random_x_object:
+.res 5,0                            ; just needs 5 bytes of data
+
+; used for generating the actual x value
+fish_generate_x:
+.word jumping_fish+6                ; generate the random value into the x position of the jumping fish
+.word fish_random_x_object          ; and use this generator
+
+; random range parameters
+fish_y_range:
+.word 93, 106                       ; y range
+.byte 4                             ; range chunks
+.word fish_random_y_object          ; object to initialize
+
+; random range object
+fish_random_y_object:
+.res 5,0                            ; just needs 5 bytes of data
+
+; used for generating the actual y value
+fish_generate_y:
+.word jumping_fish+8                ; generate the random value into the y position of the jumping fish
+.word fish_random_y_object          ; and use this generator
+
+
 function_ptrs:
    .word 0,0                              ; 0 - nullptr
    no_commands_to_add
@@ -95,11 +145,11 @@ ptr_check_return_to_basic:                ; 1 - check for exit
 
 ptr_unpack_intro:                         ; 2 - unpack screen data
    .word fill_screen, 0         
-   commands_to_add 3                      ; after unpacking, wait for fadeout
+   commands_to_add 3,6,7,8                ; after unpacking, wait for fadeout and initialize the random ranges in the meantime
 
 ptr_wait_for_fade_out:                    ; 3 - wait for fading out the palette
    .word fade_out_and_switch_to_tiled_mode, palfade_out         
-   commands_to_add 4,5,6                  ; after fading out, fade back in and start the animations
+   commands_to_add 4,5,14,9               ; after fading out, fade back in and, start smoke, generate pause
 
 ptr_fade_in:                              ; 4 - fade pal in
    .word fade_intro_in, palfade_in
@@ -109,9 +159,41 @@ ptr_animate_smoke:                        ; 5 - smoke animation
    .word loop_sprite, animated_smoke
    no_commands_to_add
 
-ptr_animate_fish:                         ; 6 - fish animation
-   .word animate_fish, random_fish_animation     
+                                          ; 6 - init fish pause random range
+   .word worker_initialize_random_range, fish_pause_range   
+   commands_to_add 7                      ; get the random pause and kick it off
+
+                                          ; 7 - init fish x random range
+   .word worker_initialize_random_range, fish_x_range
    no_commands_to_add
+
+                                          ; 8 - init fish y random range
+   .word worker_initialize_random_range, fish_y_range   
+   no_commands_to_add
+
+                                          ; 9 create random pause for fish
+   .word worker_generate_random, fish_generate_pause
+   commands_to_add 10,11,12
+
+                                          ; 10 start fish pause
+   .word worker_decrement_16, fish_pause_counter
+   commands_to_add 13
+
+                                          ; 11 create random x for fish
+   .word worker_generate_random, fish_generate_x
+   no_commands_to_add
+
+                                          ; 12 create random y for fish
+   .word worker_generate_random, fish_generate_y
+   no_commands_to_add
+
+                                          ; 13 let the fish jump - this implicitly turns the sprite on
+   .word animate_sprite, jumping_fish
+   commands_to_add 14,9                   ; hide fish, generate new pause
+
+                                          ; 14 turn the fish off
+   .word switch_sprite_off, jumping_fish
+   no_commands_to_add                     ; hide fish, generate new pause
 
 
 work_queue:
@@ -137,6 +219,8 @@ return_to_basic:
    stz work_queue
    stz workers_to_add
    stz workers_to_remove
+   LoadW jumping_fish, $0606
+   LoadW jumping_fish+2, 17
 
 
    ; init RNG
@@ -466,128 +550,6 @@ done:
    jsr animate_sprite
    clc                  ; carry = clear - do forever
    rts 
-.endproc
-
-random_fish_animation:
-.byte 0              ; 0: state - 0: init, 1: randomize values, 2: wait, 3: animate sprite
-.byte 0              ; 1: pause - how many frames to wait - this gets initialized during init
-.word 8, 15          ; 2-5: pause range (*16 = number of frames to wait between animations)
-.word 0,0            ; 6-9; room for rand range object
-.word 0,115          ; 10-13: x range for random positon
-.word 0,0            ; 14-17: room for rand_range object
-.word 93,106         ; 18-21: y range for random positon
-.word 0,0            ; 22-25: room for rand_range object
-.word jumping_fish   ; 26-27: pointer to sprite class to animate
-
-; r14 points to two words to be initialized by the rand range int r14 + 2
-.proc animate_fish_init_range
-   AddW3 R14,#4,R15                 ; R15 to point to memory receiving the data
-   ThisLoadW R14, R0, 0             ; move start to R0
-   ThisLoadW R14, R1                ; move end to R1
-   jsr rand_range_init              ; do the calculation
-   rts
-.endproc
-
-; R15 - points to the random delayed animation class   
-.proc animate_fish
-   lda (R15)
-   beq initialize                   ; state 0? - init ranges
-   cmp #1
-   beq randomize
-   cmp #2
-   beq pause                        ; state 2? - continue pause
-update_sprite:
-   PushW R15
-   ldy #26
-   lda (R15),y                      ; load sprite this pointer low
-   tax                              ; we have to be careful, use x
-   iny                              ; 
-   lda (R15),y                      ; load this pointer high
-   sta R15H                         ; now we can store it to R15 and thus clobber the current this
-   stx R15L                         ; and the low byte
-
-   jsr animate_sprite               ; do the animation
-   PopW R15                         ; restore the this pointer
-   bcs cycle_to_randomize
-   rts                              ; animation not done, carry clear, just return to caller
-cycle_to_randomize:
-   lda #1
-   sta (R15) 
-   clc
-   rts
-pause:
-   ldy #1
-   lda (R15),y                      ; load pause counter
-   dec
-   sta (R15),y                      ; store decremented
-   jeq advance_state_and_exit       ; pause over? next state please
-   clc
-   rts
-initialize:
-   AddW3 R15, #2, R14               ; R14 points to first rand range
-   jsr animate_fish_init_range      ; initialize it
-
-   ldx #2
-init_ranges:   
-   phx
-   AddVW 8, R14
-   jsr animate_fish_init_range      ; initialize the other 2 ranges as well
-   plx
-   dex
-   bne init_ranges
-
-   SubW3 R14, #18, R15              ; restore R15 to this pointer
-
-   lda (R15)                        ; move state from init to randomize
-   inc
-   sta (R15) 
-
-   ; intentional fall through - after init we go straight to randomize
-randomize:
-   
-   MoveW R15,R14                    ; remember this pointer in R14
-
-   AddVW 6,R15                      ; R15 points to range object
-   jsr rand_range
-   lda R0
-   asln 4                           ; multiply it by 16
-
-   ldy #1
-   sta (R14),y                      ; store it as pause
-
-   ThisLoadW R14,R13,26             ; R13 points to the sprite object
-
-   AddVW 8,R15                      ; R15 points to range object
-   jsr rand_range                   ; R0 holds x position
-
-   ldy #6                           ; offset of the position in the sprite object
-   lda R0L
-   sta (R13),y                      ; copy x pos to target
-   iny
-   lda R0H
-   sta (R13),y
-
-   AddVW 8,R15                      ; R15 points to range object
-   jsr rand_range                   ; R0 holds y position
-
-   ldy #8                           ; offset of the position in the sprite object
-   lda R0L
-   sta (R13),y                      ; copy y pos to target
-   iny
-   lda R0H
-   sta (R13),y
-
-   MoveW R13,R15
-   jsr switch_sprite_off            ; turn the sprite off
-
-   MoveW R14,R15                    ; restore R5
-
-advance_state_and_exit:
-   lda (R15)
-   inc
-   sta (R15)
-   clc
-   rts   
 .endproc
 
 .include "lib/lzsa.asm"

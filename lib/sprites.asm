@@ -18,9 +18,8 @@ SPRITES_ASM = 1
 
 ; R15 this pointer to a sprite class
 .proc switch_sprite_off
-; the address of the sprite block is stored at offset 10
    stz VERA_ctrl
-   ldy #10   
+   ldy #10                          ; the address of the sprite block is stored at offset 10
    lda (R15),y
    clc
    adc #6                           ; 6 is the offset to z-depth, etc.
@@ -32,6 +31,7 @@ SPRITES_ASM = 1
    sta VERA_addr_high   
 
    stz VERA_data0                   ; disable sprite
+   sec                              ; set c so we can use it as a one shot worker
    rts
 .endproc
 

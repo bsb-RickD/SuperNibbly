@@ -19,21 +19,22 @@
    printl str_ut_welcome
 
    jsr worker_decrement_8_test
+   jsr worker_decrement_16_test
    jsr worker_initialize_random_range_test
    jsr worker_generate_random_test
    rts
 .endproc
 
-range:
+range8:
    .byte 80
    .byte 23
 
 .proc worker_decrement_8_test
    prints "worker_decrement_8_test"
 
-   LoadW R15, range
+   LoadW R15, range8
    lda #80
-   sta range
+   sta range8
    ldx #0
 
 again:
@@ -48,6 +49,31 @@ again:
 
    rts
 .endproc
+
+range16:
+   .word 1080
+   .word 1023
+
+.proc worker_decrement_16_test
+   prints "worker_decrement_16_test"
+
+   LoadW R15, range16
+   LoadW range16, 1080
+   ldx #0
+
+again:
+   inx
+   phx   
+   jsr   worker_decrement_16
+   plx
+   bcc   again
+   
+   cpx #57
+   ut_exp_equal
+
+   rts
+.endproc
+
 
 random_range_expect:
 .word 230, 130

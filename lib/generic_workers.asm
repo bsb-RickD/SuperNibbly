@@ -25,6 +25,42 @@ GENERIC_WORKERS_ASM = 1
 .endproc
 
 
+; range 16 structure
+;
+; word start   ; offset 0
+; word end     ; offset 2
+
+
+; decrement start until its equal to end
+;
+; R15 points to the range8 structure
+.proc worker_decrement_16
+   lda (R15)
+   sec
+   sbc #1
+   sta (R15)
+   sta cmp_lo+1
+   ldy #1
+   lda (R15),y
+   sbc #0
+   sta (R15),y             ; store decremented value  (a = highbyte)
+   sta cmp_hi+1
+
+   ldy #3
+   lda (R15),y
+cmp_hi:   
+   cmp #00                 ; this sets the carry flag like we need it
+   bcc done
+   dey
+   lda (R15),y
+cmp_lo:
+   cmp #00                 ; this sets the carry flag like we need it
+done:   
+   rts
+.endproc
+
+
+
 ; init_r_range structure
 ;
 ; word range start        ; offset 0  
