@@ -398,19 +398,65 @@ L:
 ; define a string with leading length
 .define lstr(message) .byte .strlen(message), message
 
+
+; helper macros for the ThisLoad / ThisStore macros below
+;
+; macro trickery to enable optional y init offset and optional "-" paramter to skip iny at end
+.macro _load_y_conditionally offset, optional
+	.if .paramcount > 0
+		.if (.not .blank(offset)) .and (.not .xmatch({offset}, -))
+			ldy #offset
+		.endif
+
+		; check that no other character than - was appended
+		.if (.not .blank(offset)) .and (.not .blank(optional))
+			.assert .xmatch({optional}, -), error, "optional param can only be -"
+		.endif
+	.endif
+.endmacro
+
+; helper macros for the ThisLoad / ThisStore macros below
+;
+; macro trickery to enable optional y init offset and optional "-" paramter to skip iny at end
+.macro _inc_y_conditionally offset, optional
+	.if .blank(offset) .and .blank(optional)
+		; both blank: increment
+		iny
+	.elseif .blank(optional) .and (.not .xmatch({offset}, -))
+		; only offset and it's not -: increment
+		iny
+	.endif
+.endmacro
+
+
 ; load a byte from (this),y and copy to dest
 ;
 ; offset is optional, if given, will initialize y to the offset
 ; y is incremeted 
 ;
-.macro ThisMoveB this, dest, offset
-.if .paramcount = 3
-	ldy #offset
-.endif
+.macro ThisLoadB this, dest, offset, optional
+	_load_y_conditionally offset, optional
+	
 	lda (this),y
 	sta dest
-	iny
+	
+	_inc_y_conditionally offset, optional
 .endmacro
+
+; store a byte from source to (this),y
+;
+; offset is optional, if given, will initialize y to the offset
+; y is incremeted 
+;
+.macro ThisStoreB this, source, offset, optional
+	_load_y_conditionally offset, optional	
+
+	lda source
+	sta (this),y
+	
+	_inc_y_conditionally offset, optional
+.endmacro
+
 
 
 ; load a word from (this),y and copy to dest
@@ -418,13 +464,41 @@ L:
 ; offset is optional, if given, will initialize y to the offset
 ; y is incremeted 
 ;
-.macro ThisMoveW this, dest, offset
-.if .paramcount = 3
-	ldy #offset
+.macro ThisLoadW this, dest, offset, optional
+	_load_y_conditionally offset, optional	
+
+.if .not .xmatch({this}, {dest})  
+	; regular case
+	ThisLoadB this, dest+0
+	ThisLoadB this, dest+1, -
+.else
+	; special case, we want to load a this pointer from this pointer
+	; e.g. read a pointer from (R15),y and copy it into R15
+	lda (this),y
+	tax
+	iny
+	ThisLoadB this, dest+1, -
+	stx dest
 .endif
-	ThisMoveB this, dest+0
-	ThisMoveB this, dest+1
+
+	_inc_y_conditionally offset, optional
 .endmacro
+
+; store a word from source to (this),y
+;
+; offset is optional, if given, will initialize y to the offset
+; y is incremeted 
+;
+.macro ThisStoreW this, source, offset, optional
+	_load_y_conditionally offset, optional
+	
+	ThisStoreB this, source+0
+	ThisStoreB this, source+1, -
+
+	_inc_y_conditionally offset, optional
+.endmacro
+
+
 
 ; modified by Erik to include immediate #values
 ;

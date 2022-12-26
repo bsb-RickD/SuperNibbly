@@ -482,8 +482,8 @@ random_fish_animation:
 ; r14 points to two words to be initialized by the rand range int r14 + 2
 .proc animate_fish_init_range
    AddW3 R14,#4,R15                 ; R15 to point to memory receiving the data
-   ThisMoveW R14, R0, 0             ; move start to R0
-   ThisMoveW R14, R1                ; move end to R1
+   ThisLoadW R14, R0, 0             ; move start to R0
+   ThisLoadW R14, R1                ; move end to R1
    jsr rand_range_init              ; do the calculation
    rts
 .endproc
@@ -555,7 +555,7 @@ randomize:
    ldy #1
    sta (R14),y                      ; store it as pause
 
-   ThisMoveW R14,R13,26             ; R13 points to the sprite object
+   ThisLoadW R14,R13,26             ; R13 points to the sprite object
 
    AddVW 8,R15                      ; R15 points to range object
    jsr rand_range                   ; R0 holds x position

@@ -17,7 +17,7 @@ RANDOM_ASM = 1
 
 ; random range objects (16 bit) look like this:
 ;
-; word range length         ; offset 0  
+; word range length			; offset 0  
 ; word range start			; offset 2
 ; byte chunksize			; offset 3 - should be a power of 2 (or 0 for all) 
 
@@ -53,7 +53,7 @@ RANDOM_ASM = 1
 	; copy chunk size over (-1 so it becomes a mask)
 	lda R2L
 	dec
-	eor #$55
+	eor #$FF
 	sta (R15),y
 
 	rts	
@@ -71,7 +71,7 @@ RANDOM_ASM = 1
 	jsr rand8 				; get random number in a
 	sta R1L             	; store as scaler
 
-	ThisMoveW R15, R0, 0    ; load range length into R0
+	ThisLoadW R15, R0, 0,-  ; load range length into R0
 	jsr mul816              ; multiply
 
 	ldy	#4

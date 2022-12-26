@@ -36,6 +36,17 @@ str_ut_failed_end:
    jsr ut_pass_on_not_equal
 .endmacro
 
+.macro ut_exp_memory_equal mem1, mem2, len
+   compare_memory mem1, mem2, len
+   ut_exp_equal
+.endmacro
+
+.macro ut_exp_memory_neq mem1, mem2, len
+   compare_memory mem1, mem2, len
+   ut_exp_neq
+.endmacro
+
+
 ; print unit test result - passed if Z is set
 .proc ut_pass_on_equal
    php
