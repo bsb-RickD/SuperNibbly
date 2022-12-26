@@ -19,11 +19,14 @@ RANDOM_ASM = 1
 ;
 ; word range length         ; offset 0  
 ; word range start			; offset 2
+; byte chunksize			; offset 3 - should be a power of 2 (or 0 for all) 
 
 
 ; R0: 	range start
 ; R1: 	range end
-; R15:	points to a 4 byte memory block to initialize the range object
+; R2L:  chunksize
+;
+; R15:	points to a 5 byte memory block to initialize the range object
 ;
 ; notes - the random range must not exceed 255
 .proc rand_range_init
@@ -46,37 +49,15 @@ RANDOM_ASM = 1
 	lda R0H
 	sta (R15),y
 	iny	
+
+	; copy chunk size over (-1 so it becomes a mask)
+	lda R2L
+	dec
+	eor #$55
+	sta (R15),y
+
 	rts	
 .endproc
-
-
-; load a byte from (this),y and copy to dest
-;
-; offset is optional, if given, will initialize y to the offset
-; y is incremeted 
-;
-.macro ThisMoveB this, dest, offset
-.if .paramcount = 3
-	ldy #offset
-.endif
-	lda (this),y
-	sta dest
-	iny
-.endmacro
-
-
-; load a word from (this),y and copy to dest
-;
-; offset is optional, if given, will initialize y to the offset
-; y is incremeted 
-;
-.macro ThisMoveW this, dest, offset
-.if .paramcount = 3
-	ldy #offset
-.endif
-	ThisMoveB this, dest+0
-	ThisMoveB this, dest+1
-.endmacro
 
 
 ; get next random number in the range
@@ -93,11 +74,16 @@ RANDOM_ASM = 1
 	ThisMoveW R15, R0, 0    ; load range length into R0
 	jsr mul816              ; multiply
 
+	ldy	#4
+	lda (R15),y 			; get chunk size
+	and R2H                 ; apply it to R2H (into a)
+
+
 	; R2H is now the offset we want to add to the start
 	ldy #2
-	lda (R15),y
+	clc
+	adc (R15),y
 	iny
-	add R2H
 	sta R0L
 	lda (R15),y
 	adc #0

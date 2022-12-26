@@ -35,6 +35,11 @@
 .include "array.asm"
 .endif
 
+.ifndef RANDOM_ASM
+.include "random.asm"
+.endif
+
+
 c64_pal: .byte $00,$0, $ff,$f, $00,$8, $fe,$a, $4c,$c, $c5,$0, $0a,$0, $e7,$e,$85,$d,$40,$6,$77,$f,$33,$3,$77,$7,$f6,$a,$8f,$0,$bb,$b
 
 ; num colors to fade       1 byte   (+1, 0 meaning 1, etc.)    offset 0
@@ -97,11 +102,11 @@ ptr_fade_in:                              ; 4 - fade pal in
    no_commands_to_add
 
 ptr_animate_smoke:                        ; 5 - smoke animation
-   .word animate_sprite, animated_smoke
+   .word loop_sprite, animated_smoke
    no_commands_to_add
 
 ptr_animate_fish:                         ; 6 - fish animation
-   .word animate_sprite, jumping_fish     
+   .word animate_fish, random_fish_animation     
    no_commands_to_add
 
 
@@ -128,6 +133,10 @@ return_to_basic:
    stz work_queue
    stz workers_to_add
    stz workers_to_remove
+
+
+   ; init RNG
+   jsr rand_seed_time   
 
    LoadW R15, work_queue
    lda #1
@@ -446,6 +455,137 @@ done:
    rts
 .endproc  
 
+; animate a sprite "forever" - never indicate that this worker is done
+;
+; R15 points to sprite to animate
+.proc loop_sprite
+   jsr animate_sprite
+   clc                  ; carry = clear - do forever
+   rts 
+.endproc
+
+random_fish_animation:
+.byte 0              ; 0: state - 0: init, 1: randomize values, 2: wait, 3: animate sprite
+.byte 0              ; 1: pause - how many frames to wait - this gets initialized during init
+.word 8, 15          ; 2-5: pause range (*16 = number of frames to wait between animations)
+.word 0,0            ; 6-9; room for rand range object
+.word 0,115          ; 10-13: x range for random positon
+.word 0,0            ; 14-17: room for rand_range object
+.word 93,106         ; 18-21: y range for random positon
+.word 0,0            ; 22-25: room for rand_range object
+.word jumping_fish   ; 26-27: pointer to sprite class to animate
+
+; r14 points to two words to be initialized by the rand range int r14 + 2
+.proc animate_fish_init_range
+   AddW3 R14,#4,R15                 ; R15 to point to memory receiving the data
+   ThisMoveW R14, R0, 0             ; move start to R0
+   ThisMoveW R14, R1                ; move end to R1
+   jsr rand_range_init              ; do the calculation
+   rts
+.endproc
+
+; R15 - points to the random delayed animation class   
+.proc animate_fish
+   lda (R15)
+   beq initialize                   ; state 0? - init ranges
+   cmp #1
+   beq randomize
+   cmp #2
+   beq pause                        ; state 2? - continue pause
+update_sprite:
+   PushW R15
+   ldy #26
+   lda (R15),y                      ; load sprite this pointer low
+   tax                              ; we have to be careful, use x
+   iny                              ; 
+   lda (R15),y                      ; load this pointer high
+   sta R15H                         ; now we can store it to R15 and thus clobber the current this
+   stx R15L                         ; and the low byte
+
+   jsr animate_sprite               ; do the animation
+   PopW R15                         ; restore the this pointer
+   bcs cycle_to_randomize
+   rts                              ; animation not done, carry clear, just return to caller
+cycle_to_randomize:
+   lda #1
+   sta (R15) 
+   clc
+   rts
+pause:
+   ldy #1
+   lda (R15),y                      ; load pause counter
+   dec
+   sta (R15),y                      ; store decremented
+   jeq advance_state_and_exit       ; pause over? next state please
+   clc
+   rts
+initialize:
+   AddW3 R15, #2, R14               ; R14 points to first rand range
+   jsr animate_fish_init_range      ; initialize it
+
+   ldx #2
+init_ranges:   
+   phx
+   AddVW 8, R14
+   jsr animate_fish_init_range      ; initialize the other 2 ranges as well
+   plx
+   dex
+   bne init_ranges
+
+   SubW3 R14, #18, R15              ; restore R15 to this pointer
+
+   lda (R15)                        ; move state from init to randomize
+   inc
+   sta (R15) 
+
+   ; intentional fall through - after init we go straight to randomize
+randomize:
+   
+   MoveW R15,R14                    ; remember this pointer in R14
+
+   AddVW 6,R15                      ; R15 points to range object
+   jsr rand_range
+   lda R0
+   asln 4                           ; multiply it by 16
+
+   ldy #1
+   sta (R14),y                      ; store it as pause
+
+   ThisMoveW R14,R13,26             ; R13 points to the sprite object
+
+   AddVW 8,R15                      ; R15 points to range object
+   jsr rand_range                   ; R0 holds x position
+
+   ldy #6                           ; offset of the position in the sprite object
+   lda R0L
+   sta (R13),y                      ; copy x pos to target
+   iny
+   lda R0H
+   sta (R13),y
+
+   AddVW 8,R15                      ; R15 points to range object
+   jsr rand_range                   ; R0 holds y position
+
+   ldy #8                           ; offset of the position in the sprite object
+   lda R0L
+   sta (R13),y                      ; copy y pos to target
+   iny
+   lda R0H
+   sta (R13),y
+
+   MoveW R13,R15
+   jsr switch_sprite_off            ; turn the sprite off
+
+   MoveW R14,R15                    ; restore R5
+
+advance_state_and_exit:
+   lda (R15)
+   inc
+   sta (R15)
+   clc
+   rts   
+.endproc
+
 .include "lib/lzsa.asm"
 
 .include "sprites.inc"
@@ -458,7 +598,7 @@ animated_smoke:
 .byte 0              ; 3: current anim-frame
 .addr sprite_smoke_0 ; 4,5: sprite frame pointer
 .word 240,87         ; 6-9: position
-.word spritenum(17)  ; 10,11: sprite# to use
+.word spritenum(17)  ; 10,11: sprite# to use - stored as address of the sprite data in VRAM
                      ; 12: size of struct
 
 jumping_fish:
@@ -468,7 +608,7 @@ jumping_fish:
 .byte 0              ; 3:     current anim-frame
 .addr sprite_fish_0  ; 4,5:   sprite frame pointer
 .word 40,100         ; 6-9:   position
-.word spritenum(16)  ; 10,11: sprite# to use
+.word spritenum(16)  ; 10,11: sprite# to use - stored as address of the sprite data in VRAM
                      ; 12: size of struct
 
 

@@ -16,6 +16,26 @@ SPRITES_ASM = 1
 ; use this macro to calculate sprite number -> address in VRAM for parameters
 .define spritenum(n) (n*8)+$FC00
 
+; R15 this pointer to a sprite class
+.proc switch_sprite_off
+; the address of the sprite block is stored at offset 10
+   stz VERA_ctrl
+   ldy #10   
+   lda (R15),y
+   clc
+   adc #6                           ; 6 is the offset to z-depth, etc.
+   sta VERA_addr_low                ; lo byte
+   iny
+   lda (R15),y   
+   sta VERA_addr_med                ; high byte
+   lda #(1+ VERA_increment_1 + VERA_increment_addresses) ; this value is constant for all sprites
+   sta VERA_addr_high   
+
+   stz VERA_data0                   ; disable sprite
+   rts
+.endproc
+
+
 ; r1 points to "virtual screen position" of sprite
 ; r2 points to the address to hold the actual pos (= virtual pos + offset)
 ; a holds the offset to add
@@ -162,9 +182,6 @@ all_updated:
 ; call this every frame - will pause until the desired # of frames has passed
 ; will then switch to the next frame
 ;
-; this routine assumes that all frames have the correct position already updated
-; (see update_sprite_positions_for_multiple_sprites)
-;
 ; R15 this pointer
 ;
 .proc animate_sprite
@@ -192,12 +209,12 @@ switch_to_next_frame:
    inc               ; advance frame count
    dey               ; point to max frame count
    cmp (R15),y       
-   bne not_looped_yet ;we can just increase the frame count
+   bne not_looped_yet ;we can just increase the frame count (this also clears the carry flag)
    lda #0            ; we have looped, set to zero
+   sec
 not_looped_yet:
    iny
    sta (R15),y       ; stored new frame count
-   clc
    rts
 update_new_sprite_frame:
    ldy #3            ; point to current frame

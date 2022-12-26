@@ -18,7 +18,7 @@
 .proc main      
    jsr rand_test
    jsr rand_range_test
-
+   jsr rand_range_chunky_test
    rts
 .endproc
 
@@ -69,20 +69,47 @@ print_it:
 
 range_obj:
 .word 0,0
+.byte 0
 
 .proc rand_range_test
    prints "random generator test."
    newline
-   prints "now 100 random numbers in the range 240 to 277"
+   prints "now 50 random numbers in the range 240 to 277"
    newline 2
 
    ; initialize range
    LoadW R15, range_obj
    LoadW R0,240
    LoadW R1,277
+   LoadB R2,0
    jsr rand_range_init
+
+   ldx #50
+   jsr rand_range_loop
+
+   rts
+.endproc
+
+.proc rand_range_chunky_test
+   prints "random generator test."
+   newline
+   prints "now 50 random numbers in the range 240 to 277, with a chunksize of 4"
+   newline 2
+
+   ; initialize range
+   LoadW R15, range_obj
+   LoadW R0,240
+   LoadW R1,277
+   LoadB R2,4
+   jsr rand_range_init
+
+   ldx #50
+   jsr rand_range_loop
+
+   rts
+.endproc
    
-   ldx #100
+.proc rand_range_loop      
 generate:
    phx
 
@@ -116,4 +143,6 @@ print_it:
    newline 2
    rts
 .endproc
+
+
 

@@ -9,18 +9,6 @@ MATH_ASM = 1
 .include "mac.inc"
 .endif
 
-; 8 bit negate + add
-;
-; a = value - a
-;
-; so to negate a, use "nad 0"
-.macro nad Value
-	eor #$FF
-	sec
-	adc #Value
-.endmacro
-
-
 ; 8 bit division, unsigned
 ;
 ; taken from http://6502org.wikidot.com/software-math-intdiv

@@ -5,12 +5,12 @@
 ; based on GEOS 64, edited by Maciej 'YTM/Alliance' Witkowiak
 ; Modified / extended by Erik 'Rick Dangerous/S!P' Pojar
 
-.ifndef MACINC
+.ifndef MAC_INC
+MAC_INC = 1
 
 ; also bring in jeq, jne, jmi, jpl, jcs, jcc, jvs, jvc
 .macpack longbranch
 
-MACINC = 1
 
 .macro LoadB dest, value
 	.if .const(value) .and value=0
@@ -67,16 +67,6 @@ MACINC = 1
 	AddB source+0, dest+0
 	lda source+1
 	adc dest+1
-	sta dest+1
-.endmacro
-
-.macro AddW3 source1, source2, dest
-	lda source1
-	clc
-	adc source2
-	sta dest
-	lda source1+1
-	adc source2+1
 	sta dest+1
 .endmacro
 
@@ -171,9 +161,20 @@ MACINC = 1
 	pha
 .endmacro
 
+
+; modified by Erik to include immediate #values
+; source can be either a source or a #value 
 .macro PushW source
+.if (.match (.left (1, {source}), #))
+  	; source is a #value
+	PushB #<(.right (.tcount ({source})-1, {source}))
+	PushB #>(.right (.tcount ({source})-1, {source}))
+.else
+  	; assume absolute or zero page for sorv
 	PushB source+0
 	PushB source+1
+.endif
+
 .endmacro
 
 .macro PopB dest
@@ -396,5 +397,107 @@ L:
 
 ; define a string with leading length
 .define lstr(message) .byte .strlen(message), message
+
+; load a byte from (this),y and copy to dest
+;
+; offset is optional, if given, will initialize y to the offset
+; y is incremeted 
+;
+.macro ThisMoveB this, dest, offset
+.if .paramcount = 3
+	ldy #offset
+.endif
+	lda (this),y
+	sta dest
+	iny
+.endmacro
+
+
+; load a word from (this),y and copy to dest
+;
+; offset is optional, if given, will initialize y to the offset
+; y is incremeted 
+;
+.macro ThisMoveW this, dest, offset
+.if .paramcount = 3
+	ldy #offset
+.endif
+	ThisMoveB this, dest+0
+	ThisMoveB this, dest+1
+.endmacro
+
+; modified by Erik to include immediate #values
+;
+; dest = source1 + sorv
+; sorv can be either a source or a #value 
+.macro AddW3 source, sorv, dest
+.if (.match (.left (1, {sorv}), #))
+  	; sorv is a value
+	lda source
+	clc
+	adc #<(.right (.tcount ({sorv})-1, {sorv}))
+	sta dest
+	lda source+1
+	adc #>(.right (.tcount ({sorv})-1, {sorv}))
+	sta dest+1
+.else
+  	; assume absolute or zero page for sorv
+	lda source
+	clc
+	adc sorv
+	sta dest
+	lda source+1
+	adc sorv+1
+	sta dest+1
+.endif
+.endmacro
+
+; dest = source - sorv
+; sorv can be either a source or a #value 
+.macro SubW3 source, sorv, dest
+.if (.match (.left (1, {sorv}), #))
+  	; sorv is a value
+	lda source
+	sec
+	sbc #<(.right (.tcount ({sorv})-1, {sorv}))
+	sta dest
+	lda source+1
+	sbc #>(.right (.tcount ({sorv})-1, {sorv}))
+	sta dest+1
+.else
+  	; assume absolute or zero page for sorv
+	lda source
+	sec
+	sbc sorv
+	sta dest
+	lda source+1
+	sbc sorv+1
+	sta dest+1
+.endif
+.endmacro
+
+; 8 bit not
+; 
+; if no source is specified - not a
+.macro not source
+.if .paramcount = 1
+	lda source
+.endif
+	eor #$FF
+.if .paramcount = 1
+	sta source
+.endif
+.endmacro
+
+; 8 bit negate + add
+;
+; a = value - a
+;
+; so to negate a, use "nad 0"
+.macro nad Value
+	not
+	sec
+	adc #Value
+.endmacro
 
 .endif
