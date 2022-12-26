@@ -7,8 +7,13 @@
 
    jmp main
 
+.ifndef UT_ASM
 .include "ut.asm"
+.endif
+
+.ifndef MATH_ASM
 .include "math.asm"
+.endif
 
 .proc main   
    printl str_ut_welcome

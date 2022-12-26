@@ -7,9 +7,13 @@
 
    jmp main
 
-.include "common.inc"
+.ifndef UT_ASM
 .include "ut.asm"
+.endif
+
+.ifndef ARRAY_ASM
 .include "array.asm"
+.endif
 
 .proc main   
    printl str_ut_welcome

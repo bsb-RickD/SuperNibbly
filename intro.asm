@@ -39,6 +39,10 @@
 .include "random.asm"
 .endif
 
+.ifndef GENERIC_WORKERS_ASM
+.include "generic_workers.asm"
+.endif
+
 
 c64_pal: .byte $00,$0, $ff,$f, $00,$8, $fe,$a, $4c,$c, $c5,$0, $0a,$0, $e7,$e,$85,$d,$40,$6,$77,$f,$33,$3,$77,$7,$f6,$a,$8f,$0,$bb,$b
 
