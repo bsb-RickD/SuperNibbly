@@ -286,14 +286,36 @@ def pad_to_next_size(img, transparent_color):
 sprites = []
 total_sprite_size = 0
 
-
-def make_sprites(img, palettes, rect, frames=(1, 1), transparent_pixel=None, name=""):
-    global total_sprite_size
-
+def make_sprites(img, palettes, rect, frames = (1,1), transparent_pixel=None, name=""):
     if transparent_pixel is None:
         transparent_pixel = rect[0]
 
+    rx = rect[0][0]
+    ry = rect[0][1]
+
     transparent_color = img.getpixel(transparent_pixel)
+    w = rect[1][0]-rx+1
+    h = rect[1][1]-ry+1
+
+    # this needs cleaning up - animations of oversize sprites won't work
+    if frames == (1,1):
+        part = 0
+        for y in range(0, h, 64):
+            sh = min(h - y, 64)
+            for x in range(0,w,64):
+                sw = min(w-x,64)
+                srect = ((rx+x,ry+y),(rx+x+sw-1, ry+y+sh-1))
+                soff = (x,y)
+                make_sprites_internal(img, palettes, srect, frames, transparent_color, "%s_%d" % (name,part), soff)
+                part += 1
+    else:
+        make_sprites_internal(img, palettes, rect, frames, transparent_color, name, (0,0))
+
+
+
+def make_sprites_internal(img, palettes, rect, frames, transparent_color, name, sprite_offset):
+    global total_sprite_size
+
     subimage = img.crop((rect[0][0], rect[0][1], rect[1][0]+1, rect[1][1]+1))
     w, h = subimage.size
 
@@ -335,11 +357,11 @@ def make_sprites(img, palettes, rect, frames=(1, 1), transparent_pixel=None, nam
             bbox = get_bounding_box(animframe, transparent_color)
             if bbox is not None:
                 animframe = pad_to_next_size(animframe.crop(bbox), transparent_color)
-                # animframe.show() # for debugging
+                #animframe.show() # for debugging
                 s = Sprite()
                 s.width, s.height = animframe.size
-                s.xoffset = bbox[0]
-                s.yoffset = bbox[1]
+                s.xoffset = bbox[0]+sprite_offset[0]
+                s.yoffset = bbox[1]+sprite_offset[1]
                 s.frame = framecount
                 s.palette_index = palindex
                 s.data = tile_bytes(map_colors_to_index(animframe, colors, 0), 4)
@@ -383,14 +405,22 @@ def main():
     img = Image.open(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\titanm.png")
 
     make_sprites(img, palettes, ((117, 18), (132, 101)), (1, 6), name="smoke")  # smoke
-    make_sprites (img, palettes, ((80,19),(111,188)),(1,17), name="fish")  # fish
-    make_sprites(img, palettes, ((1, 19), (32, 210)), (1, 16), name="plane")  # plane
+    make_sprites (img, palettes, ((80,19),(111,188)),(1,17), name="fish")       # fish
+    make_sprites(img, palettes, ((1, 19), (32, 210)), (1, 16), name="plane")    # plane
+
+    img = Image.open(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\woodly2.png")
+    make_sprites(img, palettes, ((1, 1), (51, 84)), (1, 1), name="n")       # N
+    make_sprites(img, palettes, ((58, 1), (87, 72)), (1, 1), name="i")      # I
+    make_sprites(img, palettes, ((91, 1), (145, 75)), (1, 1), name="b1")    # B
+    make_sprites(img, palettes, ((150, 1), (204, 70)), (1, 1), name="b2")   # B
+    make_sprites(img, palettes, ((209, 1), (260, 78)), (1, 1), name="l")    # L
+    make_sprites(img, palettes, ((264, 1), (315, 82)), (1, 1), name="y")    # Y
 
     write_sprites(sprites, size)
 
     # calc_tiles(img, 8, 256)
     # calc_tiles(img, 16, 16)
-    # calc_tiles(b+++bbimg, 16, 256)
+    # calc_tiles(img, 16, 256)
 
 
 if __name__ == "__main__":
