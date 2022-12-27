@@ -310,3 +310,99 @@ sprite_plane_15:
 .byte 12	; 4 bit Collision mask, 3 bit z-depth, VFlip HFlip
 .byte VERA_sprite_height_8+VERA_sprite_width_16+5	;h, w, palette index
 
+; Sprite n_0, frame 0
+sprite_n_0_0:
+.byte 0, 0	; x- and y-offset
+.word 774	; address/32 (+ 16/256 bit as MSB)
+.word 0, 0	; x,y pos
+.byte 12	; 4 bit Collision mask, 3 bit z-depth, VFlip HFlip
+.byte VERA_sprite_height_64+VERA_sprite_width_64+6	;h, w, palette index
+
+; Sprite n_1, frame 0
+sprite_n_1_0:
+.byte 0, 64	; x- and y-offset
+.word 838	; address/32 (+ 16/256 bit as MSB)
+.word 0, 0	; x,y pos
+.byte 12	; 4 bit Collision mask, 3 bit z-depth, VFlip HFlip
+.byte VERA_sprite_height_32+VERA_sprite_width_64+6	;h, w, palette index
+
+; Sprite i_0, frame 0
+sprite_i_0_0:
+.byte 0, 0	; x- and y-offset
+.word 870	; address/32 (+ 16/256 bit as MSB)
+.word 0, 0	; x,y pos
+.byte 12	; 4 bit Collision mask, 3 bit z-depth, VFlip HFlip
+.byte VERA_sprite_height_64+VERA_sprite_width_32+6	;h, w, palette index
+
+; Sprite i_1, frame 0
+sprite_i_1_0:
+.byte 0, 64	; x- and y-offset
+.word 902	; address/32 (+ 16/256 bit as MSB)
+.word 0, 0	; x,y pos
+.byte 12	; 4 bit Collision mask, 3 bit z-depth, VFlip HFlip
+.byte VERA_sprite_height_8+VERA_sprite_width_32+6	;h, w, palette index
+
+; Sprite b1_0, frame 0
+sprite_b1_0_0:
+.byte 0, 0	; x- and y-offset
+.word 906	; address/32 (+ 16/256 bit as MSB)
+.word 0, 0	; x,y pos
+.byte 12	; 4 bit Collision mask, 3 bit z-depth, VFlip HFlip
+.byte VERA_sprite_height_64+VERA_sprite_width_64+6	;h, w, palette index
+
+; Sprite b1_1, frame 0
+sprite_b1_1_0:
+.byte 0, 64	; x- and y-offset
+.word 970	; address/32 (+ 16/256 bit as MSB)
+.word 0, 0	; x,y pos
+.byte 12	; 4 bit Collision mask, 3 bit z-depth, VFlip HFlip
+.byte VERA_sprite_height_16+VERA_sprite_width_64+6	;h, w, palette index
+
+; Sprite b2_0, frame 0
+sprite_b2_0_0:
+.byte 0, 0	; x- and y-offset
+.word 986	; address/32 (+ 16/256 bit as MSB)
+.word 0, 0	; x,y pos
+.byte 12	; 4 bit Collision mask, 3 bit z-depth, VFlip HFlip
+.byte VERA_sprite_height_64+VERA_sprite_width_64+6	;h, w, palette index
+
+; Sprite b2_1, frame 0
+sprite_b2_1_0:
+.byte 0, 64	; x- and y-offset
+.word 1050	; address/32 (+ 16/256 bit as MSB)
+.word 0, 0	; x,y pos
+.byte 12	; 4 bit Collision mask, 3 bit z-depth, VFlip HFlip
+.byte VERA_sprite_height_8+VERA_sprite_width_64+6	;h, w, palette index
+
+; Sprite l_0, frame 0
+sprite_l_0_0:
+.byte 0, 0	; x- and y-offset
+.word 1058	; address/32 (+ 16/256 bit as MSB)
+.word 0, 0	; x,y pos
+.byte 12	; 4 bit Collision mask, 3 bit z-depth, VFlip HFlip
+.byte VERA_sprite_height_64+VERA_sprite_width_64+6	;h, w, palette index
+
+; Sprite l_1, frame 0
+sprite_l_1_0:
+.byte 0, 64	; x- and y-offset
+.word 1122	; address/32 (+ 16/256 bit as MSB)
+.word 0, 0	; x,y pos
+.byte 12	; 4 bit Collision mask, 3 bit z-depth, VFlip HFlip
+.byte VERA_sprite_height_16+VERA_sprite_width_64+6	;h, w, palette index
+
+; Sprite y_0, frame 0
+sprite_y_0_0:
+.byte 0, 0	; x- and y-offset
+.word 1138	; address/32 (+ 16/256 bit as MSB)
+.word 0, 0	; x,y pos
+.byte 12	; 4 bit Collision mask, 3 bit z-depth, VFlip HFlip
+.byte VERA_sprite_height_64+VERA_sprite_width_64+5	;h, w, palette index
+
+; Sprite y_1, frame 0
+sprite_y_1_0:
+.byte 0, 64	; x- and y-offset
+.word 1202	; address/32 (+ 16/256 bit as MSB)
+.word 0, 0	; x,y pos
+.byte 12	; 4 bit Collision mask, 3 bit z-depth, VFlip HFlip
+.byte VERA_sprite_height_32+VERA_sprite_width_64+5	;h, w, palette index
+
