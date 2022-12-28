@@ -57,6 +57,9 @@ VERA_colors_4        = %01
 VERA_colors_16       = %10
 VERA_colors_256      = %11
 
+; to switch on bitmap mode
+VERA_Bitmap_Mode     = 1 << 2
+
 ; data increments
 VERA_increment_0     = 0 << 4
 VERA_increment_1     = 1 << 4
