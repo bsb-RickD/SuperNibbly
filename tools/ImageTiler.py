@@ -213,7 +213,7 @@ def calc_tiles(img, tile_size, max_palette_entries):
     total = palette_byte_count+tile_byte_count+screen_buffer_size
     print("Total:\t\t%d Bytes  (%f kB)\n\n" % (total, total/1024))
 
-    return screen_buffer_size+tile_byte_count, palettes
+    return screen_buffer_size+tile_byte_count, palettes, screen_buffer_bytes
 
 
 def get_bounding_box(img, transparent_color):
@@ -384,22 +384,55 @@ def write_sprites(sprites, baseaddress):
     bp = baseaddress // 32
     with open("sprites" + ".inc", "wt") as fp:
         for sprite in sprites:
-            fp.write("; Sprite %s, frame %d\n" % (sprite.name, sprite.frame))
+            # watch out - for hidden sprites len(sprite.data) = 0
+            sprite_size = len(sprite.data)
+            sprite_colors = 256 if sprite.width*sprite.height == sprite_size else 16
+            fp.write("; Sprite %s, frame %d (%dx%d - %d colors)\n" %
+                     (sprite.name, sprite.frame, sprite.width, sprite.height, sprite_colors))
             fp.write("sprite_%s_%d:\n" % (sprite.name, sprite.frame))
             fp.write(".byte %d, %d\t; x- and y-offset\n" % (sprite.xoffset, sprite.yoffset))
-            mode = 0 # 16 color - need to change for 256 colors
-            address = bp+sprite.data_offset+(mode<<7)
-            fp.write(".word %d\t; address/32 (+ 16/256 bit as MSB)\n" % address)
+
+            address = sprite.data_offset    # hidden sprites know their address
+            if sprite_size != 0:
+                address += bp               # others need to add the base pointer first
+
+            fp.write(".word %d+VERA_sprite_colors_%d\t; address/32 (+ color indicator) \n" % (address, sprite_colors))
             fp.write(".word 0, 0\t; x,y pos\n")
             fp.write(".byte %d\t; 4 bit Collision mask, 3 bit z-depth, VFlip HFlip\n" % (3 << 2))
             fp.write(".byte VERA_sprite_height_%d+VERA_sprite_width_%d+%d\t;h, w, palette index\n\n" % (sprite.height, sprite.width, sprite.palette_index))
 
 
+def hide_sprites_in_screen_buffer (buffer_bytes, sprites):
+    lines = 240
+    stride = 128
+    current_spot = 96
+    sprite_max_size = 32
+
+    saved = 0
+    saved_count = 0
+
+    line = 0
+    for sprite in sprites:
+        ss = len(sprite.data)
+        sprite.data_offset -= (saved//32)
+        if ss <= sprite_max_size:
+            saved += ss
+            saved_count += 1
+            buffer_bytes[current_spot:current_spot+ss] = sprite.data
+            sprite.data = bytearray()
+            sprite.data_offset = current_spot//32
+            current_spot += stride
+        line += 1
+        if line >= lines:
+            break;
+
+    print("Could re-use %d bytes (from %d sprites) of screen space!" % (saved, saved_count))
+
 
 def main():
     img = Image.open(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_LBM_Files\titel_bg.png")
     img = img.convert("RGB")
-    size, palettes = calc_tiles(img, 8, 16)
+    size, palettes, screen_buffer_bytes = calc_tiles(img, 8, 16)
     print(palettes)
 
     img = Image.open(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\titanm.png")
@@ -416,7 +449,12 @@ def main():
     make_sprites(img, palettes, ((209, 1), (260, 78)), (1, 1), name="l")    # L
     make_sprites(img, palettes, ((264, 1), (315, 82)), (1, 1), name="y")    # Y
 
+    # copy 8x8 sprites into the 48 bytes at the end of each line..
+    hide_sprites_in_screen_buffer (screen_buffer_bytes, sprites)
+    write_data(screen_buffer_bytes, "screen")   # neeed to re-write the screen data, after sprites where inserted
+
     write_sprites(sprites, size)
+
 
     # calc_tiles(img, 8, 256)
     # calc_tiles(img, 16, 16)
