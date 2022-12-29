@@ -16,58 +16,187 @@ SPRITES_ASM = 1
 ; use this macro to calculate sprite number -> address in VRAM for parameters
 .define spritenum(n) (n*8)+$FC00
 
-; R15 this pointer to a sprite class
-.proc switch_sprite_off
-   stz VERA_ctrl
-   ldy #10                          ; the address of the sprite block is stored at offset 10
-   lda (R15),y
+; sprite data example definition
+; 
+; Sprite smoke, frame 0 (8x16 - 16 colors)
+; 
+; .byte 4, 3                                          ; x- and y-offset
+; .word 682+VERA_sprite_colors_16                     ; address/32 (+ color indicator) 
+; .word 0, 0                                          ; x,y pos
+; .byte 12                                            ; 4 bit Collision mask, 3 bit z-depth, VFlip HFlip
+; .byte VERA_sprite_height_16+VERA_sprite_width_8+0   ; h, w, palette index
+
+; offsets for the sprite data structure
+SD_x_offset       = 0
+SD_y_offset       = 1
+;------------------------  everything below gets copied into VRAM
+SD_VRAM_address   = 2  
+SD_x_position     = 4
+SD_y_position     = 6
+SD_col_z_flips    = 8
+SD_h_w_pal        = 9
+SD_size           = 10
+
+; oversize sprite example class definition
+;
+; .word 240,87         ; 0-3: position
+; .addr sprite_smoke_0 ; 4,5: sprite frame pointer (of first sprite)
+; .word spritenum(17)  ; 6,7: sprite# to use - stored as address of the sprite data in VRAM 
+; .byte 6              ; 8: number of sprites in this oversize sprite
+;                      ; 9: size of struct
+
+SPR_x_position    = 0   
+SPR_y_position    = 2
+SPR_SD_ptr        = 4   ; points to (first) SD struct
+SPR_attr_address  = 6   ; points to (first) 8 bytes in VRAM where to copy SD struct to
+SPR_part_count    = 8   ; how many parts does this oversize sprite / how many frames does this animation hold
+
+
+
+; animated sprite example class definition
+;
+; -------------------------------------- we start with the oversize sprite def ----------------------------
+; .word 240,87         ; 0-3: position
+; .addr sprite_smoke_0 ; 4,5: sprite frame pointer (of first sprite)
+; .word spritenum(17)  ; 6,7: sprite# to use - stored as address of the sprite data in VRAM 
+; .byte 6              ; 8:   number of sprites in this oversize sprite
+; -------------------------------------- additional anim parameters follow --------------------------------
+; .byte 0              ; 9:   current anim-frame
+; .byte 5              ; 10:  frames to wait before switching to next anim frame 
+; .byte 5              ; 11:  current delay count
+
+ASPR_current_frame = 9
+ASPR_frame_delay   = 10
+ASPR_current_fdc   = 11
+                       
+; cycle trough sprite animation frames
+; call this every frame - will pause until the desired # of frames has passed
+; will then switch to the next frame
+;
+; R15 this pointer
+;
+.proc animate_sprite
+   ldy #ASPR_frame_delay
+   lda (R15),y       ; load frame delay
+   tax               ; remember it
+   iny               ; point to current fdc
+   cmp (R15),y       ; compare frame delay to current delay count
+   ; if they are equal, the anim frame was switched and we need to update to the new sprite
+   beq update_new_sprite_frame 
+decrase_frame_count:
+   lda (R15),y       ; load delay count
+   dec
+   beq switch_to_next_frame 
+   sta (R15),y       ; store decreased count
    clc
-   adc #6                           ; 6 is the offset to z-depth, etc.
+   rts
+switch_to_next_frame:
+   ; we have counted down the delay, initialize counter again, and switch to next frame index
+   txa               ; a = frame delay (was remembered in x)
+   sta (R15),y       ; current delay count initialized again
+   ldy #ASPR_current_frame  ; point to current frame
+   lda (R15),y       ; get current frame
+   inc               ; advance frame count
+   dey               ; point to max frame count (this is SPR_part_count)
+   cmp (R15),y       
+   bne not_looped_yet ;we can just increase the frame count (this also clears the carry flag)
+   lda #0            ; we have looped, set to zero
+   sec
+not_looped_yet:
+   iny
+   sta (R15),y       ; stored new frame count
+   rts
+update_new_sprite_frame:
+   ldy #ASPR_current_frame  ; point to current frame
+   lda (R15),y       ; get current frame
+multiply_frame_by_10:   
+   asl
+   sta add_offset+1  ; times 2
+   asl
+   asl
+   clc
+   adc add_offset+1  ; times 10
+   sta add_offset+1  ; store as immediate value
+   ldy #SPR_SD_ptr   ; get address of SD ptr   
+   lda (R15),y 
+add_offset:   
+   ; add offset of animation frame to sprite-frame base pointer
+   adc #$aa          ; when we end up here, carry is clear for sure
+   sta R0L    
+   iny
+   lda (R15),y 
+   adc #0
+   sta R0H           ; copy pointer over
+   jsr update_sprite_data_and_position
+   ldy #ASPR_current_fdc
+   bra decrase_frame_count
+.endproc
+
+; R15 this pointer to a sprite class (SPR)
+;
+; a holds the offset, e.g. 6 to switch off a sprite or 2 to set a new position or 0 to update all the attributes
+; (this offset is expected to be 0..7, so this addition never can overflow into the next byte)
+.proc set_vera_address_for_sprite
+   stz VERA_ctrl
+   ldy #SPR_attr_address            ; get the address of the sprite block from the SPR structure
+   clc
+   adc (R15),y                      ; add offset to the desired attribute
    sta VERA_addr_low                ; lo byte
    iny
    lda (R15),y   
    sta VERA_addr_med                ; high byte
    lda #(1+ VERA_increment_1 + VERA_increment_addresses) ; this value is constant for all sprites
    sta VERA_addr_high   
+   rts
+.endproc
 
+
+; R15 this pointer to a sprite class (SPR)
+.proc switch_sprite_off
+   lda #6
+   jsr set_vera_address_for_sprite  ; point vera to the address to switch the sprite off
    stz VERA_data0                   ; disable sprite
+
+   ; need to add loop for multiple parts.. to switch them all off
+
    sec                              ; set c so we can use it as a one shot worker
    rts
 .endproc
 
 
-; r1 points to "virtual screen position" of sprite
-; r2 points to the address to hold the actual pos (= virtual pos + offset)
+; r15 = points to Sprite (since the x position is at 0 this effectively points to SPR_x_position)
+;
+; r2 points to the address to hold the actual pos (= virtual pos + offset, meaning to a  SD_#_position
 ; a holds the offset to add
 ; y = 0 or 2, depending on x or y component
 .proc add_sprite_offset_to_virtual_pos_compontent
-   add (r1),y
-   sta (r2),y
+   add (R15),y
+   sta (R2),y
    iny   
-   lda (r1),y
+   lda (R15),y
    adc #0
-   sta (r2),y
+   sta (R2),y
    iny
    rts
 .endproc   
 
-; r0 = sprite-frame to update
-; r1 = points to "virtual screen position" of sprite (x,y as 16 bit numbers)
+; r15 = points to Sprite (since the x position is at 0 this effectively points to SPR_x_position)
+;
+; r0 = sprite-frame to update (pointing to an SD structure)
 .proc add_sprite_offset_to_virtual_pos
    ; set up R2 to point to position field in the sprite-frame structure
    lda R0L
-   clc
-   adc #4
+   add #SD_x_position
    sta R2L
    lda R0H
    adc #0
-   sta R2H
+   sta R2H           ; R2 now points to SD_x_position
 
-   ldy #1
-   lda (r0),y
+   ldy #SD_y_offset
+   lda (R0),y
    tax               ; x = y offset
    dey 
-   lda (r0),y        ; a = x offset
+   lda (R0),y        ; a = x offset
 
    jsr add_sprite_offset_to_virtual_pos_compontent
    txa
@@ -75,28 +204,20 @@ SPRITES_ASM = 1
    rts
 .endproc
 
-; R15 this pointer to a sprite class
+; R15 this pointer to a animated sprite class
 ; r0 = sprite-frame to update
 ;
-.proc update_sprite_data
-   ; the address of the sprite block is stored at offset 10
-   stz VERA_ctrl
-   ldy #10   
-   lda (R15),y
-   sta VERA_addr_low                ; lo byte
-   iny
-   lda (R15),y   
-   sta VERA_addr_med                ; high byte
-   lda #(1+ VERA_increment_1 + VERA_increment_addresses) ; this value is constant for all sprites
-   sta VERA_addr_high
+.proc update_sprite_data   
+   lda #0
+   jsr set_vera_address_for_sprite  ; vera now points to the attribute block for this sprite
    
    ; now copy the actual data
-   ldy #2
+   ldy #SD_VRAM_address
 init_sprite:
    lda (r0),y
    sta VERA_data0
    iny
-   cpy #10
+   cpy #SD_size
    bne init_sprite
    rts
 .endproc
@@ -106,50 +227,33 @@ init_sprite:
 ;
 .proc update_sprite_data_and_position
    phx
-   jsr point_r1_to_sprite_position
+   ;jsr point_r1_to_sprite_position
    jsr add_sprite_offset_to_virtual_pos
    jsr update_sprite_data
    plx
    rts
 .endproc
 
-; make R1 point to the position field of the sprite class 
-; (effectively, R1 = R15+6)
-;
-; R15 this pointer to a sprite class
-.proc point_r1_to_sprite_position
-   lda R15L
-   adc #6
-   sta R1L
-   lda R15H
-   adc #0
-   sta R1H
-   rts
-.endproc   
-
 ; R15 this pointer to a sprite class
 ; c is expected to be 0
 .proc update_sprite_positions_for_single_sprite
    ; make R0 point to the sprite-frame-data (by copying the pointer at offset 4 to R0)
-   ldy #4
+   ldy #SPR_SD_ptr
    lda (R15),y
    sta R0L
    iny
    lda (R15),y
    sta R0H
 
-   ; make R1 point to the position (to update the sprite-frame with)
-   jsr point_r1_to_sprite_position
-
    ; update the positions
    bra add_sprite_offset_to_virtual_pos
 .endproc
 
 
-; R15 this pointer
+; R15 this pointer to SPR class
 ;
 .proc update_sprite_positions_for_multiple_sprites
-   ldy #2
+   ldy #SPR_part_count
    lda (R15),y    ; load number of sprites to update
    pha            ; push it
    clc
@@ -177,72 +281,5 @@ update_next:
 all_updated:   
    rts
 .endproc
-
-; cycle trough sprite animation frames
-; call this every frame - will pause until the desired # of frames has passed
-; will then switch to the next frame
-;
-; R15 this pointer
-;
-.proc animate_sprite
-   ldy #0
-   lda (R15),y       ; load frame delay
-   tax               ; remember it
-   iny
-   cmp (R15),y       ; compare frame delay to current delay count
-   ; if they are equal, the anim frame was switched and we need to update to the new sprite
-   beq update_new_sprite_frame 
-decrase_frame_count:
-   lda (R15),y       ; load delay count
-   dec
-   beq switch_to_next_frame 
-   sta (R15),y       ; store decreased count
-   clc
-   rts
-switch_to_next_frame:
-   ; we have counted down the delay, initialize counter again, and switch to next frame index
-   ;dey               ; y = 1 again, pointing to delay count 
-   txa               ; a = frame delay (was remembered in x)
-   sta (R15),y       ; current delay count initialized again
-   ldy #3            ; point to current frame
-   lda (R15),y       ; get current frame
-   inc               ; advance frame count
-   dey               ; point to max frame count
-   cmp (R15),y       
-   bne not_looped_yet ;we can just increase the frame count (this also clears the carry flag)
-   lda #0            ; we have looped, set to zero
-   sec
-not_looped_yet:
-   iny
-   sta (R15),y       ; stored new frame count
-   rts
-update_new_sprite_frame:
-   ldy #3            ; point to current frame
-   lda (R15),y       ; get current frame
-multiply_frame_by_10:   
-   asl
-   sta add_offset+1  ; times 2
-   asl
-   asl
-   clc
-   adc add_offset+1  ; times 10
-   sta add_offset+1  ; store as immediate value
-   iny
-   ; y is now 4, and we can calculate the sprite pointer
-   lda (R15),y 
-add_offset:   
-   ; add offset of animation frame to sprite-frame base pointer
-   adc #$aa          ; when we end up here, carry is clear for sure
-   sta R0L    
-   iny
-   lda (R15),y 
-   adc #0
-   sta R0H           ; copy pointer over
-   ;jsr update_sprite_data
-   jsr update_sprite_data_and_position
-   ldy #1
-   bra decrase_frame_count
-.endproc
-
 
 .endif
