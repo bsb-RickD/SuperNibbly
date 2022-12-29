@@ -92,7 +92,7 @@ ptr_wait_for_fade_out:                    ; 3 - wait for fading out the palette
 
 ptr_fade_in:                              ; 4 - fade pal in
    .word fade_intro_in, palfade_in
-   no_commands_to_add
+   commands_to_add 15
 
 ptr_animate_smoke:                        ; 5 - smoke animation
    .word loop_sprite, animated_smoke
@@ -132,7 +132,11 @@ ptr_animate_smoke:                        ; 5 - smoke animation
 
                                           ; 14 turn the fish off
    .word switch_sprite_off, jumping_fish
-   no_commands_to_add                     ; hide fish, generate new pause
+   no_commands_to_add                     
+
+                                          ; 15 show nibbly
+   .word drop_n, 0
+   no_commands_to_add                     
 
 return_to_basic:
    .byte 0
@@ -399,6 +403,9 @@ done:
 .include "intro/jumping_fish.asm"
 .endif
 
+.ifndef DROPPING_NIBBLY_ASM
+.include "intro/dropping_nibbly.asm"
+.endif
 
 ; animated sprite example class definition
 ;

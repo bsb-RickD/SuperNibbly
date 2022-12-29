@@ -1,5 +1,3 @@
-.ifndef sprite_smoke_0
-
 ; Sprite smoke, frame 0 (8x16 - 16 colors)
 sprite_smoke_0:
 .byte 4, 3	; x- and y-offset
@@ -408,4 +406,3 @@ sprite_y_1_0:
 .byte 12	; 4 bit Collision mask, 3 bit z-depth, VFlip HFlip
 .byte VERA_sprite_height_32+VERA_sprite_width_64+5	;h, w, palette index
 
-.endif

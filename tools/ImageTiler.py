@@ -52,6 +52,11 @@ def append_palette(pal, palette_bytes):
         palette_bytes.append(((g//17) << 4) + b//17)
         palette_bytes.append(r//17)
 
+    missing_entries = 15-len(pal)  # palettes can be incomplete
+    for i in range(missing_entries):
+        palette_bytes.append(0)
+        palette_bytes.append(0)
+
 
 def bytes_as_hex_text(data, bytes_per_line=24):
     p = 0
@@ -371,8 +376,6 @@ def make_sprites_internal(img, palettes, rect, frames, transparent_color, name, 
                 total_sprite_size += len(s.data)
                 framecount += 1
 
-    write_palettes(palettes)
-
 
 def write_sprites(sprites, baseaddress):
     sprite_data = bytearray()
@@ -454,6 +457,7 @@ def main():
     write_data(screen_buffer_bytes, "screen")   # neeed to re-write the screen data, after sprites where inserted
 
     write_sprites(sprites, size)
+    write_palettes(palettes)
 
 
     # calc_tiles(img, 8, 256)

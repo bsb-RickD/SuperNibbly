@@ -132,6 +132,37 @@ add_offset:
    bra decrase_frame_count
 .endproc
 
+; R15 this pointer to the oversize sprit
+.proc show_sprite
+   jsr update_sprite_positions_for_multiple_sprites
+   ThisLoadW R15, R0, SPR_SD_ptr, -
+   ldy #SPR_part_count  
+   lda (R15),y
+   tax
+   phx
+   jsr update_sprite_data     ; makes the sprite visible
+loop:   
+   plx
+   dex
+   beq done
+   ; for following sprites -- vera is already advanced to the right address
+   ; so just add 10 to R0 to point to next data block
+   lda R0L
+   add #10
+   sta R0L
+   bcc next
+   lda R0H
+   adc #0
+   sta R0H
+next:   
+   phx
+   jsr update_sprite_data+5   ; + 5 to skip vera init
+   bra loop
+done:   
+   sec
+   rts
+.endproc
+
 ; R15 this pointer to a sprite class (SPR)
 ;
 ; a holds the offset, e.g. 6 to switch off a sprite or 2 to set a new position or 0 to update all the attributes
@@ -227,7 +258,6 @@ init_sprite:
 ;
 .proc update_sprite_data_and_position
    phx
-   ;jsr point_r1_to_sprite_position
    jsr add_sprite_offset_to_virtual_pos
    jsr update_sprite_data
    plx
