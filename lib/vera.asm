@@ -2,15 +2,15 @@
 VERA_ASM = 1
 
 .ifndef REGS_INC
-.include "regs.inc"
+.include "inc/regs.inc"
 .endif
 
 .ifndef REGS_INC
-.include "mac.inc"
+.include "inc/mac.inc"
 .endif
 
 .ifndef REGS_INC
-.include "vera.inc"
+.include "inc/vera.inc"
 .endif
 
 ; addr = 17 bit address, 

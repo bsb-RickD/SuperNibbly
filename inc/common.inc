@@ -5,19 +5,19 @@ COMMON_INC = 1
 .linecont +
 
 .ifndef REGS_INC
-.include "regs.inc"
+.include "inc/regs.inc"
 .endif
 
 .ifndef KERNAL_INC
-.include "kernal.inc"
+.include "inc/kernal.inc"
 .endif
 
 .ifndef VERA_INC
-.include "vera.inc"
+.include "inc/vera.inc"
 .endif
 
 .ifndef MAC_INC
-.include "mac.inc"
+.include "inc/mac.inc"
 .endif
 
 .endif

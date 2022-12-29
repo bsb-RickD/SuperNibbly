@@ -63,8 +63,8 @@ done:
 
 ; init_r_range structure
 ;
-; word range start        ; offset 0  
-; word range end         ; offset 2
+; word range start         ; offset 0  
+; word range end           ; offset 2
 ; byte chunksize           ; offset 3 - should be a power of 2 (or 0 for all) 
 ; word pointer             ; offset 4 - where to initialize the random range object to
 

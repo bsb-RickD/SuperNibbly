@@ -2,11 +2,11 @@
 MATH_ASM = 1
 
 .ifndef REGS_INC
-.include "regs.inc"
+.include "inc/regs.inc"
 .endif
 
 .ifndef MAC_INC
-.include "mac.inc"
+.include "inc/mac.inc"
 .endif
 
 ; 8 bit division, unsigned

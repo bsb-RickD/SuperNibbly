@@ -2,7 +2,7 @@
 VSYNC_ASM = 1
 
 .ifndef IRQ_ASM
-.include "irq.asm"
+.include "lib/irq.asm"
 .endif
 
 ; globals

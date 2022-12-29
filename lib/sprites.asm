@@ -2,15 +2,15 @@
 SPRITES_ASM = 1
 
 .ifndef REGS_INC
-.include "regs.inc"
+.include "inc/regs.inc"
 .endif
 
 .ifndef MAC_INC
-.include "mac.inc"
+.include "inc/mac.inc"
 .endif
 
 .ifndef VERA_ASM
-.include "vera.asm"
+.include "lib/vera.asm"
 .endif
 
 ; use this macro to calculate sprite number -> address in VRAM for parameters

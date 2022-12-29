@@ -2,15 +2,15 @@
 LZSA_ASM = 1
 
 .ifndef REGS_INC
-.include "regs.inc"
+.include "inc/regs.inc"
 .endif
 
 .ifndef MAC_INC
-.include "mac.inc"
+.include "inc/mac.inc"
 .endif
 
 .ifndef VERA_INC
-.include "vera.inc"
+.include "inc/vera.inc"
 .endif
 
 

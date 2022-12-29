@@ -2,15 +2,15 @@
 IRQ_ASM = 1
 
 .ifndef KERNAL_INC
-.include "kernal.inc"
+.include "inc/kernal.inc"
 .endif
 
 .ifndef MAC_INC
-.include "mac.inc"
+.include "inc/mac.inc"
 .endif
 
 .ifndef REGS_INC
-.include "regs.inc"
+.include "inc/regs.inc"
 .endif
 
 ; globals

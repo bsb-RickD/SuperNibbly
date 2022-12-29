@@ -2,7 +2,7 @@
 KERNAL_INC = 1
 
 .ifndef MAC_INC
-.include "mac.inc"
+.include "inc/mac.inc"
 .endif
 
 ; Kernal

@@ -2,7 +2,7 @@
 UTIL_ASM = 1
 
 .ifndef REGS_INC
-.include "regs.inc"
+.include "inc/regs.inc"
 .endif
 
 ; a = bitmaks of registers to push

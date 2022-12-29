@@ -8,40 +8,45 @@
    jmp main
 
 .ifndef COMMON_INC
-.include "common.inc"
+.include "inc/common.inc"
 .endif
 
 .ifndef VERA_ASM
-.include "vera.asm"
+.include "lib/vera.asm"
 .endif
 
 .ifndef VSYNC_ASM
-.include "vsync.asm"
+.include "lib/vsync.asm"
 .endif
 
 .ifndef PALETTEFADER_ASM
-.include "palettefader.asm"
+.include "lib/palettefader.asm"
 .endif
 
 .ifndef UTIL_ASM
-.include "util.asm"
+.include "lib/util.asm"
 .endif
 
 .ifndef SPRITES_ASM
-.include "sprites.asm"
+.include "lib/sprites.asm"
 .endif
 
 .ifndef ARRAY_ASM
-.include "array.asm"
+.include "lib/array.asm"
 .endif
 
 .ifndef RANDOM_ASM
-.include "random.asm"
+.include "lib/random.asm"
 .endif
 
 .ifndef GENERIC_WORKERS_ASM
-.include "generic_workers.asm"
+.include "lib/generic_workers.asm"
 .endif
+
+.ifndef WORK_QUEUE_ASM
+.include "lib/work_queue.asm"
+.endif
+
 
 
 c64_pal: .byte $00,$0, $ff,$f, $00,$8, $fe,$a, $4c,$c, $c5,$0, $0a,$0, $e7,$e,$85,$d,$40,$6,$77,$f,$33,$3,$77,$7,$f6,$a,$8f,$0,$bb,$b
@@ -69,72 +74,6 @@ palfade_in:
    .byte $0a, $0
    .byte 0
    .byte 0
-
-.macro commands_to_add p1, p2, p3, p4
-.if .paramcount = 0
-   .byte 0,0,0,0
-.elseif .paramcount = 1
-   .byte p1,0,0,0
-.elseif .paramcount = 2
-   .byte p1,p2,0,0
-.elseif .paramcount = 3
-   .byte p1,p2,p3,0
-.elseif .paramcount = 4
-   .byte p1,p2,p3,p4
-.endif
-.endmacro 
-
-.define no_commands_to_add commands_to_add
-
-; random range parameters
-fish_pause_range:
-.word 8*16, 15*16                   ; pause range (*16 = number of frames to wait between animations)
-.byte 16                            ; pause chunks
-.word fish_random_pause_object      ; object to initialize
-
-; random range object
-fish_random_pause_object:
-.res 5,0                            ; just needs 5 bytes of data
-
-; used for generating the actual pause value
-fish_generate_pause:
-.word fish_pause_counter            ; generate the random value into this location
-.word fish_random_pause_object      ; and use this generator
-
-; used for counting down the pause
-fish_pause_counter:
-.word 0,0
-
-; random range parameters
-fish_x_range:
-.word 0, 115                        ; x range
-.byte 16                            ; range chunks
-.word fish_random_x_object          ; object to initialize
-
-; random range object
-fish_random_x_object:
-.res 5,0                            ; just needs 5 bytes of data
-
-; used for generating the actual x value
-fish_generate_x:
-.word jumping_fish+SPR_x_position   ; generate the random value into the x position of the jumping fish
-.word fish_random_x_object          ; and use this generator
-
-; random range parameters
-fish_y_range:
-.word 93, 106                       ; y range
-.byte 4                             ; range chunks
-.word fish_random_y_object          ; object to initialize
-
-; random range object
-fish_random_y_object:
-.res 5,0                            ; just needs 5 bytes of data
-
-; used for generating the actual y value
-fish_generate_y:
-.word jumping_fish+SPR_y_position   ; generate the random value into the y position of the jumping fish
-.word fish_random_y_object          ; and use this generator
-
 
 function_ptrs:
    .word 0,0                              ; 0 - nullptr
@@ -195,16 +134,6 @@ ptr_animate_smoke:                        ; 5 - smoke animation
    .word switch_sprite_off, jumping_fish
    no_commands_to_add                     ; hide fish, generate new pause
 
-
-work_queue:
-   .res 64,0
-
-workers_to_add:
-   .res 16,0
-
-workers_to_remove:
-   .res 16,0      
-
 return_to_basic:
    .byte 0
 
@@ -241,51 +170,10 @@ return_to_basic:
 iterate_main_loop:   
    jsr wait_for_vsync
 
-   lda work_queue                ; worker count
-   beq work_loop_empty
-   ldx #1
-fetch_next_worker:
-   pha                           ; push the number of workers to call
-   phx                           ; save worker index
-
-   lda work_queue,x              ; get next function number
-   sta remove_this_fnum+1        ; remember it, in case we need to remove it on completion
-   asln 3                        ; multiply by 8
-   tay                           ; y holds the offset to the function_ptrs table
-
-   jsr call_worker               ; call the worker (this y register is pushed and popped)
-
-   ; carry clear? - nothing to do, call worker again next frame
-   bcc call_worker_next_frame    
-
-   ; carry is set - this means remove current worker and add the new workers
-   LoadW R15, workers_to_add
-   ldx #4                        ; max of 4 pseudo pointers to add
-append_workers:   
-   iny                           ; advance to next worker to load
-   lda function_ptrs,y           ; get the 1 byte pseudo pointer
-   beq no_more_workers_2_append  ; null ptr found - stop evaluation workers to add
-   jsr array_append              ; add it to the list of pointers to add 
-   dex                           ; dec the counter of allowed pointers to add
-   bne append_workers            ; try one more
-no_more_workers_2_append:
-   LoadW R15, workers_to_remove
-remove_this_fnum:   
-   lda #$F2                      ; this is function num we want to remove - was stored upstream here
-   jsr array_append              ; add the current
-call_worker_next_frame:   
-   plx                           ; restore worker index   
-   inx                           ; advance to next index
-   pla                           ; restore count
-   dec
-   bne fetch_next_worker         ; not at zero? get next worker
-
-   jsr update_work_queue         ; update the workers list by removing old and adding new workers
+   jsr execute_work_queue
 
    lda return_to_basic           ; shall we quit?
    beq iterate_main_loop         ; no, continue
-
-work_loop_empty:
 
    ; cleanup
    clear_vsync_irq
@@ -352,55 +240,6 @@ complete:
    rts
 .endproc
 
-; call the worker 
-; pass this pointer in R15
-;
-; y: index to function_ptrs table (worker index * 8)
-;
-; a,x get thrashed, y is pushed/pulled
-;
-; return: 
-;  C = 0: worker not done, call again next frame
-;  C = 1: worker has completed its work
-;
-.proc call_worker
-   ; load address to jump to and write it to jsr below
-   lda function_ptrs,y
-   sta jsr_to_patch+1
-   iny 
-   lda function_ptrs,y
-   sta jsr_to_patch+2
-   ; load this pointer and copy it to R15
-   iny
-   lda function_ptrs,y
-   sta R15L
-   iny
-   lda function_ptrs,y
-   sta R15H      
-   phy                           ; save index to worker data
-jsr_to_patch:   
-   jsr $CA11                     ; dispatch the call
-   ply
-
-   rts
-.endproc
-
-; take remove / add workers to queue
-.proc update_work_queue
-   LoadW R15, work_queue
-   
-   LoadW R14, workers_to_remove
-   jsr array_remove_array        ; remove the ones to remove
-   lda #0
-   sta (R14)                     ; empty remove array
-
-   LoadW R14, workers_to_add
-   jsr array_append_array        ; append the ones to append
-   lda #0
-   sta (R14)                     ; empty append array
-
-   rts
-.endproc
 
 ; worker procedure to check whether we shall quit or not
 .proc check_return_to_basic
@@ -552,9 +391,13 @@ done:
    rts 
 .endproc
 
+.ifndef LZSA_ASM
 .include "lib/lzsa.asm"
+.endif
 
-.include "sprites.inc"
+.ifndef JUMPING_FISH_ASM
+.include "intro/jumping_fish.asm"
+.endif
 
 
 ; animated sprite example class definition
@@ -579,16 +422,6 @@ animated_smoke:
 .byte 0              ; 9:   current anim-frame
 .byte 5              ; 10:  frames to wait before switching to next anim frame 
 .byte 5              ; 11:  current delay count
-                     ; 12:  size of struct
-
-jumping_fish:
-.word 40,100         ; 0-3: position
-.addr sprite_fish_0  ; 4,5: sprite frame pointer
-.word spritenum(16)  ; 6,7: sprite# to use - stored as address of the sprite data in VRAM 
-.byte 17             ; 8:   number of sprites in this oversize sprite
-.byte 0              ; 9:   current anim-frame
-.byte 6              ; 10:  frames to wait before switching to next anim frame 
-.byte 6              ; 11:  current delay count
                      ; 12:  size of struct
 
 screen:

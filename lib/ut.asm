@@ -2,11 +2,11 @@
 UT_ASM = 1
 
 .ifndef COMMON_INC
-.include "common.inc"
+.include "inc/common.inc"
 .endif
 
 .ifndef PRINT_ASM
-.include "print.asm"
+.include "lib/print.asm"
 .endif
 
 str_ut_welcome:

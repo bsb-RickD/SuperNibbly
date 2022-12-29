@@ -2,11 +2,11 @@
 PRINT_ASM = 1
 
 .ifndef COMMON_INC
-.include "common.inc"
+.include "inc/common.inc"
 .endif
 
 .ifndef MATH_ASM
-.include "math.asm"
+.include "lib/math.asm"
 .endif
 
 .macro print_push_state
