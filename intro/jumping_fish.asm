@@ -74,7 +74,7 @@ fish_generate_y:
 jumping_fish:
 .word 40,100         ; 0-3: position
 .addr sprite_fish_0  ; 4,5: sprite frame pointer
-.word spritenum(16)  ; 6,7: sprite# to use - stored as address of the sprite data in VRAM 
+.word spritenum(127) ; 6,7: sprite# to use - stored as address of the sprite data in VRAM 
 .byte 17             ; 8:   number of sprites in this oversize sprite
 .byte 0              ; 9:   current anim-frame
 .byte 6              ; 10:  frames to wait before switching to next anim frame 

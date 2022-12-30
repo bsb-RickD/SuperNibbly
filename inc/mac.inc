@@ -574,4 +574,7 @@ L:
 	adc #Value
 .endmacro
 
+.define neg_word(n) ($FFFF-n)+1
+.define neg_byte(n) ($FF-n)+1
+
 .endif

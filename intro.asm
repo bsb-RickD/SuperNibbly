@@ -424,7 +424,7 @@ done:
 animated_smoke:
 .word 240,87         ; 0-3: position
 .addr sprite_smoke_0 ; 4,5: sprite frame pointer
-.word spritenum(17)  ; 6,7: sprite# to use - stored as address of the sprite data in VRAM 
+.word spritenum(126) ; 6,7: sprite# to use - stored as address of the sprite data in VRAM 
 .byte 6              ; 8:   number of sprites in this oversize sprite
 .byte 0              ; 9:   current anim-frame
 .byte 5              ; 10:  frames to wait before switching to next anim frame 
