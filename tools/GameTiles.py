@@ -1,6 +1,6 @@
 from PIL import Image
 from ordered_set import OrderedSet
-
+from ImageTiler import tile_bytes, write_data
 
 def get_mask(img):
     mask = Image.new(mode="L", size=img.size)
@@ -57,6 +57,55 @@ def build_image(wall, pill=None):
     return tiled
 
 
+"""
+
+Purpose: generate the tile data needed to draw the level
+
+Loads the various level graphics sets (7 of them) and generates the 7 tiles needed for displaying pills on the floor:
+0: empty (no wall touching)
+1: wall corner upper left corner
+2: wall above, but only one
+3: wall above, both
+4: wall to the left, only one
+6: wall to the left, both
+
+the numbers are corresponding to the bits where the neighboring walls are:
+1 top left, 2 top, 4 left
+
+  1            2 
+         +------------+
+         |\  |        |
+         |__\|        | 
+  4      |            |  
+         |            |
+         +------------+
+         
+Image above shows the cell for the 1 configuration
+
+for 2 it looks like this:
+
+         +------------+
+         |\           |
+         |  \_________| 
+         |            |  
+         |            |
+         +------------+
+
+
+for 3 like this:
+
+         +------------+
+         |\           |
+         |__\_________| 
+         |            |  
+         |            |
+         +------------+
+
+and so on..
+
+these 7 tiles are then combined with the 6 pill states (no pill, size 1, 2, 3, 4, 5)
+
+"""
 def main():
     img = Image.open(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\level1.png")
 
@@ -74,7 +123,9 @@ def main():
             tiled.paste(grab_tiles(build_image(wall,p)),(0,7*16*i))
         tiled.paste(wall,(0,16*42))
 
-        tiled.show()
+        #tiled.show() # to debug
+
+        write_data(bytearray(tile_bytes(bytearray(tiled.getdata()), 4)), "wall_gfx_set_%d"%n)
 
 
 if __name__ == "__main__":

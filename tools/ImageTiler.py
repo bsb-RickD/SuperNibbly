@@ -68,8 +68,15 @@ def bytes_as_hex_text(data, bytes_per_line=24):
 
     return output
 
+def write_data(data, name : str, write_asm=False):
+    """
+        Creates a file and writes data to it.
+        Optionally can create a second file, with asm source of the data
 
-def write_data(data, name, write_asm=False):
+        :param data: The data to write, as byte arreay or similar, gets iterated
+        :param name: name of the file, without extension, the extension .bin / .asm gets added automatically
+        :param write_asm: If true, also the asm file is generated
+    """
     with open(name+".bin", "wb") as fp:
         fp.write(data)
     if write_asm:
