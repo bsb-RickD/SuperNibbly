@@ -212,5 +212,39 @@ loop:
    rts
 .endproc
 
+c64_pal: .byte $00,$0, $ff,$f, $00,$8, $fe,$a, $4c,$c, $c5,$0, $0a,$0, $e7,$e,$85,$d,$40,$6,$77,$f,$33,$3,$77,$7,$f6,$a,$8f,$0,$bb,$b
+
+; go back to the textmode basic uses
+;
+;
+.proc switch_to_textmode
+   stz VERA_ctrl              ; dcsel and adrsel both to 0
+
+   lda VERA_dc_video
+   and #7                     ; keep video and chroma mode
+   ora #VERA_enable_layer_1   ; layer 1 = on, sprites = off, layer 0 = off
+   sta VERA_dc_video          ; set it
+   stz VERA_ctrl              ; dcsel and adrsel both to 0
+   LoadW VERA_dc_hscale, 128  ; 1 pixel output 
+   sta VERA_dc_vscale         ; 640 x 480   
+   ; map 128x64, 1bpp colors (textmode)
+   LoadB VERA_L1_config, VERA_map_height_64 + VERA_map_width_128 + VERA_colors_2
+   LoadB VERA_L1_mapbase, $D8
+   LoadB VERA_L1_tilebase, $F8
+
+   ; restore default palette   
+   LoadW R11, c64_pal
+   ldx #15
+   lda #0
+   sei
+   jsr write_to_palette
+   cli
+
+   stz VERA_ctrl              ; make kernal happy
+
+   rts
+.endproc
+
+
 
 .endif

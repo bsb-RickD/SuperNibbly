@@ -45,6 +45,10 @@ VERA_map_width_64    = %01 << 4
 VERA_map_width_128   = %10 << 4
 VERA_map_width_256   = %11 << 4
 
+VERA_mapbase_chunk   = 512
+
+VERA_tilebase_chunk  = 2048
+
 VERA_tile_height_8   = 0 << 1
 VERA_tile_height_16  = 1 << 1
 

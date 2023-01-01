@@ -49,8 +49,6 @@
 
 
 
-c64_pal: .byte $00,$0, $ff,$f, $00,$8, $fe,$a, $4c,$c, $c5,$0, $0a,$0, $e7,$e,$85,$d,$40,$6,$77,$f,$33,$3,$77,$7,$f6,$a,$8f,$0,$bb,$b
-
 ; num colors to fade       1 byte   (+1, 0 meaning 1, etc.)    offset 0
 ; pointer to palette       2 bytes                             offset 1
 ; target color             2 bytes                             offset 3
@@ -339,30 +337,6 @@ done:
    LoadW VERA_L0_config, VERA_map_height_32 + VERA_map_width_64 + VERA_colors_16
    stz VERA_L0_mapbase   
    LoadB VERA_L0_tilebase, ((4096/2048) << 2) + VERA_tile_width_8 + VERA_tile_height_8
-
-   rts
-.endproc
-
-.proc switch_to_textmode
-   lda VERA_dc_video
-   and #7                     ; keep video and chroma mode
-   ora #$20                   ; layer 1 = on, sprites = off, layer 1 = off
-   sta VERA_dc_video          ; set it
-   stz VERA_ctrl              ; dcsel and adrsel both to 0
-   LoadW VERA_dc_hscale, 128  ; 1 pixel output 
-   sta VERA_dc_vscale         ; 640 x 480   
-   ; map 128x64, 1bpp colors (textmode)
-   LoadB VERA_L1_config, VERA_map_height_64 + VERA_map_width_128 + VERA_colors_2
-
-   ; restore default palette   
-   LoadW R11, c64_pal
-   ldx #15
-   lda #0
-   sei
-   jsr write_to_palette
-   cli
-
-   stz VERA_ctrl           ; dcsel and adrsel both to 0
 
    rts
 .endproc
