@@ -155,6 +155,7 @@ return_to_basic:
    LoadW jumping_fish, $0606
    LoadW jumping_fish+2, 17
 
+   jsr switch_all_sprites_off
 
    ; init RNG
    jsr rand_seed_time   

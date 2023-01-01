@@ -184,15 +184,34 @@ done:
 
 ; R15 this pointer to a sprite class (SPR)
 .proc switch_sprite_off
-   lda #6
+   lda #6                           ; 6 is the offset in the VRAM sprite structure that controls z/visibility
    jsr set_vera_address_for_sprite  ; point vera to the address to switch the sprite off
    stz VERA_data0                   ; disable sprite
 
    ; need to add loop for multiple parts.. to switch them all off
-
+   ldy #SPR_part_count
+   lda (R15),y
+   tax
+more_parts:
+   dex
+   beq done
+   AddVW 7, VERA_addr_low
+   stz VERA_data0                   ; disable sprite part
+   bra more_parts
+done:
    sec                              ; set c so we can use it as a one shot worker
    rts
 .endproc
+
+
+all_sprites:                        ; pseudo sprite 0 with 128 parts to switch all sprites off
+.word spritenum(0)
+.byte 128
+
+.proc switch_all_sprites_off
+   LoadW R15, all_sprites-SPR_attr_address
+   bra switch_sprite_off
+.endproc   
 
 
 ; r15 = points to Sprite (since the x position is at 0 this effectively points to SPR_x_position)
