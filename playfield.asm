@@ -27,11 +27,21 @@
 .include "lib/lzsa.asm"
 .endif
 
+tileset:
+.byte 0
+
+pills:
+.byte 0
+
+level:
+.byte 0
+
+
 .proc main
 
    jsr clear_map
 
-   lda #0
+   lda tileset
    jsr switch_gfx_set
    jsr show_level
 
@@ -42,12 +52,52 @@ loop:
    jsr KRNL_GETIN    ; read key
    cmp #KEY_Q
    beq quit
+   cmp #KEY_T
+   beq switch_gfx
+   cmp #KEY_P
+   beq switch_pills
+   cmp #KEY_L
+   beq switch_level
    bra loop
    
 quit:   
    jsr switch_to_textmode
 
    rts
+
+switch_gfx:
+   lda tileset
+   inc
+   cmp #7
+   blt switch_it
+   lda #0   
+switch_it:
+   sta tileset
+   jsr switch_gfx_set
+   bra loop
+
+switch_pills:
+   lda pills
+   clc
+   adc #7
+   cmp #36
+   blt switch_it_p
+   lda #0   
+switch_it_p:
+   sta pills
+   jsr show_level
+   bra loop
+
+switch_level:
+   lda level
+   inc
+   and #15
+   sta level
+   jsr show_level
+   bra loop
+
+
+
 .endproc
 
 .proc switch_to_tiled_mode
@@ -108,6 +158,25 @@ quit:
    LoadW R12,levels-21           ; R12: 1 up, 1 left
    LoadW R13,levels-20           ; R13: 1 up
    LoadW R14,levels-1            ; R14: 1 left
+
+   ; fix up high byte for the level count
+   clc
+   lda R15H
+   adc level
+   sta R15H
+
+   lda R14H
+   adc level
+   sta R14H
+
+   lda R13H
+   adc level
+   sta R13H
+
+   lda R12H
+   adc level
+   sta R12H
+
    LoadW R11,VERA_data0
 
    set_vera_address 0,0,VERA_increment_2
@@ -145,7 +214,7 @@ combiner:
    lda #6                        ; cut it to 6, if necessary, 
 store_it:
    clc
-   adc #7   
+   adc pills   
    iny
    sta (R11)                     ; store it
    dex
