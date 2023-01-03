@@ -58,6 +58,8 @@ def build_image(wall, pill=None):
             elif (entry == 0) and (pill is not None) and y <7:
                 tiled.paste(pill, (16 * x, 16 * y), mask=pm)
 
+    #tiled.show()
+
     return tiled
 
 
@@ -120,25 +122,27 @@ def main():
         img = Image.open(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\level%d.png"%n)
         wall = img.crop((21, 5, 42,26))
 
-        tiled = Image.new(mode="P", size=(16, 16 * 46), color=0)
+        tiled = Image.new(mode="P", size=(16, 16 * 47), color=0)
         tiled.putpalette(wall.getpalette())
 
         for i, p in enumerate(pills):
             lab_img = build_image(wall,p)
             tiled.paste(grab_tiles(lab_img),(0,7*16*i))
+            if i == 0:
+                w1 = lab_img.crop((2 * 16, 6 * 16, 3 * 16, 7 * 16))
+                w2 = lab_img.crop((16, 7 * 16, 33, 8 * 16))
+                w3 = lab_img.crop((2 * 16, 7 * 16, 3 * 16, 8 * 16))
+
         tiled.paste(wall,(0,16*42))
 
         empty = Image.new(mode="P", size=(16, 16), color=0)
         tiled.paste(empty, (0, 16 * 43))
 
-        w1 = lab_img.crop((0,7*16,17,8*16))
-        w2 = lab_img.crop((16, 7 * 16, 33, 8 * 16))
-
         tiled.paste(w1, (0, 16 * 44))
         tiled.paste(w2, (0, 16 * 45))
+        tiled.paste(w3, (0, 16 * 46))
 
-
-        # tiled.show() # to debug
+        #tiled.show() # to debug
 
         write_data(bytearray(tile_bytes(bytearray(tiled.getdata()), 4)), "wall_gfx_set_%d"%n)
 

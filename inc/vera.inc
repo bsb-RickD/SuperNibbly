@@ -12,15 +12,32 @@ VERA_control      = VERA_ctrl
 VERA_ien          = $9F26
 VERA_isr          = $9F27
 VERA_irqline_low  = $9F28
-VERA_dc_video     = $9F29
-VERA_dc_hscale    = $9F2A
-VERA_dc_vscale    = $9F2B
+
+VERA_dc_video     = $9F29     ; when dcsel = 0
+VERA_dc_hscale    = $9F2A     ; when dcsel = 0
+VERA_dc_vscale    = $9F2B     ; when dcsel = 0
+VERA_dc_bordercol = $9F2C     ; when dcsel = 0
+
+VERA_dc_hstart    = $9F29     ; when dcsel = 1
+VERA_dc_hstop     = $9F2A     ; when dcsel = 1
+VERA_dc_vstart    = $9F2B     ; when dcsel = 1
+VERA_dc_vstop     = $9F2C     ; when dcsel = 1 
+
 VERA_L0_config    = $9F2D
 VERA_L0_mapbase   = $9F2E
 VERA_L0_tilebase  = $9F2F
+VERA_L0_hscroll_l = $9F30
+VERA_L0_hscroll_h = $9F31
+VERA_L0_vscroll_l = $9F32
+VERA_L0_vscroll_h = $9F33
+
 VERA_L1_config    = $9F34
 VERA_L1_mapbase   = $9F35
 VERA_L1_tilebase  = $9F36
+VERA_L1_hscroll_l = $9F37
+VERA_L1_hscroll_h = $9F38
+VERA_L1_vscroll_l = $9F39
+VERA_L1_vscroll_h = $9F3A
 
 IO_PAGE = $9F
 

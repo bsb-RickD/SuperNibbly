@@ -119,6 +119,10 @@ switch_level:
    LoadB VERA_L1_mapbase, (32*16*2 / VERA_mapbase_chunk)
    LoadB VERA_L1_tilebase, ((2048/VERA_tilebase_chunk) << 2) + VERA_tile_width_16 + VERA_tile_height_16
 
+   ; scroll the playfield a bit to the left
+   LoadB VERA_L0_hscroll_l, 5
+   sta VERA_L1_hscroll_l
+   
    rts
 .endproc
 
@@ -219,21 +223,26 @@ store_it:
    sta (R11)                     ; store it
    dex
    bne loop_x
-   AddVW 24, VERA_addr_low       ; line offset added to vera address
+   lda #5                        ; default border stone
    plx
+   cpx #11                       ; check y-counter if we're still on first line
+   bne store_right_border
+   lda #44                       ; we're on the first line - select special corner stone
+store_right_border:   
+   sta (R11)
+   AddVW 22, VERA_addr_low       ; line offset added to vera address
    dex
    bne loop_y
 
    ; add the segments for the last line
-   lda #44
-   sta (R11)
    lda #45
-   ldx #19
+   ldx #20
 last_line:   
    sta (R11)
    dex
    bne last_line
-
+   lda #46
+   sta (R11)
 
 .endproc                         ; fall through to walls in layer 1
 

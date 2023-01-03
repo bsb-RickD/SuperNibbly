@@ -232,6 +232,9 @@ c64_pal: .byte $00,$0, $ff,$f, $00,$8, $fe,$a, $4c,$c, $c5,$0, $0a,$0, $e7,$e,$8
    LoadB VERA_L1_mapbase, $D8
    LoadB VERA_L1_tilebase, $F8
 
+   stz VERA_L0_hscroll_l
+   stz VERA_L1_hscroll_l
+
    ; restore default palette   
    LoadW R11, c64_pal
    ldx #15
