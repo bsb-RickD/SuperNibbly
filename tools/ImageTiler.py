@@ -1,6 +1,9 @@
 from PIL import Image
 from ordered_set import OrderedSet
 
+sprites = []
+total_sprite_size = 0
+
 
 class Sprite:
     def __init__(self):
@@ -79,11 +82,17 @@ def write_data(data, name: str, write_asm=False):
         :param name: name of the file, without extension, the extension .bin / .asm gets added automatically
         :param write_asm: If true, also the asm file is generated
     """
-    with open(name + ".bin", "wb") as fp:
+
+    bin_name = name + ".bin"
+    asm_name = name + ".asm"
+
+    with open(bin_name, "wb") as fp:
         fp.write(data)
+        # print("### Wrote: " + bin_name)  # for debugging
     if write_asm:
-        with open(name + ".asm", "wt") as fp:
+        with open(asm_name, "wt") as fp:
             fp.write(bytes_as_hex_text(data))
+            # print("### Wrote: " + asm_name)  # for debugging
 
 
 def make_filename(name, prefix):
@@ -234,7 +243,7 @@ def calc_tiles(img, tile_size, max_palette_entries, prefix="", transparent_color
     bits_per_pixel = {3: 2, 15: 4, 255: 8}.get(max_palette_entries)
     tile_byte_count = num_tiles * (tile_size * tile_size) // (8 // bits_per_pixel)
 
-    print("total # tiles: %d (holding %d small tiles)" % (num_tiles, small_tiles))
+    # print("total # tiles: %d (holding %d small tiles)" % (num_tiles, small_tiles))
 
     single_tile_size = (tile_size * tile_size * bits_per_pixel) // 8
     tiles_bytes = bytearray(tile_byte_count)
@@ -244,7 +253,8 @@ def calc_tiles(img, tile_size, max_palette_entries, prefix="", transparent_color
 
     write_data(tiles_bytes, make_filename("tiles", prefix))
 
-    print("== Config: %d x %d tiles of %d colors ===================" % (tile_size, tile_size, max_palette_entries + 1))
+    print("== Config: %s - %d x %d tiles of %d colors ===================" %
+          (prefix, tile_size, tile_size, max_palette_entries + 1))
     num_palettes = len(palettes_plus_subimages)
 
     palettes = [pal for pal, _ in palettes_plus_subimages]
@@ -264,7 +274,17 @@ def calc_tiles(img, tile_size, max_palette_entries, prefix="", transparent_color
         screen_columns *= 2
     screen_rows = h // tile_size
     screen_buffer_size = screen_columns * screen_rows * 2
-    screen_buffer_bytes = bytearray(screen_buffer_size)
+
+    # pad screen buffer to a multiple of 2048 (for the tile base)
+    tilebase_chunk_size = 2048
+    screen_chunk_remainder = screen_buffer_size % tilebase_chunk_size
+    empty_space_at_end = 0
+    if screen_chunk_remainder != 0:
+        empty_space_at_end = tilebase_chunk_size - screen_chunk_remainder
+    screen_buffer_size += empty_space_at_end
+
+    # init it all to zero, just to be safe
+    screen_buffer_bytes = (bytearray(b'\x00')) * screen_buffer_size
 
     idx = 0
     tidx = 0
@@ -282,7 +302,7 @@ def calc_tiles(img, tile_size, max_palette_entries, prefix="", transparent_color
     total = palette_byte_count + tile_byte_count + screen_buffer_size
     print("Total:\t\t%d Bytes  (%f kB)\n\n" % (total, total / 1024))
 
-    return screen_buffer_size + tile_byte_count, palettes, screen_buffer_bytes
+    return screen_buffer_size + tile_byte_count, palettes, screen_buffer_bytes, empty_space_at_end
 
 
 def get_bounding_box(img, transparent_color):
@@ -350,10 +370,6 @@ def pad_to_next_size(img, transparent_color):
         new_img.paste(img, (0, 0))
         return new_img
     return img
-
-
-sprites = []
-total_sprite_size = 0
 
 
 def make_sprites(img, palettes, rect, frames=(1, 1), transparent_pixel=None, name=""):
@@ -441,15 +457,17 @@ def make_sprites_internal(img, palettes, rect, frames, transparent_color, name, 
                 framecount += 1
 
 
-def write_sprites(sprites_to_write, baseaddress):
+def write_sprites(sprites_to_write, baseaddress, prefix=None):
     sprite_data = bytearray()
     for sprite in sprites_to_write:
         sprite_data += bytearray(sprite.data)
 
-    write_data(sprite_data, "sprites")
+    filename = make_filename("sprites", prefix)
+
+    write_data(sprite_data, filename)
 
     bp = baseaddress // 32
-    with open("sprites" + ".inc", "wt") as fp:
+    with open(filename + ".inc", "wt") as fp:
         for sprite in sprites:
             # watch out - for hidden sprites len(sprite.data) = 0
             sprite_size = len(sprite.data)
@@ -497,10 +515,20 @@ def hide_sprites_in_screen_buffer(buffer_bytes, sprites_to_potentially_hide):
     print("Could re-use %d bytes (from %d sprites) of screen space!" % (saved, saved_count))
 
 
+def init():
+    global sprites
+    global total_sprite_size
+
+    sprites = []
+    total_sprite_size = 0
+
+
 def super_nibbly_title():
-    img = Image.open(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_LBM_Files\titel_bg.png")
+    init()
+    prefix = "intro"
+    img = Image.open(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\TITEL_BG_x16.png")
     img = img.convert("RGB")
-    size, palettes, screen_buffer_bytes = calc_tiles(img, 8, 16)
+    size, palettes, screen_buffer_bytes, empty_space_at_end = calc_tiles(img, 8, 16, prefix)
 
     img = Image.open(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\titanm.png")
 
@@ -518,21 +546,23 @@ def super_nibbly_title():
 
     # copy 8x8 sprites into the 48 bytes at the end of each line..
     hide_sprites_in_screen_buffer(screen_buffer_bytes, sprites)
-    write_data(screen_buffer_bytes, "screen")  # neeed to re-write the screen data, after sprites where inserted
+    # neeed to re-write the screen data, after sprites where inserted
+    write_data(screen_buffer_bytes, make_filename("screen", prefix))
 
-    write_sprites(sprites, size)
-    write_palettes(palettes)
+    write_sprites(sprites, size, prefix)
+    write_palettes(palettes, prefix)
 
 
 def super_nibbly_travel():
+    init()
+    prefix = "travel"
     img = Image.open(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\LMAPP_x16.png")
-    # img = Image.open(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_LBM_Files\titel_bg.png")
     transparent_color = tuple(img.getpalette()[0:3])
     img = img.convert("RGB")
 
-    calc_tiles(img, 8, 16, "travel", transparent_color)
+    calc_tiles(img, 8, 16, prefix, transparent_color)
 
 
 if __name__ == "__main__":
-    # super_nibbly_travel()
     super_nibbly_title()
+    super_nibbly_travel()

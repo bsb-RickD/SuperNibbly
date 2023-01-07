@@ -338,6 +338,9 @@ done:
    stz VERA_L0_mapbase   
    LoadB VERA_L0_tilebase, ((4096/2048) << 2) + VERA_tile_width_8 + VERA_tile_height_8
 
+   ; scroll a little bit up, so we can move when dropping the characters
+   LoadB VERA_L0_vscroll_l, 8
+
    rts
 .endproc
 
@@ -407,12 +410,12 @@ animated_smoke:
                      ; 12:  size of struct
 
 screen:
-.incbin "intro_data.bin"
+.incbin "assets/intro_data.bin"
 
 SCREEN_SIZE = *-screen
 
 screen_pal:
-.incbin "palette.bin"
+.incbin "assets/intro_palette.bin"
 PALETTE_SIZE = *-screen_pal
 
 ; this is where we fade into
