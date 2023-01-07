@@ -9,6 +9,20 @@ copy ..\intro_sprites.inc intro\intro_sprites.inc
 copy ..\intro_palette.bin assets
 echo.
 
+echo ============= travel assets ====================
+
+copy /b ..\travel_screen.bin+..\travel_tiles.bin assets\travel_data.raw
+lzsa -v -r -f2 assets\travel_data.raw assets\travel_data.bin
+del assets\travel_data.raw
+
+lzsa -v -r -f2 ..\travel_desert_sprites.bin assets\travel_desert_sprites.bin
+lzsa -v -r -f2 ..\travel_green_sprites.bin assets\travel_green_sprites.bin
+lzsa -v -r -f2 ..\travel_ice_sprites.bin assets\travel_ice_sprites.bin
+lzsa -v -r -f2 ..\travel_vulcano_sprites.bin assets\travel_vulcano_sprites.bin
+
+copy ..\travel_palette.bin assets
+echo.
+
 
 echo ============= playfield assets ====================
 

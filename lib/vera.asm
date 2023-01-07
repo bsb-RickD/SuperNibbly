@@ -212,6 +212,25 @@ loop:
    rts
 .endproc
 
+
+.proc switch_to_320_240_tiled_mode
+   stz VERA_ctrl              ; dcsel and adrsel both to 0
+   lda VERA_dc_video
+   and #7                     ; keep video and chroma mode
+   ; layer 0 = on, sprites = on, layer 1 = off
+   ora #VERA_enable_layer_0 + VERA_enable_sprites                   
+   sta VERA_dc_video          ; set it
+   LoadW VERA_dc_hscale,64    ; 2 pixel output     
+   sta VERA_dc_vscale         ; 320 x 240   
+   ; map 64x32, 16 colors, starting at 0, tiles start at 4k, 8x8
+   LoadW VERA_L0_config, VERA_map_height_32 + VERA_map_width_64 + VERA_colors_16
+   stz VERA_L0_mapbase   
+   LoadB VERA_L0_tilebase, ((4096/2048) << 2) + VERA_tile_width_8 + VERA_tile_height_8
+
+   rts
+.endproc
+
+
 c64_pal: .byte $00,$0, $ff,$f, $00,$8, $fe,$a, $4c,$c, $c5,$0, $0a,$0, $e7,$e,$85,$d,$40,$6,$77,$f,$33,$3,$77,$7,$f6,$a,$8f,$0,$bb,$b
 
 ; go back to the textmode basic uses

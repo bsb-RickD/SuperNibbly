@@ -13,6 +13,9 @@ RANDOM_ASM = 1
 .include "inc/kernal.inc"
 .endif
 
+.ifndef MATH_ASM
+.include "lib/math.asm"
+.endif
 
 
 ; random range objects (16 bit) look like this:

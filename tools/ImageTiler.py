@@ -372,7 +372,7 @@ def pad_to_next_size(img, transparent_color):
     return img
 
 
-def make_sprites(img, palettes, rect, frames=(1, 1), transparent_pixel=None, name=""):
+def make_sprites(img, palettes, rect, frames=(1, 1), transparent_pixel=None, name="", optimize_size=True):
     if transparent_pixel is None:
         transparent_pixel = rect[0]
 
@@ -395,10 +395,10 @@ def make_sprites(img, palettes, rect, frames=(1, 1), transparent_pixel=None, nam
                 make_sprites_internal(img, palettes, srect, frames, transparent_color, "%s_%d" % (name, part), soff)
                 part += 1
     else:
-        make_sprites_internal(img, palettes, rect, frames, transparent_color, name, (0, 0))
+        make_sprites_internal(img, palettes, rect, frames, transparent_color, name, (0, 0), optimize_size)
 
 
-def make_sprites_internal(img, palettes, rect, frames, transparent_color, name, sprite_offset):
+def make_sprites_internal(img, palettes, rect, frames, transparent_color, name, sprite_offset, optimize_size=True):
     global total_sprite_size
 
     subimage = img.crop((rect[0][0], rect[0][1], rect[1][0] + 1, rect[1][1] + 1))
@@ -439,7 +439,10 @@ def make_sprites_internal(img, palettes, rect, frames, transparent_color, name, 
     for ty in range(0, h, frame_h):
         for tx in range(0, w, frame_w):
             animframe = subimage.crop((tx, ty, tx + frame_w, ty + frame_h))
-            bbox = get_bounding_box(animframe, transparent_color)
+            if optimize_size:
+                bbox = get_bounding_box(animframe, transparent_color)
+            else:
+                bbox = (0, 0, frame_w, frame_h)
             if bbox is not None:
                 animframe = pad_to_next_size(animframe.crop(bbox), transparent_color)
                 # animframe.show() # for debugging
@@ -568,9 +571,30 @@ def super_nibbly_travel():
     transparent_color = tuple(img.getpalette()[0:3])
     img = img.convert("RGB")
 
-    calc_tiles(img, 8, 16, prefix, transparent_color)
+    size, palettes, screen_buffer_bytes, empty_space_at_end = calc_tiles(img, 8, 16, prefix, transparent_color)
+
+    img = Image.open(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\minanm.png")
+    img = img.convert("RGB")
+
+    y_start = 0
+    landscapes = ["green", "ice", "vulcano", "desert"]
+
+    for i in range(4):
+        init()
+        make_sprites(img, palettes, ((0, 80 + y_start), (95, 103 + y_start)), (3, 1),
+                     name="mountain_bg", optimize_size=False)
+        make_sprites(img, palettes, ((0, 104 + y_start), (95, 111 + y_start)), (3, 1),
+                     name="mountain_fg", optimize_size=False)
+        make_sprites(img, palettes, ((104, 88 + y_start), (135, 111 + y_start)), (2, 1),
+                     name="trees", optimize_size=False)
+        make_sprites(img, palettes, ((136, 80 + y_start), (183, 111 + y_start)), (2, 1),
+                     name="houses", optimize_size=False)
+        y_start += 32
+        write_sprites(sprites, size, prefix + "_" + landscapes[i])
+
+    #write_palettes(palettes, prefix)
 
 
 if __name__ == "__main__":
-    super_nibbly_title()
+    # super_nibbly_title()
     super_nibbly_travel()
