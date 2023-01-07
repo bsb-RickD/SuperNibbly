@@ -11,7 +11,7 @@ echo.
 
 echo ============= travel assets ====================
 
-copy /b ..\travel_screen.bin+..\travel_tiles.bin assets\travel_data.raw
+copy /b ..\travel_screen.bin+..\travel_tiles.bin+..\travel_common_sprites.bin assets\travel_data.raw
 lzsa -v -r -f2 assets\travel_data.raw assets\travel_data.bin
 del assets\travel_data.raw
 

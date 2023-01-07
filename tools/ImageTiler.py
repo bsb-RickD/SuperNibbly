@@ -101,7 +101,7 @@ def make_filename(name, prefix):
     return name
 
 
-def write_palettes(palettes, prefix=""):
+def write_palettes(palettes, prefix="", write_asm=False):
     palette_bytes = bytearray()
     for pal in palettes:
         append_palette(pal, palette_bytes)
@@ -576,6 +576,14 @@ def super_nibbly_travel():
     img = Image.open(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\minanm.png")
     img = img.convert("RGB")
 
+    make_sprites(img, palettes, ((246, 32), (293, 231)), (1, 10), name="speech_big")
+    make_sprites(img, palettes, ((214, 32), (237, 151)), (1, 6), name="speech_medium")
+    make_sprites(img, palettes, ((214, 14), (261, 30)), (2, 1), name="speech_small")
+    write_sprites(sprites, size, prefix + "_common")
+
+    size += total_sprite_size
+
+
     y_start = 0
     landscapes = ["green", "ice", "vulcano", "desert"]
 
@@ -592,7 +600,7 @@ def super_nibbly_travel():
         y_start += 32
         write_sprites(sprites, size, prefix + "_" + landscapes[i])
 
-    #write_palettes(palettes, prefix)
+    write_palettes(palettes, prefix, write_asm=True)
 
 
 if __name__ == "__main__":

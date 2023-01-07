@@ -59,7 +59,10 @@ carry_on:
    LoadW R11, travel_pal
    ldx #(TRAVEL_PALETTE_SIZE/2)-1
    lda #0
-   jmp write_to_palette
+   sei
+   jsr write_to_palette
+   cli
+   rts
 .endproc
 
 .ifndef LZSA_ASM
