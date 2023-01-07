@@ -193,7 +193,8 @@ for:
    inc R11+1
 next:
    dex
-   bpl for
+   cpx #$FF
+   bne for
    rts
 .endproc
 
