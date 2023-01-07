@@ -488,7 +488,7 @@ def write_sprites(sprites_to_write, baseaddress, prefix=None):
                      (sprite.height, sprite.width, sprite.palette_index))
 
 
-def hide_sprites_in_screen_buffer(buffer_bytes, sprites_to_potentially_hide):
+def hide_sprites_in_screen_buffer(buffer_bytes, sprites_to_potentially_hide, empty_space_at_end):
     lines = 240
     stride = 128
     current_spot = 96
@@ -501,13 +501,21 @@ def hide_sprites_in_screen_buffer(buffer_bytes, sprites_to_potentially_hide):
     for sprite in sprites_to_potentially_hide:
         ss = len(sprite.data)
         sprite.data_offset -= (saved // 32)
-        if ss <= sprite_max_size:
+        if ss <= sprite_max_size or ss <= empty_space_at_end:
             saved += ss
             saved_count += 1
-            buffer_bytes[current_spot:current_spot + ss] = sprite.data
+            if ss <= sprite_max_size:
+                # hide in the remainder of the line
+                spot = current_spot
+                current_spot += stride
+            else:
+                # hide in the chunk size at the end
+                spot = len(buffer_bytes) - empty_space_at_end
+                empty_space_at_end -= ss
+            buffer_bytes[spot:spot + ss] = sprite.data
             sprite.data = bytearray()
-            sprite.data_offset = current_spot // 32
-            current_spot += stride
+            sprite.data_offset = spot // 32
+
         line += 1
         if line >= lines:
             break
@@ -545,7 +553,7 @@ def super_nibbly_title():
     make_sprites(img, palettes, ((264, 1), (315, 82)), (1, 1), name="y")  # Y
 
     # copy 8x8 sprites into the 48 bytes at the end of each line..
-    hide_sprites_in_screen_buffer(screen_buffer_bytes, sprites)
+    hide_sprites_in_screen_buffer(screen_buffer_bytes, sprites, empty_space_at_end)
     # neeed to re-write the screen data, after sprites where inserted
     write_data(screen_buffer_bytes, make_filename("screen", prefix))
 
