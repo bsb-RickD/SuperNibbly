@@ -1,5 +1,7 @@
 from PIL import Image
 from ordered_set import OrderedSet
+from PaletteOptimizer import get_sub_images, get_unique_colors, transparent_color, \
+    get_palettes_from_images, get_min_num_of_palettes, transparent_pixel
 
 sprites = []
 total_sprite_size = 0
@@ -17,10 +19,6 @@ class Sprite:
         self.sprite_id = 0
         self.data_offset = 0  # where in the sprite data block is this sprite located, divided by 32
         self.name = ""
-
-
-def get_unique_colors(img):
-    return OrderedSet(img.getdata())
 
 
 def map_colors_to_index(img, colors, offset=1):
@@ -106,7 +104,7 @@ def write_palettes(palettes, prefix="", write_asm=False):
     for pal in palettes:
         append_palette(pal, palette_bytes)
 
-    write_data(palette_bytes, make_filename("palette", prefix))
+    write_data(palette_bytes, make_filename("palette", prefix), write_asm=write_asm)
     return palette_bytes
 
 
@@ -583,7 +581,6 @@ def super_nibbly_travel():
 
     size += total_sprite_size
 
-
     y_start = 0
     landscapes = ["green", "ice", "vulcano", "desert"]
 
@@ -603,6 +600,40 @@ def super_nibbly_travel():
     write_palettes(palettes, prefix, write_asm=True)
 
 
+def test_palette_optimiztation():
+    bg_img = Image.open(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\LMAPP_x16.png")
+    bg_img = bg_img.convert("RGB")
+    w, h = bg_img.size
+
+    pal_generators = [get_palettes_from_images(get_sub_images(bg_img, (0, 0), (w - 1, h - 1), (w / 8, h / 8)),
+                                               transparent_color((255, 0, 0)))]
+
+    spr_img = Image.open(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\minanm.png")
+    spr_img = spr_img.convert("RGB")
+
+    pal_generators.append(
+        get_palettes_from_images(get_sub_images(spr_img, (246, 32), (293, 231), (1, 10)), transparent_pixel()))
+    pal_generators.append(
+        get_palettes_from_images(get_sub_images(spr_img, (214, 32), (237, 151), (1, 6)), transparent_pixel()))
+    pal_generators.append(
+        get_palettes_from_images(get_sub_images(spr_img, (214, 14), (261, 30), (2, 1)), transparent_pixel()))
+
+    y_start = 0
+    for i in range(4):
+        pal_generators.append(get_palettes_from_images(
+            get_sub_images(spr_img, (0, 80 + y_start), (95, 103 + y_start), (3, 1)), transparent_pixel()))
+        pal_generators.append(get_palettes_from_images(
+            get_sub_images(spr_img, (0, 104 + y_start), (95, 111 + y_start), (3, 1)), transparent_pixel()))
+        pal_generators.append(get_palettes_from_images(
+            get_sub_images(spr_img, (104, 88 + y_start), (135, 111 + y_start), (2, 1)), transparent_pixel()))
+        pal_generators.append(get_palettes_from_images(
+            get_sub_images(spr_img, (136, 80 + y_start), (183, 111 + y_start), (2, 1)), transparent_pixel()))
+
+        y_start += 32
+
+    get_min_num_of_palettes(*pal_generators)
+
+
 if __name__ == "__main__":
-    # super_nibbly_title()
+    super_nibbly_title()
     super_nibbly_travel()
