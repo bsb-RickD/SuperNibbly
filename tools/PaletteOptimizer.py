@@ -15,9 +15,10 @@ def get_sub_images(img, upper_left, lower_right, partitioning):
     cell_width = int(width // x_parts)
     cell_height = int(height // y_parts)
 
-    for y in range(l, r, cell_width):
-        for x in range(t, b, cell_height):
-            yield img.crop((x, y, x + cell_width, y + cell_height)), x, y
+    for y in range(t, b, cell_height):
+        for x in range(l, r, cell_width):
+            cropped = img.crop((x, y, x + cell_width, y + cell_height))
+            yield cropped, x, y
 
 
 def no_transparent_color():
@@ -54,11 +55,9 @@ def get_min_num_of_palettes(*args):
     palettes = [set(p) for p in initial_palette_set]
     print("Starting with %d palettes" % len(palettes))
 
-    #palettes = [p for p in palettes for q in palettes if p != q and not p.issubset(q)]
-
     p2 = []
-    for pi,p in enumerate(palettes):
-        for q in palettes[pi+1:]:
+    for pi, p in enumerate(palettes):
+        for q in palettes[pi + 1:]:
             if p.issubset(q):
                 break
         else:
@@ -66,7 +65,6 @@ def get_min_num_of_palettes(*args):
 
     palettes = p2
     print("removed subsets, before merge: %d palettes" % len(palettes))
-
 
     done = False
     while not done:
@@ -86,4 +84,3 @@ def get_min_num_of_palettes(*args):
     print("Reduced to %d palettes" % len(palettes))
 
     return palettes
-

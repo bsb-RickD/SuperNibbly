@@ -2,6 +2,7 @@ from PIL import Image
 from ordered_set import OrderedSet
 from PaletteOptimizer import get_sub_images, get_unique_colors, transparent_color, \
     get_palettes_from_images, get_min_num_of_palettes, transparent_pixel
+from Sprites import Sprites, SpriteGroup
 
 sprites = []
 total_sprite_size = 0
@@ -611,29 +612,29 @@ def test_palette_optimiztation():
     spr_img = Image.open(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\minanm.png")
     spr_img = spr_img.convert("RGB")
 
-    pal_generators.append(
-        get_palettes_from_images(get_sub_images(spr_img, (246, 32), (293, 231), (1, 10)), transparent_pixel()))
-    pal_generators.append(
-        get_palettes_from_images(get_sub_images(spr_img, (214, 32), (237, 151), (1, 6)), transparent_pixel()))
-    pal_generators.append(
-        get_palettes_from_images(get_sub_images(spr_img, (214, 14), (261, 30), (2, 1)), transparent_pixel()))
+    common_sprites = SpriteGroup("travel_common_sprites", [
+        Sprites(spr_img, (246, 32), (293, 231), (1, 10), name="speech_big"),
+        Sprites(spr_img, (214, 32), (237, 151), (1, 6), name="speech_medium"),
+        Sprites(spr_img, (214, 14), (261, 30), (2, 1), name="speech_small")])
+    pal_generators.append(common_sprites.palettes())
 
     y_start = 0
-    for i in range(4):
-        pal_generators.append(get_palettes_from_images(
-            get_sub_images(spr_img, (0, 80 + y_start), (95, 103 + y_start), (3, 1)), transparent_pixel()))
-        pal_generators.append(get_palettes_from_images(
-            get_sub_images(spr_img, (0, 104 + y_start), (95, 111 + y_start), (3, 1)), transparent_pixel()))
-        pal_generators.append(get_palettes_from_images(
-            get_sub_images(spr_img, (104, 88 + y_start), (135, 111 + y_start), (2, 1)), transparent_pixel()))
-        pal_generators.append(get_palettes_from_images(
-            get_sub_images(spr_img, (136, 80 + y_start), (183, 111 + y_start), (2, 1)), transparent_pixel()))
+    landscapes = ["green", "ice", "vulcano", "desert"]
+    landscape_sprites = []
 
+    for i in range(4):
+        landscape_sprites.append(SpriteGroup("travel_" + landscapes[i], [
+            Sprites(spr_img, (0, 80 + y_start), (95, 103 + y_start), (3, 1), name="mountain_bg", optimize_size=False),
+            Sprites(spr_img, (0, 104 + y_start), (95, 111 + y_start), (3, 1), name="mountain_fg", optimize_size=False),
+            Sprites(spr_img, (104, 88 + y_start), (135, 111 + y_start), (2, 1), name="trees", optimize_size=False),
+            Sprites(spr_img, (136, 80 + y_start), (183, 111 + y_start), (2, 1), name="houses", optimize_size=False)]))
+        pal_generators.append(landscape_sprites[-1].palettes())
         y_start += 32
 
     get_min_num_of_palettes(*pal_generators)
 
 
 if __name__ == "__main__":
-    super_nibbly_title()
-    super_nibbly_travel()
+    # super_nibbly_title()
+    # super_nibbly_travel()
+    test_palette_optimiztation()
