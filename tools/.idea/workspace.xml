@@ -5,9 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3af9e987-ee4a-4e9e-a0e6-6c4e604ea779" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Sprites.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ImageTiler.py" beforeDir="false" afterPath="$PROJECT_DIR$/ImageTiler.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/PaletteOptimizer.py" beforeDir="false" afterPath="$PROJECT_DIR$/PaletteOptimizer.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -21,11 +18,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/ImageTiler.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="167">
-              <caret line="615" selection-start-line="615" selection-end-line="615" />
+            <state relative-caret-position="-3410">
+              <caret line="394" column="25" lean-forward="true" selection-start-line="387" selection-end-line="394" selection-end-column="25" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
               </folding>
@@ -47,16 +44,16 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/PaletteOptimizer.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="340">
-              <caret line="41" selection-start-line="41" selection-end-line="41" />
+            <state>
+              <caret lean-forward="true" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Sprites.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="194">
+            <state relative-caret-position="391">
               <caret line="23" column="85" lean-forward="true" selection-start-line="23" selection-start-column="85" selection-end-line="23" selection-end-column="85" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
@@ -177,12 +174,12 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1673175927419</updated>
-      <workItem from="1673175928982" duration="17512000" />
+      <workItem from="1673175928982" duration="20080000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="17512000" />
+    <option name="totallyTimeSpent" value="20080000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
@@ -219,22 +216,22 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/PaletteOptimizer.py</url>
-          <line>49</line>
+          <line>58</line>
           <option name="timeStamp" value="3" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/PaletteOptimizer.py</url>
-          <line>55</line>
+          <line>64</line>
           <option name="timeStamp" value="4" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/PaletteOptimizer.py</url>
-          <line>85</line>
+          <line>94</line>
           <option name="timeStamp" value="5" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/PaletteOptimizer.py</url>
-          <line>66</line>
+          <line>75</line>
           <option name="timeStamp" value="6" />
         </line-breakpoint>
       </breakpoints>
@@ -259,29 +256,29 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ImageTiler.py">
+    <entry file="file://$PROJECT_DIR$/Sprites.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="167">
-          <caret line="615" selection-start-line="615" selection-end-line="615" />
+        <state relative-caret-position="391">
+          <caret line="23" column="85" lean-forward="true" selection-start-line="23" selection-start-column="85" selection-end-line="23" selection-end-column="85" />
           <folding>
-            <element signature="e#0#21#0" expanded="true" />
+            <element signature="e#0#23#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/PaletteOptimizer.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="340">
-          <caret line="41" selection-start-line="41" selection-end-line="41" />
+        <state>
+          <caret lean-forward="true" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Sprites.py">
+    <entry file="file://$PROJECT_DIR$/ImageTiler.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="194">
-          <caret line="23" column="85" lean-forward="true" selection-start-line="23" selection-start-column="85" selection-end-line="23" selection-end-column="85" />
+        <state relative-caret-position="-3410">
+          <caret line="394" column="25" lean-forward="true" selection-start-line="387" selection-end-line="394" selection-end-column="25" />
           <folding>
-            <element signature="e#0#23#0" expanded="true" />
+            <element signature="e#0#21#0" expanded="true" />
           </folding>
         </state>
       </provider>

@@ -1,5 +1,6 @@
 from ordered_set import OrderedSet
 
+MAX_SPRITE_SIZE = 64
 
 def get_sub_images(img, upper_left, lower_right, partitioning):
     l, t = upper_left
@@ -18,7 +19,15 @@ def get_sub_images(img, upper_left, lower_right, partitioning):
     for y in range(t, b, cell_height):
         for x in range(l, r, cell_width):
             cropped = img.crop((x, y, x + cell_width, y + cell_height))
-            yield cropped, x, y
+            if cell_width > MAX_SPRITE_SIZE or cell_height > MAX_SPRITE_SIZE:
+                # sprite is too big, chunk it up
+                for sy in range(0, cell_height, MAX_SPRITE_SIZE):
+                    sh = min(cell_height - sy, MAX_SPRITE_SIZE)
+                    for sx in range(0, cell_width, MAX_SPRITE_SIZE):
+                        sw = min(cell_width - sx, MAX_SPRITE_SIZE)
+                        yield cropped.crop((x+sx,y+sy,x+sx+sw-1,y+sy+sh-1)), x+sx, y+sy
+            else:
+                yield cropped, x, y
 
 
 def no_transparent_color():
