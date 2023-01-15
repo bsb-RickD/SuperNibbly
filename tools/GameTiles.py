@@ -1,7 +1,7 @@
 from PIL import Image
 from ordered_set import OrderedSet
-from ImageTiler import image_bytes, append_palette
-from ImageUtils import write_data
+from ImageTiler import image_bytes
+from ImageUtils import write_data, append_palette
 
 
 def get_mask(img):

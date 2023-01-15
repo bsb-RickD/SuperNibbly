@@ -1,3 +1,4 @@
+from PIL import Image
 from ordered_set import OrderedSet
 
 
@@ -18,6 +19,10 @@ def image_bytes(img, bits_per_pixel):
         return [(a << 6) + (b << 4) + (c << 2) + d for a, b, c, d in (img[i:i + 4] for i in range(0, len(img), 4))]
 
 
+def print_header(message):
+    print ("== %s " % message + "="*(60-len(message)))
+
+
 # this holds the sub-image cut out of the image
 class SubImage:
     """
@@ -25,9 +30,11 @@ class SubImage:
         x,y: upper left corner where the image was cut out
         part = part index (used for sprites that are larher than max sprite size)
         part_x, part_y = coords of the part, relative to x,y
+        palette = palette found for this sub image
+        transparent_color = the color meant to be transparent
     """
 
-    def __init__(self, img, x, y, index, part_x, part_y, part_index, palette):
+    def __init__(self, img, x, y, index, part_x, part_y, part_index, palette, transparent_color):
         self.img = img
         self.x = x
         self.y = y
@@ -36,9 +43,11 @@ class SubImage:
         self.part_y = part_y
         self.part_index = part_index
         self.palette = palette
+        self.transparent_color = transparent_color
 
 
-def get_sub_images(img, upper_left, lower_right, partitioning, transparent_color_getter, max_size=(1 << 64)):
+def get_sub_images(img, upper_left, lower_right, partitioning, transparent_color_getter, max_palette_size = 15,
+                   max_size=(1 << 64)):
     l, t = upper_left
     r, b = lower_right
     width = r - l + 1
@@ -66,12 +75,15 @@ def get_sub_images(img, upper_left, lower_right, partitioning, transparent_color
                     # sc.show() # for debugging
 
                     colors = get_unique_colors(sc)
-                    tc = transparent_color_getter(sc)
+                    tc = transparent_color_getter(cropped)
                     if tc in colors:
                         colors.remove(tc)
+                    if len(colors) > max_palette_size:
+                        raise ValueError("Subimage with too many colors encountered")
+
                     if sh == cell_height and sw == cell_width:
                         part = None
-                    yield SubImage(sc, x, y, index, sx, sy, part, colors)
+                    yield SubImage(sc, x, y, index, sx, sy, part, colors, tc)
                     if part is not None:
                         part += 1
             index += 1
@@ -161,3 +173,31 @@ def bytes_as_hex_text(data, bytes_per_line=24):
         p += bytes_per_line
 
     return output
+
+
+def flip_horizontal(tile, ts):
+    return tuple(tile[y * ts + x] for y in range(ts) for x in range(ts - 1, -1, -1))
+
+
+def flip_vertical(tile, ts):
+    return tuple(tile[y * ts + x] for y in range(ts - 1, -1, -1) for x in range(ts))
+
+
+def append_palette(pal, palette_bytes):
+    palette_bytes.append(0)
+    palette_bytes.append(0)  # first entry is always 0,0
+
+    for r, g, b in pal:
+        palette_bytes.append(((g // 17) << 4) + b // 17)
+        palette_bytes.append(r // 17)
+
+    missing_entries = 15 - len(pal)  # palettes can be incomplete
+    for i in range(missing_entries):
+        palette_bytes.append(0)
+        palette_bytes.append(0)
+
+
+def load_image(filename):
+    img = Image.open(filename)
+    img = img.convert("RGB")
+    return img

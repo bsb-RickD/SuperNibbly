@@ -1,6 +1,6 @@
 from PIL import Image
 from typing import List, Any
-from PaletteOptimizer import transparent_pixel, get_palettes_from_images
+from PaletteOptimizer import transparent_pixel
 from ImageUtils import map_colors_to_index, image_bytes, get_sub_images, get_img_bounding_box, write_data, SubImage
 from itertools import chain
 
@@ -37,7 +37,8 @@ class MultiSprite:
         self.name = name
         self.transparency = transparency
         self.optimize_size = optimize_size
-        self.images = [i for i in get_sub_images(img, upper_left, lower_right, frames, transparency(), MAX_SPRITE_SIZE)]
+        self.images = [i for i in get_sub_images(img, upper_left, lower_right, frames, transparency(),
+                                                 max_size=MAX_SPRITE_SIZE)]
 
 
 # pseudo constructor for sprintes with a single frame
@@ -49,7 +50,7 @@ def Sprite(img, upper_left, lower_right, name, transparency=transparent_pixel, o
 # this is the class that holds the actual sprite bitmap information
 # the actual bitmap, palette index, etc.
 class SpriteBitmap:
-    def __init__(self, sub_image: SubImage, name, transparent_color_getter, optimized_palettes,
+    def __init__(self, sub_image: SubImage, name, palette_optimizer,
                  optimize_size):
         self.width = 0
         self.height = 0  # size of sprite (8,16,32,64) x (8,16,32,64)
@@ -63,6 +64,8 @@ class SpriteBitmap:
         self.name = ""
         self.basename = name
 
+        palindex,pal = palette_optimizer.get_index(sub_image.palette)
+        """
         spritepal = sub_image.palette
         for index, pal in enumerate(optimized_palettes):
             if pal.issuperset(spritepal):
@@ -70,17 +73,17 @@ class SpriteBitmap:
                 break
         else:
             raise ValueError("Sprite palette not found in optimized palettes!")
+        """
 
-        transparent_color = transparent_color_getter(sub_image.img)
         colors = list(pal)
-        colors.insert(0, transparent_color)
+        colors.insert(0, sub_image.transparent_color)
 
         if optimize_size:
-            bbox = get_img_bounding_box(sub_image.img, transparent_color)
+            bbox = get_img_bounding_box(sub_image.img, sub_image.transparent_color)
         else:
             bbox = (0, 0, *sub_image.img.size)
         if bbox is not None:
-            padded_sprite_frame = pad_sprite_to_next_size(sub_image.img.crop(bbox), transparent_color)
+            padded_sprite_frame = pad_sprite_to_next_size(sub_image.img.crop(bbox), sub_image.transparent_color)
             # padded_sprite_frame.show() # for debugging
             self.width, self.height = padded_sprite_frame.size
             self.xoffset = bbox[0] + sub_image.part_x
@@ -97,8 +100,7 @@ class SpriteBitmap:
 # a spritegroup is used to group Sprites together, to write the sprite data to a file
 # this class also takes care of converting the Sprites and the subimages into SpriteBitmaps
 class SpriteGroup:
-    def __init__(self, filename: str, sprites: List[MultiSprite]):
-        self.filename = filename
+    def __init__(self, sprites: List[MultiSprite]):
         self.sprites = sprites
         self.sprite_bitmaps = []
 
@@ -108,11 +110,11 @@ class SpriteGroup:
             chained = chain(chained, (f.palette for f in s.images))
         return chained
 
-    def calc_sprite_bitmaps(self, optimized_palettes, offset):
+    def calc_sprite_bitmaps(self, palette_optimizer, offset):
         self.sprite_bitmaps = []
         for s in self.sprites:
             for img in s.images:
-                sb = SpriteBitmap(img, s.name, s.transparency(), optimized_palettes, s.optimize_size)
+                sb = SpriteBitmap(img, s.name, palette_optimizer, s.optimize_size)
                 self.sprite_bitmaps.append(sb)
         self.update_sprite_offsets(offset)
 
@@ -124,14 +126,14 @@ class SpriteGroup:
                 sb.data_offset = int(co//32)  # if size 0, it's a hidden sprite and that already knows it's data offset
             co += len(sb.data)
 
-    def save(self):
+    def save(self, filename):
         sprite_data = bytearray()
         for sb in self.sprite_bitmaps:
             sprite_data += bytearray(sb.data)
 
-        write_data(sprite_data, self.filename)
+        write_data(sprite_data, filename)
 
-        with open(self.filename + ".inc", "wt") as fp:
+        with open(filename + ".inc", "wt") as fp:
             for sb in self.sprite_bitmaps:
                 # watch out - for hidden sprites len(sprite.data) = 0
                 sprite_size = len(sb.data)
