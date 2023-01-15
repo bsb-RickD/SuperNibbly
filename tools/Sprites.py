@@ -1,7 +1,8 @@
 from PIL import Image
 from typing import List, Any
 from PaletteOptimizer import transparent_pixel
-from ImageUtils import map_colors_to_index, image_bytes, get_sub_images, get_img_bounding_box, write_data, SubImage
+from ImageUtils import map_colors_to_index, image_bytes, get_sub_images, get_img_bounding_box, write_data, SubImage, \
+    print_header
 from itertools import chain
 
 SPRITE_SIZES = (8, 16, 32, 64)
@@ -64,17 +65,8 @@ class SpriteBitmap:
         self.name = ""
         self.basename = name
 
-        palindex,pal = palette_optimizer.get_index(sub_image.palette)
-        """
-        spritepal = sub_image.palette
-        for index, pal in enumerate(optimized_palettes):
-            if pal.issuperset(spritepal):
-                palindex = index
-                break
-        else:
-            raise ValueError("Sprite palette not found in optimized palettes!")
-        """
-
+        palindex, pal = palette_optimizer.get_index(sub_image.palette)
+        
         colors = list(pal)
         colors.insert(0, sub_image.transparent_color)
 
@@ -103,6 +95,7 @@ class SpriteGroup:
     def __init__(self, sprites: List[MultiSprite]):
         self.sprites = sprites
         self.sprite_bitmaps = []
+        self.sprite_data = bytearray()
 
     def palettes(self) -> chain:
         chained: chain[Any] = chain()
@@ -111,27 +104,36 @@ class SpriteGroup:
         return chained
 
     def calc_sprite_bitmaps(self, palette_optimizer, offset):
+        print_header("Sprites")
         self.sprite_bitmaps = []
         for s in self.sprites:
             for img in s.images:
                 sb = SpriteBitmap(img, s.name, palette_optimizer, s.optimize_size)
                 self.sprite_bitmaps.append(sb)
         self.update_sprite_offsets(offset)
+        self.get_sprite_data()
+        total = len(self.sprite_data)
+        print("Total:\t\t%d Bytes  (%f kB)\n\n" % (total, total / 1024))
+
+    def get_sprite_data(self):
+        self.sprite_data = bytearray()
+        for sb in self.sprite_bitmaps:
+            self.sprite_data += bytearray(sb.data)
+
+    def get_used_memory(self):
+        return len(self.sprite_data)
 
     def update_sprite_offsets(self, offset):
         co = offset
         for sb in self.sprite_bitmaps:
             size = len(sb.data)
             if size != 0:
-                sb.data_offset = int(co//32)  # if size 0, it's a hidden sprite and that already knows it's data offset
+                sb.data_offset = int(
+                    co // 32)  # if size 0, it's a hidden sprite and that already knows it's data offset
             co += len(sb.data)
 
     def save(self, filename):
-        sprite_data = bytearray()
-        for sb in self.sprite_bitmaps:
-            sprite_data += bytearray(sb.data)
-
-        write_data(sprite_data, filename)
+        write_data(self.sprite_data, filename)
 
         with open(filename + ".inc", "wt") as fp:
             for sb in self.sprite_bitmaps:

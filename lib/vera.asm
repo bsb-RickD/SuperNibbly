@@ -227,6 +227,11 @@ loop:
    LoadW VERA_L0_config, VERA_map_height_32 + VERA_map_width_64 + VERA_colors_16
    stz VERA_L0_mapbase   
    LoadB VERA_L0_tilebase, ((4096/2048) << 2) + VERA_tile_width_8 + VERA_tile_height_8
+   
+   ; scroll positions to 0
+   LoadB VERA_L0_vscroll_l, 0
+   LoadB VERA_L0_hscroll_l, 0
+
 
    rts
 .endproc

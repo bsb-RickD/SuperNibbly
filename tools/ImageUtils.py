@@ -20,7 +20,7 @@ def image_bytes(img, bits_per_pixel):
 
 
 def print_header(message):
-    print ("== %s " % message + "="*(60-len(message)))
+    print("== %s " % message + "=" * (60 - len(message)))
 
 
 # this holds the sub-image cut out of the image
@@ -46,7 +46,7 @@ class SubImage:
         self.transparent_color = transparent_color
 
 
-def get_sub_images(img, upper_left, lower_right, partitioning, transparent_color_getter, max_palette_size = 15,
+def get_sub_images(img, upper_left, lower_right, partitioning, transparent_color_getter, max_palette_size=15,
                    max_size=(1 << 64)):
     l, t = upper_left
     r, b = lower_right
@@ -87,6 +87,7 @@ def get_sub_images(img, upper_left, lower_right, partitioning, transparent_color
                     if part is not None:
                         part += 1
             index += 1
+
 
 def get_img_bounding_box(img, transparent_color):
     """
@@ -201,3 +202,7 @@ def load_image(filename):
     img = Image.open(filename)
     img = img.convert("RGB")
     return img
+
+
+def create_screen_buffer_entry(tile_index, palette_index, h_flip, v_flip):
+    return tile_index & 255, (palette_index << 4) + (v_flip << 3) + (h_flip << 2) + (tile_index >> 8)
