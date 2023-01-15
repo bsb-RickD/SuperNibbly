@@ -1,6 +1,8 @@
 from PIL import Image
 from ordered_set import OrderedSet
-from ImageTiler import tile_bytes, write_data, append_palette
+from ImageTiler import image_bytes, append_palette
+from ImageUtils import write_data
+
 
 def get_mask(img):
     mask = Image.new(mode="L", size=img.size)
@@ -144,7 +146,7 @@ def main():
 
         #tiled.show() # to debug
 
-        write_data(bytearray(tile_bytes(bytearray(tiled.getdata()), 4)), "wall_gfx_set_%d"%n)
+        write_data(bytearray(image_bytes(bytearray(tiled.getdata()), 4)), "wall_gfx_set_%d" % n)
 
         pal = wall.getpalette()
         pal = [pal[i:i + 3] for i in range(3, 16*3, 3)]

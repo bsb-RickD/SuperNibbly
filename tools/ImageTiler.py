@@ -1,8 +1,10 @@
 from PIL import Image
 from ordered_set import OrderedSet
-from PaletteOptimizer import get_sub_images, get_unique_colors, transparent_color, \
-    get_palettes_from_images, get_min_num_of_palettes, transparent_pixel
-from Sprites import Sprites, SpriteGroup
+from PaletteOptimizer import transparent_color, \
+    get_palettes_from_images, get_min_num_of_palettes, no_transparent_color
+from ImageUtils import get_unique_colors, get_sub_images, write_data, map_colors_to_index, image_bytes
+from Sprites import SpriteGroup, MultiSprite, Sprite
+import Sprites
 
 sprites = []
 total_sprite_size = 0
@@ -22,25 +24,12 @@ class Sprite:
         self.name = ""
 
 
-def map_colors_to_index(img, colors, offset=1):
-    return tuple(colors.index(d) + offset for d in img.getdata())
-
-
 def flip_horizontal(tile, ts):
     return tuple(tile[y * ts + x] for y in range(ts) for x in range(ts - 1, -1, -1))
 
 
 def flip_vertical(tile, ts):
     return tuple(tile[y * ts + x] for y in range(ts - 1, -1, -1) for x in range(ts))
-
-
-def tile_bytes(tile, bits_per_pixel):
-    if bits_per_pixel == 8:
-        return tile
-    if bits_per_pixel == 4:
-        return [(a << 4) + b for a, b in (tile[i:i + 2] for i in range(0, len(tile), 2))]
-    if bits_per_pixel == 2:
-        return [(a << 6) + (b << 4) + (c << 2) + d for a, b, c, d in (tile[i:i + 4] for i in range(0, len(tile), 4))]
 
 
 def map_entry_bytes(tile_index, palette_index, h_flip, v_flip):
@@ -59,39 +48,6 @@ def append_palette(pal, palette_bytes):
     for i in range(missing_entries):
         palette_bytes.append(0)
         palette_bytes.append(0)
-
-
-def bytes_as_hex_text(data, bytes_per_line=24):
-    p = 0
-    output = ""
-
-    while p < len(data):
-        output += ".byte " + ",".join(['$' + ('0' + hex(b)[2:])[-2:] for b in data[p:p + bytes_per_line]]) + "\n"
-        p += bytes_per_line
-
-    return output
-
-
-def write_data(data, name: str, write_asm=False):
-    """
-        Creates a file and writes data to it.
-        Optionally can create a second file, with asm source of the data
-
-        :param data: The data to write, as byte arreay or similar, gets iterated
-        :param name: name of the file, without extension, the extension .bin / .asm gets added automatically
-        :param write_asm: If true, also the asm file is generated
-    """
-
-    bin_name = name + ".bin"
-    asm_name = name + ".asm"
-
-    with open(bin_name, "wb") as fp:
-        fp.write(data)
-        # print("### Wrote: " + bin_name)  # for debugging
-    if write_asm:
-        with open(asm_name, "wt") as fp:
-            fp.write(bytes_as_hex_text(data))
-            # print("### Wrote: " + asm_name)  # for debugging
 
 
 def make_filename(name, prefix):
@@ -248,7 +204,7 @@ def calc_tiles(img, tile_size, max_palette_entries, prefix="", transparent_color
     tiles_bytes = bytearray(tile_byte_count)
     for tile, index in tiles.items():
         idx = index * single_tile_size
-        tiles_bytes[idx:idx + single_tile_size] = tile_bytes(tile, bits_per_pixel)
+        tiles_bytes[idx:idx + single_tile_size] = image_bytes(tile, bits_per_pixel)
 
     write_data(tiles_bytes, make_filename("tiles", prefix))
 
@@ -451,7 +407,7 @@ def make_sprites_internal(img, palettes, rect, frames, transparent_color, name, 
                 s.yoffset = bbox[1] + sprite_offset[1]
                 s.frame = framecount
                 s.palette_index = palindex
-                s.data = tile_bytes(map_colors_to_index(animframe, colors, 0), 4)
+                s.data = image_bytes(map_colors_to_index(animframe, colors, 0), 4)
                 s.data_offset = total_sprite_size // 32
                 s.name = name
                 sprites.append(s)
@@ -539,14 +495,17 @@ def super_nibbly_title():
     img = Image.open(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\TITEL_BG_x16.png")
     img = img.convert("RGB")
     size, palettes, screen_buffer_bytes, empty_space_at_end = calc_tiles(img, 8, 16, prefix)
+    title = img
 
     img = Image.open(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\titanm.png")
+    titanm = img
 
     make_sprites(img, palettes, ((117, 18), (132, 101)), (1, 6), name="smoke")  # smoke
     make_sprites(img, palettes, ((80, 19), (111, 188)), (1, 17), name="fish")  # fish
     make_sprites(img, palettes, ((1, 19), (32, 210)), (1, 16), name="plane")  # plane
 
     img = Image.open(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\woodly2.png")
+    woodly2 = img
     make_sprites(img, palettes, ((1, 1), (51, 84)), (1, 1), name="n")  # N
     make_sprites(img, palettes, ((58, 1), (87, 72)), (1, 1), name="i")  # I
     make_sprites(img, palettes, ((91, 1), (145, 75)), (1, 1), name="b1")  # B
@@ -555,12 +514,31 @@ def super_nibbly_title():
     make_sprites(img, palettes, ((264, 1), (315, 82)), (1, 1), name="y")  # Y
 
     # copy 8x8 sprites into the 48 bytes at the end of each line..
-    hide_sprites_in_screen_buffer(screen_buffer_bytes, sprites, empty_space_at_end)
+    #hide_sprites_in_screen_buffer(screen_buffer_bytes, sprites, empty_space_at_end)
     # neeed to re-write the screen data, after sprites where inserted
     write_data(screen_buffer_bytes, make_filename("screen", prefix))
 
     write_sprites(sprites, size, prefix)
     write_palettes(palettes, prefix)
+
+    sg = SpriteGroup("intro_new_sprites", [
+        MultiSprite(titanm, (117, 18), (132, 101), (1, 6), name="smoke"),
+        MultiSprite(titanm, (80, 19), (111, 188), (1, 17), name="fish"),
+        MultiSprite(titanm, (1, 19), (32, 210), (1, 16), name="plane"),
+        Sprites.Sprite(woodly2, (1, 1), (51, 84), name="n"),
+        Sprites.Sprite(woodly2, (58, 1), (87, 72), name="i"),
+        Sprites.Sprite(woodly2, (91, 1), (145, 75),name="b1"),
+        Sprites.Sprite(woodly2, (150, 1), (204, 70), name="b2"),
+        Sprites.Sprite(woodly2, (209, 1), (260, 78), name="l"),
+        Sprites.Sprite(woodly2, (264, 1), (315, 82), name="y"),
+    ])
+
+    w,h = title.size
+    tiles = get_sub_images(title, (0, 0), (w - 1, h - 1), (w / 8, h / 8), no_transparent_color())
+    pal_generators = [sg.palettes(),(t.palette for t in tiles)]
+    optimal_palettes = get_min_num_of_palettes(*pal_generators)
+    sg.calc_sprite_bitmaps(optimal_palettes, size)
+    sg.save()
 
 
 def super_nibbly_travel():
@@ -601,7 +579,7 @@ def super_nibbly_travel():
     write_palettes(palettes, prefix, write_asm=True)
 
 
-def test_palette_optimiztation():
+def test_palette_optimization():
     bg_img = Image.open(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\LMAPP_x16.png")
     bg_img = bg_img.convert("RGB")
     w, h = bg_img.size
@@ -612,29 +590,28 @@ def test_palette_optimiztation():
     spr_img = Image.open(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\minanm.png")
     spr_img = spr_img.convert("RGB")
 
-    common_sprites = SpriteGroup("travel_common_sprites", [
+    sprite_groups = [SpriteGroup("travel_common_sprites", [
         Sprites(spr_img, (246, 32), (293, 231), (1, 10), name="speech_big"),
         Sprites(spr_img, (214, 32), (237, 151), (1, 6), name="speech_medium"),
-        Sprites(spr_img, (214, 14), (261, 30), (2, 1), name="speech_small")])
-    pal_generators.append(common_sprites.palettes())
+        Sprites(spr_img, (214, 14), (261, 30), (2, 1), name="speech_small")])]
 
     y_start = 0
     landscapes = ["green", "ice", "vulcano", "desert"]
-    landscape_sprites = []
 
     for i in range(4):
-        landscape_sprites.append(SpriteGroup("travel_" + landscapes[i], [
+        sprite_groups.append(SpriteGroup("travel_" + landscapes[i]+"_sprites", [
             Sprites(spr_img, (0, 80 + y_start), (95, 103 + y_start), (3, 1), name="mountain_bg", optimize_size=False),
             Sprites(spr_img, (0, 104 + y_start), (95, 111 + y_start), (3, 1), name="mountain_fg", optimize_size=False),
             Sprites(spr_img, (104, 88 + y_start), (135, 111 + y_start), (2, 1), name="trees", optimize_size=False),
             Sprites(spr_img, (136, 80 + y_start), (183, 111 + y_start), (2, 1), name="houses", optimize_size=False)]))
-        pal_generators.append(landscape_sprites[-1].palettes())
         y_start += 32
 
-    get_min_num_of_palettes(*pal_generators)
+    for sg in sprite_groups:
+        pal_generators.append(sg.palettes())
+    optimal_palettes = get_min_num_of_palettes(*pal_generators)
 
 
 if __name__ == "__main__":
-    # super_nibbly_title()
+    super_nibbly_title()
     # super_nibbly_travel()
-    test_palette_optimiztation()
+    # test_palette_optimization()
