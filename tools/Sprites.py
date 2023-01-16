@@ -66,7 +66,7 @@ class SpriteBitmap:
         self.basename = name
 
         palindex, pal = palette_optimizer.get_index(sub_image.palette)
-        
+
         colors = list(pal)
         colors.insert(0, sub_image.transparent_color)
 
