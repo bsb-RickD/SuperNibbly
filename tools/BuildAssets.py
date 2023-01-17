@@ -34,7 +34,8 @@ def super_nibbly_title():
     sg.calc_sprite_bitmaps(po, it.get_used_memory())
 
     # save some space on sprites
-    it.hide_sprites_in_screen_buffer(sg.sprite_bitmaps)
+    #it.hide_sprites_in_screen_buffer(sg.sprite_bitmaps)
+    #sg.update_sprite_offsets(it.get_used_memory())
 
     # write everything to disk
     sg.save("intro_sprites")
