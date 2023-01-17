@@ -1,6 +1,7 @@
 from PaletteOptimizer import transparent_color
 from ImageUtils import get_sub_images, write_data, map_colors_to_index, image_bytes, flip_horizontal, \
     flip_vertical, print_header, create_screen_buffer_entry
+from Sprites import SpriteGroup
 
 
 def make_filename(name, prefix):
@@ -144,11 +145,13 @@ class ImageTiler:
     def get_used_memory(self):
         return len(self.tiles_bytes) + len(self.screen_buffer_bytes)
 
-    def hide_sprites_in_screen_buffer(self, sprites_to_potentially_hide):
+    def hide_sprites_in_screen_buffer(self, sprites_to_potentially_hide: SpriteGroup):
+        print_header("Sprite hiding")
+
         saved = 0
         saved_count = 0
 
-        for sprite in sprites_to_potentially_hide:
+        for sprite in sprites_to_potentially_hide.sprite_bitmaps:
             ss = len(sprite.data)
             sprite.data_offset -= (saved // 32)
             if ss <= self.empty_space_at_end_of_each_line or ss <= self.empty_space_at_end:
@@ -168,5 +171,8 @@ class ImageTiler:
 
             if self.line_spot >= len(self.screen_buffer_bytes):
                 break
-        print_header("Sprite hiding")
         print("Could re-use %d bytes (from %d sprites) of screen space!" % (saved, saved_count))
+
+        # we saved sprites, need to update the sprite_data
+        if saved_count > 0:
+            sprites_to_potentially_hide.get_sprite_data()
