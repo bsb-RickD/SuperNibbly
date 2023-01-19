@@ -77,9 +77,9 @@ copper_ptr:                   ; current ptr - gets initialized to copper_list_st
    sei                                 ; disable interrupts
    lda VERA_isr
    and #3                              ; check vsync, hsync bit
-   beq vsync_irq_exit                  ; bit 1 not set - no vsync, bit 2 not set - no hsync
-   and #2                              ; check vsync bit
-   bne hsync_irq_pre                   ; bit 2 set - go to hsync
+   beq direct_irq_exit                 ; bit 1 not set - no vsync, bit 2 not set - no hsync, just leave
+   and #2                              ; check hsync bit
+   bne hsync_irq                       ; bit 2 set - go to hsync
 
    ; check if we have a copper_list
    lda copper_list_enabled
@@ -124,13 +124,23 @@ custom_code:
 ; jump here at the end of your custom irq code
 ;
 vsync_irq_exit:  
+   lda copper_list_enabled
+   bne direct_vsync_exit               ; if we have a copper list, con't do the default irq handler - we'll do it at the end of the copper list
    jmp (default_irq)                   ; for vsyncs, jump to the default handler, it does all the cleanup, keeps os happy, etc.
+direct_vsync_exit:
+   lda #1
+   sta VERA_isr                        ; ack vsync, intentional fall through to direct_irq_exit
 .endif
 
+.proc direct_irq_exit
+   ; hsync exists directly, not going to default handler
+   ply
+   plx
+   pla            ; restore regs
+   rti            ; kansas goes bye-bye
+.endproc   
 
-
-hsync_irq_pre:
-.proc hsync_irq   
+.proc hsync_irq
    ; write the color
    lda #0
    sta VERA_data1
@@ -146,7 +156,7 @@ hsync_irq_pre:
    iny 
    lda (R0),y                          ; get high byte of address
    beq hi_byte_empty
-   cmp $FF
+   cmp #$FF
    beq list_complete
    lda #$80
 hi_byte_empty:
@@ -166,15 +176,15 @@ hi_byte_empty:
    stz VERA_ctrl
    bra leave
 list_complete:
+   PopW R0
    lda #1
    sta VERA_ien                        ; disable h-sync, keep only v-sync   
+   lda #2
+   sta VERA_isr                        ; ack interrupt
+   ; for a copper list, the default irq is postponed until afther the copper list.. this is now the case, so jump to default handler and keep os happy...
+   jmp (default_irq)   
 leave:
    lda #2
    sta VERA_isr                        ; ack interrupt
-
-   ; hsync exists directly, not going to default handler
-   ply
-   plx
-   pla            ; restore regs
-   rti            ; kansas goes bye-bye
-.endproc   
+   bra direct_irq_exit
+.endproc
