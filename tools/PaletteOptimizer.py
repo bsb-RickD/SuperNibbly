@@ -5,23 +5,12 @@ def no_transparent_color():
     return lambda img: None
 
 
-def transparent_color(color):
+def fixed_transparent_color(color):
     return lambda img: color
 
 
 def transparent_pixel(pos=(0, 0)):
     return lambda img: img.getpixel(pos)
-
-
-"""
-def get_palettes_from_images(image_generator, transparent_color_getter):
-    for img, _, _ in image_generator:
-        colors = get_unique_colors(img)
-        tc = transparent_color_getter(img)
-        if tc in colors:
-            colors.remove(tc)
-        yield tuple(colors)
-"""
 
 
 def get_min_num_of_palettes(*args):

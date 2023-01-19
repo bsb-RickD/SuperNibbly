@@ -1,6 +1,6 @@
 from ImageTiler import ImageTiler
-from ImageUtils import print_header, load_image
-from PaletteOptimizer import no_transparent_color, PaletteOptimizer, transparent_color
+from ImageUtils import print_header, load_image, load_image_plus_pal
+from PaletteOptimizer import no_transparent_color, PaletteOptimizer, fixed_transparent_color
 from Sprites import SpriteGroup, MultiSprite, Sprite
 
 
@@ -44,11 +44,11 @@ def super_nibbly_title():
 
 def super_nibbly_travel():
     print_header("Super Nibbly Travel Screen")
-    travel = load_image(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\LMAPP_x16.png")
+    travel, pal = load_image_plus_pal(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\LMAPP_x16.png")
     anim = load_image(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\minanm.png")
 
     # background image
-    it = ImageTiler(travel, transparent_color((255, 0, 0)))
+    it = ImageTiler(travel, fixed_transparent_color((pal.palette[0], pal.palette[1], pal.palette[2])))
 
     sg_main = SpriteGroup([
         MultiSprite(anim, (246, 32), (293, 231), (1, 10), name="speech_big"),

@@ -204,5 +204,12 @@ def load_image(filename):
     return img
 
 
+def load_image_plus_pal(filename):
+    img = Image.open(filename)
+    pal = img.palette
+    img = img.convert("RGB")
+    return img, pal
+
+
 def create_screen_buffer_entry(tile_index, palette_index, h_flip, v_flip):
     return tile_index & 255, (palette_index << 4) + (v_flip << 3) + (h_flip << 2) + (tile_index >> 8)

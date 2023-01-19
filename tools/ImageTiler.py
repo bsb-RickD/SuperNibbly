@@ -1,4 +1,3 @@
-from PaletteOptimizer import transparent_color
 from ImageUtils import get_sub_images, write_data, map_colors_to_index, image_bytes, flip_horizontal, \
     flip_vertical, print_header, create_screen_buffer_entry
 from Sprites import SpriteGroup
@@ -51,10 +50,10 @@ class ImageTiler:
         for si in self.sub_images:
             pal_index, pal = palette_optimizer.get_index(si.palette)
             colors = list(pal)
-            if transparent_color is not None:
-                colors.insert(0, transparent_color)
+            if si.transparent_color is not None:
+                colors.insert(0, si.transparent_color)
 
-            tile = map_colors_to_index(si.img, colors, 0 if transparent_color is not None else 1)
+            tile = map_colors_to_index(si.img, colors, 0 if si.transparent_color is not None else 1)
             flipped_h = 0
             flipped_v = 0
             if tile in tiles:
