@@ -52,11 +52,21 @@ VSYNC_worker_ptr = ZEROPAGE_SCRATCH
 .endproc
 
 
-; remove vsync interrupr again
+; remove vsync interrupt again
 ;
 .macro clear_vsync_irq
    jsr reset_irq
 .endmacro
+
+copper_list_enabled:
+.byte 0
+
+copper_list_start:            ; pointer to begin of list
+.word 0
+
+copper_ptr:                   ; current ptr - gets initialized to copper_list_start in the vsync and increments from there
+.word 0
+
 
 
 ; the actual vsync routine
@@ -64,12 +74,44 @@ VSYNC_worker_ptr = ZEROPAGE_SCRATCH
 ; increases the vsync count
 ;
 .proc vsync_irq
-   php                                 ; save flags
    sei                                 ; disable interrupts
    lda VERA_isr
-   and #1                              ; check vsync bit
-   beq vsync_irq_exit                  ; bit 1 not set - no vsync
+   and #3                              ; check vsync, hsync bit
+   beq vsync_irq_exit                  ; bit 1 not set - no vsync, bit 2 not set - no hsync
+   and #2                              ; check vsync bit
+   bne hsync_irq_pre                   ; bit 2 set - go to hsync
 
+   ; check if we have a copper_list
+   lda copper_list_enabled
+   beq no_copper_list_or_init_done   
+init_copper_list:   
+   PushW R0
+   MoveW copper_list_start, R0
+   ldy #0
+   lda (R0),y                          ; line to start with
+   sta VERA_irqline_low                ; store it
+   iny 
+   lda (R0),y                          ; get high 
+   beq hi_byte_empty
+   cmp $FF
+   beq empty_list
+   lda #$80
+hi_byte_empty:
+   ora #3
+   sta VERA_ien                        ; enable v- and h-sync
+   iny
+   lda (R0),y                          ; color
+   sta hsync_irq+1
+   iny
+   lda (R0),y                          ; color
+   sta hsync_irq+6
+   AddW3 R0, #4, copper_ptr            ; set up ptr
+   set_vera_address $1FA00, VERA_port_1; vera data port 0 - reset to pal 0
+   stz VERA_ctrl
+empty_list:   
+   PopW R0
+
+no_copper_list_or_init_done:
    ; we have a vsync - increase the vsync_count
    inc vsync_count
    bne custom_code
@@ -81,8 +123,58 @@ custom_code:
 
 ; jump here at the end of your custom irq code
 ;
-vsync_irq_exit:
-   plp                                 ; don't re-enable interrupts, the flag knows the prev state anyhow
-   jmp (default_irq)
-
+vsync_irq_exit:  
+   jmp (default_irq)                   ; for vsyncs, jump to the default handler, it does all the cleanup, keeps os happy, etc.
 .endif
+
+
+
+hsync_irq_pre:
+.proc hsync_irq   
+   ; write the color
+   lda #0
+   sta VERA_data1
+   lda #0
+   sta VERA_data1
+
+   ; maintenance code to set up the next line..
+   PushW R0
+   MoveW copper_ptr, R0
+   ldy #0
+   lda (R0),y                          ; line to start with
+   sta VERA_irqline_low                ; store it
+   iny 
+   lda (R0),y                          ; get high byte of address
+   beq hi_byte_empty
+   cmp $FF
+   beq list_complete
+   lda #$80
+hi_byte_empty:
+   ora #3
+   sta VERA_ien                        ; enable v- and h-sync
+   iny
+   lda (R0),y                          ; color
+   sta hsync_irq+1
+   iny
+   lda (R0),y                          ; color
+   sta hsync_irq+6
+   AddW3 R0, #4, copper_ptr            ; set up ptr
+   PopW R0
+   lda #1
+   sta VERA_ctrl
+   stz VERA_addr_low                   ; vera data port 1 - reset to pal 0
+   stz VERA_ctrl
+   bra leave
+list_complete:
+   lda #1
+   sta VERA_ien                        ; disable h-sync, keep only v-sync   
+leave:
+   lda #2
+   sta VERA_isr                        ; ack interrupt
+
+   ; hsync exists directly, not going to default handler
+   ply
+   plx
+   pla            ; restore regs
+   rti            ; kansas goes bye-bye
+.endproc   
