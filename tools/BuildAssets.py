@@ -1,7 +1,7 @@
 from ImageTiler import ImageTiler
 from ImageUtils import print_header, load_image, load_image_plus_pal
 from PaletteOptimizer import no_transparent_color, PaletteOptimizer, fixed_transparent_color
-from Sprites import SpriteGroup, MultiSprite, Sprite
+from Sprites import SpriteGroup, MultiSprite, Sprite, SPRITE_LAYER_BACKGROUND
 
 
 def super_nibbly_title():
@@ -59,12 +59,13 @@ def super_nibbly_travel():
     y_start = 0
     landscape_sprite_groups = []
 
+    common_params = {"optimize_size": False, "layer": SPRITE_LAYER_BACKGROUND}
     for i in range(4):
         landscape_sprite_groups.append(SpriteGroup([
-            MultiSprite(anim, (0, 80 + y_start), (95, 103 + y_start), (3, 1), name="mountain_bg", optimize_size=False),
-            MultiSprite(anim, (0, 104 + y_start), (95, 111 + y_start), (3, 1), name="mountain_fg", optimize_size=False),
-            MultiSprite(anim, (104, 88 + y_start), (135, 111 + y_start), (2, 1), name="trees", optimize_size=False),
-            MultiSprite(anim, (136, 80 + y_start), (183, 111 + y_start), (2, 1), name="houses", optimize_size=False)
+            MultiSprite(anim, (0, 80 + y_start), (95, 103 + y_start), (3, 1), name="mountain_bg", **common_params),
+            MultiSprite(anim, (0, 104 + y_start), (95, 111 + y_start), (3, 1), name="mountain_fg", **common_params),
+            MultiSprite(anim, (104, 88 + y_start), (135, 111 + y_start), (2, 1), name="trees", **common_params),
+            MultiSprite(anim, (136, 80 + y_start), (183, 111 + y_start), (2, 1), name="houses", **common_params)
         ]))
         y_start += 32
 
@@ -91,6 +92,7 @@ def super_nibbly_travel():
     sg_main.save("travel_common_sprites")
     po.save("travel_palette")
     it.save("travel")
+
 
 if __name__ == "__main__":
     super_nibbly_title()
