@@ -44,6 +44,19 @@
    LoadB copper_list_enabled, 1
    cli
 
+   LoadW R15,mountain_bg_0
+   ldx #8
+show_sprites:
+   phx
+   jsr show_sprite
+   plx
+   dex
+   beq all_sprites_shown
+   AddVW 9,R15
+   bra show_sprites
+all_sprites_shown:   
+
+
 carry_on:
    wai
    jsr KRNL_GETIN                   ; read key
@@ -56,7 +69,6 @@ carry_on:
 
    rts
 .endproc
-
 
 ; uncompress the screen data 
 ; plus some sprites, plus palette
@@ -84,13 +96,58 @@ carry_on:
    rts
 .endproc
 
-.ifndef LZSA_ASM
-.include "lib/lzsa.asm"
-.endif
-
 .include "travel/copper_lists.inc"
 .include "travel/travel_common_sprites.inc"
 .include "travel/travel_landscape_sprites.inc"
+
+mountain_bg_0:
+.word 11,14                ; 0-3: position
+.addr sprite_mountain_bg_0 ; 4,5: sprite frame pointer
+.word spritenum(124)       ; 6,7: sprite# to use - stored as address of the sprite data in VRAM 
+.byte 1                    ; 8:   number of sprites in this oversize sprite
+
+mountain_bg_1:
+.word 43,14                ; 0-3: position
+.addr sprite_mountain_bg_1 ; 4,5: sprite frame pointer
+.word spritenum(125)       ; 6,7: sprite# to use - stored as address of the sprite data in VRAM 
+.byte 1                    ; 8:   number of sprites in this oversize sprite
+
+mountain_bg_2:
+.word 75,14                ; 0-3: position
+.addr sprite_mountain_bg_2 ; 4,5: sprite frame pointer
+.word spritenum(126)       ; 6,7: sprite# to use - stored as address of the sprite data in VRAM 
+.byte 1                    ; 8:   number of sprites in this oversize sprite
+
+mountain_bg_3:
+.word 107,14               ; 0-3: position
+.addr sprite_mountain_bg_0 ; 4,5: sprite frame pointer
+.word spritenum(127)       ; 6,7: sprite# to use - stored as address of the sprite data in VRAM 
+.byte 1                    ; 8:   number of sprites in this oversize sprite
+
+mountain_fg_0:
+.word 11,30                ; 0-3: position
+.addr sprite_mountain_fg_0 ; 4,5: sprite frame pointer
+.word spritenum(120)       ; 6,7: sprite# to use - stored as address of the sprite data in VRAM 
+.byte 1                    ; 8:   number of sprites in this oversize sprite
+
+mountain_fg_1:
+.word 43,30                ; 0-3: position
+.addr sprite_mountain_fg_1 ; 4,5: sprite frame pointer
+.word spritenum(121)       ; 6,7: sprite# to use - stored as address of the sprite data in VRAM 
+.byte 1                    ; 8:   number of sprites in this oversize sprite
+
+mountain_fg_2:
+.word 75,30                ; 0-3: position
+.addr sprite_mountain_fg_2 ; 4,5: sprite frame pointer
+.word spritenum(122)       ; 6,7: sprite# to use - stored as address of the sprite data in VRAM 
+.byte 1                    ; 8:   number of sprites in this oversize sprite
+
+mountain_fg_3:
+.word 107,30               ; 0-3: position
+.addr sprite_mountain_fg_0 ; 4,5: sprite frame pointer
+.word spritenum(123)       ; 6,7: sprite# to use - stored as address of the sprite data in VRAM 
+.byte 1                    ; 8:   number of sprites in this oversize sprite
+
 
 travel_screen:
 .incbin "assets/travel_data.bin"
@@ -115,3 +172,7 @@ ice_landscape:
 
 desert_landscape:
 .incbin "assets/travel_desert_sprites.bin"
+
+.ifndef LZSA_ASM
+.include "lib/lzsa.asm"
+.endif

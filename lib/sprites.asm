@@ -132,7 +132,7 @@ add_offset:
    bra decrase_frame_count
 .endproc
 
-; R15 this pointer to the oversize sprit
+; R15 this pointer to the (oversize) sprite
 .proc show_sprite
    jsr update_sprite_positions_for_multiple_sprites
    ThisLoadW R15, R0, SPR_SD_ptr, -

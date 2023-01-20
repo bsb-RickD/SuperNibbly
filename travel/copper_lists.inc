@@ -6,7 +6,7 @@ volcano_copper_list:
 .word 028, $ccf   ; line, color
 .word 034, $bbf   ; line, color
 .word 040, $aaf   ; line, color
-.word 048, $99f   ; line, color
+.word 046, $99f   ; line, color
 .word 052, $88f   ; line, color
 .word 058, $77f   ; line, color
 .word 064, $66f   ; line, color
@@ -31,7 +31,7 @@ green_copper_list:
 .word 028, $ccf   ; line, color
 .word 034, $bbf   ; line, color
 .word 040, $aaf   ; line, color
-.word 048, $99f   ; line, color
+.word 046, $99f   ; line, color
 .word 052, $88f   ; line, color
 .word 058, $77f   ; line, color
 .word 064, $66f   ; line, color
@@ -58,7 +58,7 @@ ice_copper_list:
 .word 028, $ccf   ; line, color
 .word 034, $bbf   ; line, color
 .word 040, $aaf   ; line, color
-.word 048, $99f   ; line, color
+.word 046, $99f   ; line, color
 .word 052, $88f   ; line, color
 .word 058, $77f   ; line, color
 .word 064, $66f   ; line, color
@@ -84,7 +84,7 @@ desert_copper_list:
 .word 028, $ccf   ; line, color
 .word 034, $bbf   ; line, color
 .word 040, $aaf   ; line, color
-.word 048, $99f   ; line, color
+.word 046, $99f   ; line, color
 .word 052, $88f   ; line, color
 .word 058, $77f   ; line, color
 .word 064, $66f   ; line, color
@@ -111,7 +111,7 @@ water_copper_list:
 .word 028, $ccf   ; line, color
 .word 034, $bbf   ; line, color
 .word 040, $aaf   ; line, color
-.word 048, $99f   ; line, color
+.word 046, $99f   ; line, color
 .word 052, $88f   ; line, color
 .word 058, $77f   ; line, color
 .word 064, $66f   ; line, color
