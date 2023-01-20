@@ -33,11 +33,12 @@ variable_5:
 
 
 function_ptrs:
+TEST_FPB = *                              ; test function pointer base
    .word 0,0                              ; 0 - nullptr
    no_commands_to_add
 
    .word increment, variable_1            ; 1 - increment command
-   commands_to_add 2,33,34,35
+   commands_to_add TEST_FPB,2,33,34,35
 
    .word decrement, variable_2            ; 2 - decrement command
    no_commands_to_add
