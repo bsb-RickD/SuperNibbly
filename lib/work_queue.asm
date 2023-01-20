@@ -5,6 +5,10 @@ WORK_QUEUE_ASM = 1
 .include "inc/common.inc"
 .endif
 
+.ifndef ARRAY_ASM
+.include "lib/array.asm"
+.endif
+
 .macro commands_to_add p1, p2, p3, p4
 .if .paramcount = 0
    .byte 0,0,0,0
@@ -41,10 +45,17 @@ fetch_next_worker:
 
    lda work_queue,x              ; get next function number
    sta remove_this_fnum+1        ; remember it, in case we need to remove it on completion
-   asln 3                        ; multiply by 8
-   tay                           ; y holds the offset to the function_ptrs table
-
-   jsr call_worker               ; call the worker (this y register is pushed and popped)
+   stz R0H                       ; multiply a by 8 into R0
+.repeat 3   
+   asl
+   rol R0H
+.endrepeat                       ; R0H = high byte, a = low byte of func ptr * 8, carry is clear 
+   adc #<function_ptrs
+   sta R0L
+   lda R0H
+   adc #>function_ptrs 
+   sta R0H                       ; R0 = function_ptrs + function_number*8
+   jsr call_worker               ; call the worker 
 
    ; carry clear? - nothing to do, call worker again next frame
    bcc call_worker_next_frame    
@@ -52,9 +63,10 @@ fetch_next_worker:
    ; carry is set - this means remove current worker and add the new workers
    LoadW R15, workers_to_add
    ldx #4                        ; max of 4 pseudo pointers to add
+   ldy #3
 append_workers:   
    iny                           ; advance to next worker to load
-   lda function_ptrs,y           ; get the 1 byte pseudo pointer
+   lda (R0),y                    ; get the 1 byte pseudo pointer
    beq no_more_workers_2_append  ; null ptr found - stop evaluation workers to add
    jsr array_append              ; add it to the list of pointers to add 
    dex                           ; dec the counter of allowed pointers to add
@@ -81,32 +93,33 @@ work_loop_empty:
 ; call the worker 
 ; pass this pointer in R15
 ;
-; y: index to function_ptrs table (worker index * 8)
+; R0: ptr into function_ptrs table (function_ptrs + (worker index * 8))
 ;
-; a,x get thrashed, y is pushed/pulled
+; a,x,y get thrashed, R0 is pushed, popped
 ;
 ; return: 
 ;  C = 0: worker not done, call again next frame
 ;  C = 1: worker has completed its work
 ;
 .proc call_worker
+   ldy #0
    ; load address to jump to and write it to jsr below
-   lda function_ptrs,y
+   lda (R0),y
    sta jsr_to_patch+1
    iny 
-   lda function_ptrs,y
+   lda (R0),y
    sta jsr_to_patch+2
    ; load this pointer and copy it to R15
    iny
-   lda function_ptrs,y
+   lda (R0),y
    sta R15L
    iny
-   lda function_ptrs,y
+   lda (R0),y
    sta R15H      
-   phy                           ; save index to worker data
+   PushW R0                      ; save R0
 jsr_to_patch:   
    jsr $CA11                     ; dispatch the call
-   ply
+   PopW R0
 
    rts
 .endproc

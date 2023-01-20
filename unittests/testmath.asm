@@ -8,11 +8,11 @@
    jmp main
 
 .ifndef UT_ASM
-.include "ut.asm"
+.include "lib/ut.asm"
 .endif
 
 .ifndef MATH_ASM
-.include "math.asm"
+.include "lib/math.asm"
 .endif
 
 .proc main   

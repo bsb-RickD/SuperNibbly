@@ -8,11 +8,11 @@
    jmp main
 
 .ifndef PRINT_ASM
-.include "print.asm"
+.include "lib/print.asm"
 .endif
 
 .ifndef RANDOM_ASM
-.include "random.asm"
+.include "lib/random.asm"
 .endif
 
 .proc main      
@@ -74,14 +74,14 @@ range_obj:
 .proc rand_range_test
    prints "random generator test."
    newline
-   prints "now 50 random numbers in the range 240 to 277"
+   prints "now 50 random numbers in the range [240 to 277) - 277 is not reached"
    newline 2
 
    ; initialize range
    LoadW R15, range_obj
    LoadW R0,240
    LoadW R1,277
-   LoadB R2,0
+   LoadB R2,1
    jsr rand_range_init
 
    ldx #50
@@ -93,7 +93,7 @@ range_obj:
 .proc rand_range_chunky_test
    prints "random generator test."
    newline
-   prints "now 50 random numbers in the range 240 to 277, with a chunksize of 4"
+   prints "now 50 random numbers in the range [240 to 277), with a chunksize of 4"
    newline 2
 
    ; initialize range

@@ -7,10 +7,21 @@
 
    jmp main
 
-.include "common.inc"
-.include "ut.asm"
-.include "vera.asm"
-.include "lzsa.asm"
+.ifndef COMMON_INC
+.include "inc/common.inc"
+.endif
+
+.ifndef UT_ASM
+.include "lib/ut.asm"
+.endif
+
+.ifndef VERA_ASM
+.include "lib/vera.asm"
+.endif
+
+.ifndef LZSA_ASM
+.include "lib/lzsa.asm"
+.endif
 
 .proc main   
    printl str_ut_welcome

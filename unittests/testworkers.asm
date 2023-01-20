@@ -8,11 +8,11 @@
    jmp main
 
 .ifndef UT_ASM
-.include "ut.asm"
+.include "lib/ut.asm"
 .endif
 
 .ifndef GENERIC_WORKERS_ASM
-.include "generic_workers.asm"
+.include "lib/generic_workers.asm"
 .endif
 
 .proc main      
