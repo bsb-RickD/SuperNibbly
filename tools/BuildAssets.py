@@ -82,7 +82,7 @@ def super_nibbly_travel():
     total_used_memory = it.get_used_memory() + sg_main.get_used_memory()
 
     # save anim sprites
-    landscapes = ["green", "ice", "vulcano", "desert"]
+    landscapes = ["green", "ice", "volcano", "desert"]
     for i in range(4):
         landscape_sprite_groups[i].calc_sprite_bitmaps(po, total_used_memory)
         landscape_sprite_groups[i].save("travel_%s_sprites" % landscapes[i])

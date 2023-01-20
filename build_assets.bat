@@ -18,9 +18,11 @@ del assets\travel_data.raw
 lzsa -v -r -f2 ..\travel_desert_sprites.bin assets\travel_desert_sprites.bin
 lzsa -v -r -f2 ..\travel_green_sprites.bin assets\travel_green_sprites.bin
 lzsa -v -r -f2 ..\travel_ice_sprites.bin assets\travel_ice_sprites.bin
-lzsa -v -r -f2 ..\travel_vulcano_sprites.bin assets\travel_vulcano_sprites.bin
+lzsa -v -r -f2 ..\travel_volcano_sprites.bin assets\travel_volcano_sprites.bin
 
 copy ..\travel_palette.bin assets
+copy ..\travel_green_sprites.inc travel\travel_landscape_sprites.inc
+copy ..\travel_common_sprites.inc travel\travel_common_sprites.inc
 echo.
 
 
