@@ -27,6 +27,20 @@
 .include "lib/vsync.asm"
 .endif
 
+.ifndef WORK_QUEUE_ASM
+.include "lib/work_queue.asm"
+.endif
+
+.ifndef ARRAY_ASM
+.include "lib/array.asm"
+.endif
+
+function_ptrs:
+; bring in the function pointers for the work queue
+.ifndef FUNCTION_PTRS_INC
+.include "travel/travel_function_ptrs.inc"
+.endif
+
 .proc main
    ; restore state for multiple runs
    jsr switch_all_sprites_off
@@ -37,14 +51,15 @@
    jsr fill_screen
    jsr switch_to_320_240_tiled_mode
 
+   ; establish vsync and copper list
    init_vsync_irq
-
    sei
    LoadW copper_list_start, green_copper_list
    LoadB copper_list_enabled, 1
    cli
 
-   LoadW R15,mountain_bg_0
+   ; show sprites initially
+   LoadW R15,mountain_bg_0+3
    ldx #8
 show_sprites:
    phx
@@ -52,16 +67,33 @@ show_sprites:
    plx
    dex
    beq all_sprites_shown
-   AddVW 9,R15
+   AddVW 12,R15
    bra show_sprites
 all_sprites_shown:   
 
+   ; init work queue
+   LoadW R15, work_queue
+   lda #0
+   sta (R15)
 
-carry_on:
-   wai
+   lda #(TRAVEL_FPI+0)
+add_fptrs:   
+   pha
+   jsr array_append
+   pla
+   inc
+   cmp #(TRAVEL_FPI+8)
+   bne add_fptrs
+
+   ; main game loop - iterate the objects and update them
+iterate_main_loop:   
+   jsr wait_for_vsync
+
+   jsr execute_work_queue
+
    jsr KRNL_GETIN                   ; read key
    cmp #KEY_Q         
-   bne carry_on
+   bne iterate_main_loop
 
    ; cleanup
    clear_vsync_irq
@@ -98,56 +130,10 @@ carry_on:
 
 .include "travel/copper_lists.inc"
 .include "travel/travel_common_sprites.inc"
-.include "travel/travel_landscape_sprites.inc"
 
-mountain_bg_0:
-.word 11,14                ; 0-3: position
-.addr sprite_mountain_bg_0 ; 4,5: sprite frame pointer
-.word spritenum(124)       ; 6,7: sprite# to use - stored as address of the sprite data in VRAM 
-.byte 1                    ; 8:   number of sprites in this oversize sprite
-
-mountain_bg_1:
-.word 43,14                ; 0-3: position
-.addr sprite_mountain_bg_1 ; 4,5: sprite frame pointer
-.word spritenum(125)       ; 6,7: sprite# to use - stored as address of the sprite data in VRAM 
-.byte 1                    ; 8:   number of sprites in this oversize sprite
-
-mountain_bg_2:
-.word 75,14                ; 0-3: position
-.addr sprite_mountain_bg_2 ; 4,5: sprite frame pointer
-.word spritenum(126)       ; 6,7: sprite# to use - stored as address of the sprite data in VRAM 
-.byte 1                    ; 8:   number of sprites in this oversize sprite
-
-mountain_bg_3:
-.word 107,14               ; 0-3: position
-.addr sprite_mountain_bg_0 ; 4,5: sprite frame pointer
-.word spritenum(127)       ; 6,7: sprite# to use - stored as address of the sprite data in VRAM 
-.byte 1                    ; 8:   number of sprites in this oversize sprite
-
-mountain_fg_0:
-.word 11,30                ; 0-3: position
-.addr sprite_mountain_fg_0 ; 4,5: sprite frame pointer
-.word spritenum(120)       ; 6,7: sprite# to use - stored as address of the sprite data in VRAM 
-.byte 1                    ; 8:   number of sprites in this oversize sprite
-
-mountain_fg_1:
-.word 43,30                ; 0-3: position
-.addr sprite_mountain_fg_1 ; 4,5: sprite frame pointer
-.word spritenum(121)       ; 6,7: sprite# to use - stored as address of the sprite data in VRAM 
-.byte 1                    ; 8:   number of sprites in this oversize sprite
-
-mountain_fg_2:
-.word 75,30                ; 0-3: position
-.addr sprite_mountain_fg_2 ; 4,5: sprite frame pointer
-.word spritenum(122)       ; 6,7: sprite# to use - stored as address of the sprite data in VRAM 
-.byte 1                    ; 8:   number of sprites in this oversize sprite
-
-mountain_fg_3:
-.word 107,30               ; 0-3: position
-.addr sprite_mountain_fg_0 ; 4,5: sprite frame pointer
-.word spritenum(123)       ; 6,7: sprite# to use - stored as address of the sprite data in VRAM 
-.byte 1                    ; 8:   number of sprites in this oversize sprite
-
+.ifndef TRAVEL_WORKERS_ASM
+.include "travel/travel_workers.asm"
+.endif
 
 travel_screen:
 .incbin "assets/travel_data.bin"

@@ -2,6 +2,7 @@
 INTRO_FUNCTION_PTRS_INC = 1
 
 INTRO_FPB = *                             ; intro function pointer base
+INTRO_FPI = ((INTRO_FPB-function_ptrs)/8)
    .word 0,0                              ; 0 - nullptr
    no_commands_to_add
 ptr_check_return_to_basic:                ; 1 - check for exit

@@ -73,8 +73,9 @@ palfade_in:
    .byte 0
    .byte 0
 
-.ifndef FUNCTION_PTRS_INC
-.include "function_ptrs.inc"
+function_ptrs:
+.ifndef INTRO_FUNCTION_PTRS_INC
+.include "intro/intro_function_ptrs.inc"
 .endif
 
 return_to_basic:
@@ -100,10 +101,10 @@ return_to_basic:
    jsr rand_seed_time   
 
    LoadW R15, work_queue
-   lda #1
+   lda #(INTRO_FPI+1)
    jsr array_append              ; append check for exit to worker queue
 
-   lda #2 
+   lda #(INTRO_FPI+2)
    jsr array_append              ; append unpacking of intro data to work queue
 
    init_vsync_irq initial_fade_out   
