@@ -160,3 +160,13 @@ class SpriteGroup:
                 fp.write(".byte VERA_sprite_layer_%s\t; 4 bit Collision mask, 3 bit z-depth, VFlip HFlip\n" % sb.layer)
                 fp.write(".byte VERA_sprite_height_%d+VERA_sprite_width_%d+%d\t;h, w, palette index\n\n" %
                          (sb.height, sb.width, sb.palette_index))
+
+    # I need this for the travel data
+    # sprites all have the same size but different palette indexes
+    def save_just_pal_index(self, filename):
+        with open(filename + ".inc", "wt") as fp:
+            for sb in self.sprite_bitmaps:
+                fp.write(
+                    ".byte VERA_sprite_height_%d+VERA_sprite_width_%d+%d\t;h, w, pal index for %s, frame %d%s\n" %
+                    (sb.height, sb.width, sb.palette_index, sb.basename, sb.frame,
+                     ("" if sb.part is None else ", part %d " % sb.part)))

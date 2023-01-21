@@ -87,6 +87,7 @@ def super_nibbly_travel():
     for i in range(4):
         landscape_sprite_groups[i].calc_sprite_bitmaps(po, total_used_memory)
         landscape_sprite_groups[i].save("travel_%s_sprites" % landscapes[i])
+        landscape_sprite_groups[i].save_just_pal_index("travel_%s_pal_indexes" % landscapes[i])
 
     # write everything to disk
     sg_main.save("travel_common_sprites")

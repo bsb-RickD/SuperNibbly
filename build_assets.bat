@@ -22,6 +22,7 @@ lzsa -v -r -f2 ..\travel_volcano_sprites.bin assets\travel_volcano_sprites.bin
 
 copy ..\travel_palette.bin assets
 copy ..\travel_green_sprites.inc travel\travel_landscape_sprites.inc
+copy ..\travel_*_pal_indexes.inc travel
 copy ..\travel_common_sprites.inc travel\travel_common_sprites.inc
 echo.
 

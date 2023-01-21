@@ -1,0 +1,10 @@
+.byte VERA_sprite_height_32+VERA_sprite_width_32+2	;h, w, pal index for mountain_bg, frame 0
+.byte VERA_sprite_height_32+VERA_sprite_width_32+2	;h, w, pal index for mountain_bg, frame 1
+.byte VERA_sprite_height_32+VERA_sprite_width_32+2	;h, w, pal index for mountain_bg, frame 2
+.byte VERA_sprite_height_8+VERA_sprite_width_32+1	;h, w, pal index for mountain_fg, frame 0
+.byte VERA_sprite_height_8+VERA_sprite_width_32+1	;h, w, pal index for mountain_fg, frame 1
+.byte VERA_sprite_height_8+VERA_sprite_width_32+1	;h, w, pal index for mountain_fg, frame 2
+.byte VERA_sprite_height_32+VERA_sprite_width_16+0	;h, w, pal index for trees, frame 0
+.byte VERA_sprite_height_32+VERA_sprite_width_16+0	;h, w, pal index for trees, frame 1
+.byte VERA_sprite_height_32+VERA_sprite_width_32+3	;h, w, pal index for houses, frame 0
+.byte VERA_sprite_height_32+VERA_sprite_width_32+3	;h, w, pal index for houses, frame 1

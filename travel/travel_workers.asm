@@ -1,6 +1,7 @@
 .ifndef TRAVEL_WORKERS_ASM
 TRAVEL_WORKERS_ASM = 1
 
+landscape_sprites:
 .include "travel/travel_landscape_sprites.inc"
 
 TRAVEL_SP_SHIFT  = 3
@@ -42,7 +43,7 @@ wrap_around:
    bra store_updated_value ; write it back..
 .endproc
 
-MBG_SP = 7
+MBG_SP = 6
 MFG_SP = 8
 TBG_SP = 16
 RD_SP  = 18
