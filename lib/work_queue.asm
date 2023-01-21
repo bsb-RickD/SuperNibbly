@@ -33,7 +33,7 @@ OFFSET = ((base-function_ptrs)/8)
 .define no_commands_to_add commands_to_add
 
 work_queue:
-   .res 64,0
+   .res 128,0
 
 workers_to_add:
    .res 16,0

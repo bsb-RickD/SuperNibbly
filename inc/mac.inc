@@ -357,10 +357,49 @@ L:
 .endmacro
 
 ; arithmetic shift right
-.macro  asr             ; Arithmetic shift right
-        cmp     #$80    ; Put bit 7 into carry
-        ror             ; Rotate right with carry
+.macro  asr arg         ; Arithmetic shift right
+.if .paramcount = 1
+   lda arg
+.endif
+   cmp     #$80    ; Put bit 7 into carry
+   ror             ; Rotate right with carry
+.if .paramcount = 1
+   sta arg
+.endif
+
 .endmacro
+
+; arithmetic shift right of 16 bit word
+.macro AsrW arg, shift
+.if .blank(shift) .or ((shift) = 1)
+   asr arg+1
+   ror arg
+.else
+	.assert ((shift) >= 2) && ((shift) < 16), error, "shift for AsrW can only be 1 to 15"
+	.if ((shift) = 2)
+		lda arg+1
+		cmp #$80
+		ror
+		ror arg
+		cmp #$80
+		ror 
+		ror arg
+		sta arg+1
+	.else
+		.local loop
+		ldx #(shift)
+		lda arg+1
+loop:
+		cmp #$80
+		ror
+		ror arg
+		dex
+		bne loop
+		sta arg+1		
+	.endif
+.endif   
+.endmacro   
+
 
 ; expands to as many asl commands as specified by shift
 .macro asln shift
@@ -574,7 +613,7 @@ L:
 	adc #Value
 .endmacro
 
-.define neg_word(n) ($FFFF-n)+1
-.define neg_byte(n) ($FF-n)+1
+.define neg_word(n) (($FFFF-n)+1)
+.define neg_byte(n) (($FF-n)+1)
 
 .endif

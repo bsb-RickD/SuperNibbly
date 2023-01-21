@@ -58,19 +58,6 @@ function_ptrs:
    LoadB copper_list_enabled, 1
    cli
 
-   ; show sprites initially
-   LoadW R15,mountain_bg_0+3
-   ldx #8
-show_sprites:
-   phx
-   jsr show_sprite
-   plx
-   dex
-   beq all_sprites_shown
-   AddVW 12,R15
-   bra show_sprites
-all_sprites_shown:   
-
    ; init work queue
    LoadW R15, work_queue
    lda #0
@@ -82,7 +69,7 @@ add_fptrs:
    jsr array_append
    pla
    inc
-   cmp #(TRAVEL_FPI+8)
+   cmp #(TRAVEL_FPI+23)
    bne add_fptrs
 
    ; main game loop - iterate the objects and update them
