@@ -81,10 +81,8 @@ function_ptrs:
 return_to_basic:
    .byte 0
 
-
-.proc main
-   
-   ; restore state for multiple runs
+; init state for multiple runs
+.proc reset_intro_state
    stz palfade_state
    stz palfade_in+5
    stz palfade_out+5
@@ -94,12 +92,15 @@ return_to_basic:
    stz workers_to_remove
    LoadW jumping_fish, $0606
    LoadW jumping_fish+2, 17
-
    jsr switch_all_sprites_off
-
-   ; init RNG
+   jsr init_drop
    jsr rand_seed_time   
+   rts
+.endproc
 
+.proc main   
+   jsr reset_intro_state         ; init state for multiple runs
+   
    LoadW R15, work_queue
    lda #(INTRO_FPI+1)
    jsr array_append              ; append check for exit to worker queue
@@ -109,8 +110,6 @@ return_to_basic:
 
    init_vsync_irq initial_fade_out   
 
-
-   
    ; main game loop - iterate the objects and update them
 iterate_main_loop:   
    jsr wait_for_vsync

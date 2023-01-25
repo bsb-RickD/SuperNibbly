@@ -61,7 +61,22 @@ ptr_animate_smoke:                        ; 5 - smoke animation
    .word switch_sprite_off, jumping_fish
    no_commands_to_add                     
 
-                                          ; 15 show nibbly
-   .word drop_n, 0
+   .word drop_letter, dropping_n          ; 15 drop n
+   commands_to_add INTRO_FPB,16           ; drop next one
+                                          
+   .word drop_letter, dropping_i          ; 16 show nibbly
+   commands_to_add INTRO_FPB,17           ; drop next one
+                                          
+   .word drop_letter, dropping_b1         ; 17 show nibbly
+   commands_to_add INTRO_FPB,18           ; drop next one
+
+   .word drop_letter, dropping_b2         ; 18 show nibbly
+   commands_to_add INTRO_FPB,19           ; drop next one
+
+   .word drop_letter, dropping_l          ; 19 show nibbly
+   commands_to_add INTRO_FPB,20           ; drop next one
+
+   .word drop_letter, dropping_y          ; 20 show nibbly
    no_commands_to_add
+
 .endif

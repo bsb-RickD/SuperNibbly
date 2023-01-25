@@ -50,7 +50,7 @@ function_ptrs:
 
    jsr fill_screen
 
-   lda #3
+   lda #0
    jsr switch_to_landscape
 
    jsr switch_to_320_240_tiled_mode
