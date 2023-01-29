@@ -118,14 +118,18 @@ color_r:
    lda (R15),y             ; get count
    tax                     ; x = count
 
-   ; initialize R1 and R2, by copying from the class structure
-init_regs:                 
    iny 
-   lda (R15),y 
-   sta R0H,y
-   cpy #4
-   bne init_regs
-   ; R1 now points to the palette, R2 holds target color
+   ThisLoadW R15, R1       ; R1 now points to the palette   
+   lda (R15),y             ; a now holds blue and green
+   rorn 4
+   and #$F
+   sta R2H                 ; R2H = green
+   lda (R15),y             ; a now holds blue and green
+   and #$F                 
+   sta R2L                 ; R2L = blue
+   iny
+   lda (R15),y
+   sta R3H                 ; R3H = red
 
    PushW R0                ; push R0 - it's used as moving output pointer while fading..
 
@@ -135,9 +139,7 @@ lerp_loop:
    lda (R1)                ; load palette value
    and #$F                 ; mask out the lower 4 bits, this is blue
    tax
-   lda R2L                 ; get target color
-   and #$F                 ; .. blue of target
-   tay
+   ldy R2L                 ; get blue of target color
    lda R3L                 ; load the factor
    jsr lerp416             ; a = lerped color
 
@@ -147,12 +149,7 @@ lerp_loop:
    rorn 4
    and #$F                 ; shift and mask to get the higher 4 bits, this is green
    tax
-   lda R2L                 ; get target color
-   rorn 4
-   and #$F                 ; shift and mask to get the higher 4 bits, this is green  
-                           ; !!! OPTIMIZE -- target color factors into 3 registers, then all the shifting and masking only needs to
-                           ; be done once! and we directly can load y and be done with it!
-   tay
+   ldy R3H                 ; get green of target color
    lda R3L                 ; load the factor
    jsr lerp416             ; a = lerped color
    asln 4
@@ -165,7 +162,7 @@ lerp_loop:
 
    lda (R1)                ; load source red
    tax
-   lda R2H                 ; load target red
+   lda R3H                 ; load target red
    tay
    lda R3L                 ; load the factor
    jsr lerp416             ; a = lerped color
