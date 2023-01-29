@@ -6,12 +6,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3af9e987-ee4a-4e9e-a0e6-6c4e604ea779" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BuildAssets.py" beforeDir="false" afterPath="$PROJECT_DIR$/BuildAssets.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/GameTiles.py" beforeDir="false" afterPath="$PROJECT_DIR$/GameTiles.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ImageUtils.py" beforeDir="false" afterPath="$PROJECT_DIR$/ImageUtils.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/PaletteOptimizer.py" beforeDir="false" afterPath="$PROJECT_DIR$/PaletteOptimizer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Sprites.py" beforeDir="false" afterPath="$PROJECT_DIR$/Sprites.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -21,7 +17,7 @@
   </component>
   <component name="CoverageDataManager">
     <SUITE FILE_PATH="coverage/tools$CopperList.coverage" NAME="CopperList Coverage Results" MODIFIED="1674066139378" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/tools$Build_Assets.coverage" NAME="Build Assets Coverage Results" MODIFIED="1674945064309" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../.." />
+    <SUITE FILE_PATH="coverage/tools$Build_Assets.coverage" NAME="Build Assets Coverage Results" MODIFIED="1675012188016" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../.." />
     <SUITE FILE_PATH="coverage/tools$ImageTiler.coverage" NAME="ImageTiler Coverage Results" MODIFIED="1673817569193" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../.." />
   </component>
   <component name="FileEditorManager">
@@ -56,11 +52,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/BuildAssets.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="510">
-              <caret line="30" column="9" selection-start-line="30" selection-start-column="9" selection-end-line="30" selection-end-column="9" />
+            <state relative-caret-position="306">
+              <caret line="54" column="9" lean-forward="true" selection-start-line="54" selection-start-column="9" selection-end-line="54" selection-end-column="9" />
               <folding>
                 <element signature="e#0#33#0" expanded="true" />
               </folding>
@@ -69,10 +65,19 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
+        <entry file="file://C:/Program Files/Python37/Lib/codecs.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="131">
+              <caret line="309" selection-start-line="309" selection-end-line="309" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ImageUtils.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="289">
-              <caret line="78" selection-start-line="78" selection-end-line="78" />
+            <state relative-caret-position="207">
+              <caret line="207" column="4" selection-start-line="207" selection-start-column="4" selection-end-line="207" selection-end-column="4" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
               </folding>
@@ -92,11 +97,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/PaletteOptimizer.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="328">
-              <caret line="111" selection-start-line="111" selection-end-line="111" />
+            <state relative-caret-position="189">
+              <caret line="114" selection-start-line="114" selection-end-line="114" />
             </state>
           </provider>
         </entry>
@@ -104,8 +109,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Sprites.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="292">
-              <caret line="48" column="29" lean-forward="true" selection-start-line="48" selection-start-column="29" selection-end-line="48" selection-end-column="29" />
+            <state relative-caret-position="470">
+              <caret line="188" lean-forward="true" selection-start-line="185" selection-end-line="188" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
               </folding>
@@ -144,6 +149,8 @@
       <find>pixel</find>
       <find>max_</find>
       <find>try</find>
+      <find>debug</find>
+      <find>putdata</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -155,10 +162,10 @@
         <option value="$PROJECT_DIR$/ImageTiler.py" />
         <option value="$PROJECT_DIR$/CopperList.py" />
         <option value="$PROJECT_DIR$/GameTiles.py" />
-        <option value="$PROJECT_DIR$/PaletteOptimizer.py" />
         <option value="$PROJECT_DIR$/Sprites.py" />
-        <option value="$PROJECT_DIR$/ImageUtils.py" />
         <option value="$PROJECT_DIR$/BuildAssets.py" />
+        <option value="$PROJECT_DIR$/ImageUtils.py" />
+        <option value="$PROJECT_DIR$/PaletteOptimizer.py" />
       </list>
     </option>
   </component>
@@ -190,7 +197,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/BuildAssets.py" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/ImageUtils.py" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
   </component>
@@ -278,12 +285,12 @@
       <workItem from="1673893678393" duration="24885000" />
       <workItem from="1674213221445" duration="5426000" />
       <workItem from="1674767327320" duration="2079000" />
-      <workItem from="1674828477255" duration="23095000" />
+      <workItem from="1674828477255" duration="31475000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="115879000" />
+    <option name="totallyTimeSpent" value="124259000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
@@ -293,8 +300,8 @@
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.32936078" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.27193934" />
+      <window_info active="true" anchor="bottom" id="Find" order="1" visible="true" weight="0.32936078" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.27193934" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.5417118" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -348,13 +355,13 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/PaletteOptimizer.py</url>
-          <line>111</line>
-          <option name="timeStamp" value="16" />
+          <line>115</line>
+          <option name="timeStamp" value="18" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/PaletteOptimizer.py</url>
-          <line>99</line>
-          <option name="timeStamp" value="17" />
+          <line>101</line>
+          <option name="timeStamp" value="19" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -416,13 +423,6 @@
     </expressions>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://C:/Program Files/Python37/Lib/codecs.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="131">
-          <caret line="309" selection-start-line="309" selection-end-line="309" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/CopperList.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="493">
@@ -471,17 +471,27 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/PaletteOptimizer.py">
+    <entry file="file://C:/Program Files/Python37/Lib/codecs.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="328">
-          <caret line="111" selection-start-line="111" selection-end-line="111" />
+        <state relative-caret-position="131">
+          <caret line="309" selection-start-line="309" selection-end-line="309" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BuildAssets.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="306">
+          <caret line="54" column="9" lean-forward="true" selection-start-line="54" selection-start-column="9" selection-end-line="54" selection-end-column="9" />
+          <folding>
+            <element signature="e#0#33#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Sprites.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="292">
-          <caret line="48" column="29" lean-forward="true" selection-start-line="48" selection-start-column="29" selection-end-line="48" selection-end-column="29" />
+        <state relative-caret-position="470">
+          <caret line="188" lean-forward="true" selection-start-line="185" selection-end-line="188" />
           <folding>
             <element signature="e#0#21#0" expanded="true" />
           </folding>
@@ -490,21 +500,18 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/ImageUtils.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="289">
-          <caret line="78" selection-start-line="78" selection-end-line="78" />
+        <state relative-caret-position="207">
+          <caret line="207" column="4" selection-start-line="207" selection-start-column="4" selection-end-line="207" selection-end-column="4" />
           <folding>
             <element signature="e#0#21#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/BuildAssets.py">
+    <entry file="file://$PROJECT_DIR$/PaletteOptimizer.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="510">
-          <caret line="30" column="9" selection-start-line="30" selection-start-column="9" selection-end-line="30" selection-end-column="9" />
-          <folding>
-            <element signature="e#0#33#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="189">
+          <caret line="114" selection-start-line="114" selection-end-line="114" />
         </state>
       </provider>
     </entry>

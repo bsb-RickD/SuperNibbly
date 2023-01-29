@@ -131,14 +131,14 @@ iterate_main_loop:
 ; check on the palette fade out  to be complete..
 .proc fade_out_and_switch_to_tiled_mode
    ldy #5
-   lda (R15),y          ; get fade state - 0 means fade is complete    
+   lda (R15),y             ; get fade state - 0 means fade is complete    
    beq complete
-   clc                  ; indicate that worker is not done yet
+   clc                     ; indicate that worker is not done yet
    rts
 complete:
 
    ; set all used colors to fade target
-   ldx #(INTRO_PALETTE_SIZE/2)-1
+   ldx intro_pal_mapping   ; load the number of palette entries used
    lda #0
    MoveW palfade_out+3, R11
    jsr write_to_palette_const_color
@@ -146,7 +146,7 @@ complete:
    ; switch to the intro screen - but it's still "invisible" because it's all a single color
    jsr switch_to_tiled_mode
 
-   sec                  ; fade complete - carry on with new workers
+   sec                     ; fade complete - carry on with new workers
    rts   
 .endproc
 
@@ -168,10 +168,9 @@ fade_further:
    jsr palettefader_step_fade
 
 write_the_pal:
-   MoveW R0, R11 
-   ldx #(INTRO_PALETTE_SIZE/2)-1
+   LoadW R1, intro_pal_mapping
    lda #0
-   jsr write_to_palette
+   jsr write_to_palette_mapped
 
    ldy #5
    lda (R15),y
@@ -358,6 +357,10 @@ INTRO_SCREEN_SIZE = *-intro_screen
 intro_pal:
 .incbin "assets/intro_palette.bin"
 INTRO_PALETTE_SIZE = *-intro_pal
+
+intro_pal_mapping:
+.incbin "assets/intro_palette_mapping.bin"
+
 
 ; this is where we fade into
 fadebuffer:

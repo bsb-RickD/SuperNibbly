@@ -1,4 +1,4 @@
-from ImageUtils import write_data, append_palette, print_header
+from ImageUtils import write_data, append_palette, print_header, write_palette_debug_png
 
 MAX_SUB_PALETTE_SIZE = 15
 MAX_FULL_PALETTE_SIZE = 256
@@ -85,31 +85,39 @@ def get_min_num_of_palettes(*args):
     print("Using %d colors to represent %d unique colors.. thats a ratio of %f" %
           (palette_color_count, unique_color_count, palette_color_count / unique_color_count))
 
-    return palettes
+    return palettes, merged
 
 
 class PaletteOptimizer:
     def __init__(self, *palette_providers):
         pals = (p.palettes() for p in palette_providers)
-        self.palettes = get_min_num_of_palettes(*pals)
+        self.palettes, color_set = get_min_num_of_palettes(*pals)
+        self.color_set = [(0, 0, 0)] + list(color_set)
 
         if len(self.palettes[0]) > MAX_SUB_PALETTE_SIZE:
             raise ValueError(
                 "Palette size expected to be max %d - but rececved %d" % (MAX_SUB_PALETTE_SIZE, len(self.palettes[0])))
 
-        self.full_palette = list(self.palettes[0])
-        for p in self.palettes[1:]:
-
+        # build full palette
+        self.full_palette = []
+        for p in self.palettes:
             # pad to a multiple of 16 before adding a new palette
-            remainder = len(self.full_palette) % (MAX_SUB_PALETTE_SIZE + 1)
-            if remainder > 0:
-                self.full_palette.extend([(0, 0, 0)] * ((MAX_SUB_PALETTE_SIZE + 1)-remainder))
+            if len(self.full_palette) > 0:
+                remainder = len(self.full_palette) % (MAX_SUB_PALETTE_SIZE + 1)
+                if remainder > 0:
+                    self.full_palette.extend([(0, 0, 0)] * ((MAX_SUB_PALETTE_SIZE + 1) - remainder))
 
-            if len(p) == MAX_SUB_PALETTE_SIZE:
+            if len(p) <= MAX_SUB_PALETTE_SIZE:
                 self.full_palette.append((0, 0, 0))
             self.full_palette.extend(list(p))
-
         assert len(self.full_palette) <= MAX_FULL_PALETTE_SIZE
+
+        # deduce virtual palette from it
+        self.virtual_palette = [self.color_set.index(p) for p in self.full_palette]
+
+        # all palettes, also the full_palette, is expected to start at index 1 -
+        # so remove the pseudo entry we added for building the virtual palette indexes
+        self.full_palette = self.full_palette[1:]
 
     def get_index(self, palette):
         if len(palette) <= MAX_SUB_PALETTE_SIZE:
@@ -125,8 +133,20 @@ class PaletteOptimizer:
 
     def save(self, filename, write_asm=False):
         palette_bytes = bytearray()
-        for pal in self.palettes:
-            append_palette(pal, palette_bytes)
+        append_palette(self.color_set[1:], palette_bytes)
 
         write_data(palette_bytes, filename, write_asm=write_asm)
+
+        write_palette_debug_png("pal_debug.png", self.full_palette)
+        write_palette_debug_png("pal_debug_2.png", self.color_set)
+
+        virtual_pal_bytes = bytearray()
+
+        assert len(self.color_set) <= 127, "Erik, your palette mapping code in assembly is broken and can't handle " \
+                                           "more than 127 entries. You're using 8 bit adressing, you schmuck!"
+        virtual_pal_bytes.append(len(self.virtual_palette))
+        virtual_pal_bytes.extend(self.virtual_palette)
+
+        write_data(virtual_pal_bytes, filename + "_mapping", write_asm=write_asm)
+
         return palette_bytes

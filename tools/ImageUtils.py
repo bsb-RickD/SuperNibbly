@@ -213,7 +213,9 @@ def append_palette(pal, palette_bytes):
         palette_bytes.append(((g // 17) << 4) + b // 17)
         palette_bytes.append(r // 17)
 
-    missing_entries = 15 - len(pal)  # palettes can be incomplete
+    # palettes can be incomplete, however a full palette will have more than 15 entries,
+    # thus producing an empty range, so all is good
+    missing_entries = 15 - len(pal)
     for i in range(missing_entries):
         palette_bytes.append(0)
         palette_bytes.append(0)
@@ -257,3 +259,15 @@ def load_image_plus_pal(filename):
 
 def create_screen_buffer_entry(tile_index, palette_index, h_flip, v_flip):
     return tile_index & 255, (palette_index << 4) + (v_flip << 3) + (h_flip << 2) + (tile_index >> 8)
+
+
+def write_palette_debug_png(filename, palette):
+    img = Image.new("P", (1,1))
+    imgdata = [0]
+    img.putdata(imgdata)
+    palette_bytes = bytearray()
+    palette_bytes.extend([0,0,0])
+    for p in palette:
+        palette_bytes.extend(p)
+    img.putpalette(palette_bytes)
+    img.save(filename)

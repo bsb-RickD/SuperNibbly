@@ -198,6 +198,34 @@ next:
    rts
 .endproc
 
+
+; a = palette index / color# to start writing to
+; R0 = pointer to color data to be copied to VRAM palette
+; R1 = pointer to mapping data
+;
+;         1st byte = # of mapping data
+;         n bytes of indixes into color data stored at R0
+;
+.proc write_to_palette_mapped   
+   jsr set_vera_data_to_palette
+   lda (R1)
+   tax
+for:   
+   IncW R1
+   lda (R1)
+   asl
+   tay
+   lda (R0),y
+   sta VERA_data1
+   iny
+   lda (R0),y
+   sta VERA_data1
+   dex
+   bne for
+   rts
+.endproc
+
+
 ; a = palette index / color# to write to
 ; x = # of colors-1 to write.. so to copy 1 color, set x = 0; to copy 256 colors set x = 255.
 ; R11 = color to write to palette x times
