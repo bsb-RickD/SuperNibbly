@@ -209,7 +209,8 @@ loop:
    lda R11H
    sta VERA_data1
    dex
-   bpl loop
+   cpx #255
+   bne loop
    rts
 .endproc
 

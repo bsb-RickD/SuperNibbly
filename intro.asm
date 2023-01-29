@@ -67,8 +67,8 @@ palfade_out:
 ; state                    1 byte   (up/down/done)             offset 5
 ; current f                1 byte   (0..16)                    offset 6
 palfade_in:
-   .byte PALETTE_SIZE/2
-   .word screen_pal
+   .byte INTRO_PALETTE_SIZE/2
+   .word intro_pal
    .byte $0a, $0
    .byte 0
    .byte 0
@@ -138,7 +138,7 @@ iterate_main_loop:
 complete:
 
    ; set all used colors to fade target
-   ldx #(PALETTE_SIZE/2)-1
+   ldx #(INTRO_PALETTE_SIZE/2)-1
    lda #0
    MoveW palfade_out+3, R11
    jsr write_to_palette_const_color
@@ -169,7 +169,7 @@ fade_further:
 
 write_the_pal:
    MoveW R0, R11 
-   ldx #(PALETTE_SIZE/2)-1
+   ldx #(INTRO_PALETTE_SIZE/2)-1
    lda #0
    jsr write_to_palette
 
@@ -290,7 +290,7 @@ done:
 .proc fill_screen
    ; vera address0 set to 0, increment 1
    set_vera_address 0   
-   LoadW R0, screen           ; screendata to R0 (source)        
+   LoadW R0, intro_screen     ; screendata to R0 (source)        
    LoadW R1, VERA_data0       ; vera data #0 to R1 (destination)
    jsr memory_decompress
    sec                        ; set carry flag to indicate that the next worker task should start
@@ -350,15 +350,15 @@ animated_smoke:
 .byte 5              ; 11:  current delay count
                      ; 12:  size of struct
 
-screen:
+intro_screen:
 .incbin "assets/intro_data.bin"
 
-SCREEN_SIZE = *-screen
+INTRO_SCREEN_SIZE = *-intro_screen
 
-screen_pal:
+intro_pal:
 .incbin "assets/intro_palette.bin"
-PALETTE_SIZE = *-screen_pal
+INTRO_PALETTE_SIZE = *-intro_pal
 
 ; this is where we fade into
 fadebuffer:
-.res PALETTE_SIZE, 0
+.res INTRO_PALETTE_SIZE, 0

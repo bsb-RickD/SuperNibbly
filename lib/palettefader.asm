@@ -71,20 +71,24 @@ set_state_and_f:
    tax            ; x = number of colors
    ldy #3
    lda (R15),y
-   sta copy_colors+1
+   sta color_gb+1
    iny
    lda (R15),y
-   sta copy_colors+6
-   ldy #0
+   sta color_r+1
+   PushW R0
 copy_colors:
+color_gb:
    lda #00           ; offset 1 from copy_colors - this receives the color to copy
-   sta (R0),y
-   iny         
+   sta (R0)      
+   IncW R0
+color_r:   
    lda #00           ; offset 6 from copy_colors - this receives the color to copy
-   sta (R0),y
-   iny
+   sta (R0)
+   IncW R0
    dex
+   cpx #255
    bne copy_colors
+   PopW R0
    rts
 .endproc
 
@@ -94,76 +98,89 @@ copy_colors:
 ; returns: 
 ;  c = 0: not done yet
 ;  c = 1: fade complete
-; 
+;
+; palette fader class layout
+;
+; num colors to fade       1 byte   (+1, 0 meaning 1, etc.)    offset 0
+; pointer to palette       2 bytes                             offset 1
+; target color             2 bytes                             offset 3
+; state                    1 byte   (up/down/done)             offset 5
+; current f                1 byte   (0..16)                    offset 6 
 .proc palettefader_step_fade
    ldy #5                  ; point to state
    lda (R15),y             ; get state
    iny   
-   add (R15),y             ; change f, carry is clear afterwards
+   add (R15),y             ; change f (= lerp factor), carry is clear afterwards
    sta (R15),y
 
    sta R3L                 ; R3L = factor, remember factor for later
    ldy #0
    lda (R15),y             ; get count
-   asl
-   pha                     ; a = index to last byte of the palette+1
+   tax                     ; x = count
 
-init_regs:
+   ; initialize R1 and R2, by copying from the class structure
+init_regs:                 
    iny 
    lda (R15),y 
-   tax
-   stx R0H,y
+   sta R0H,y
    cpy #4
    bne init_regs
+   ; R1 now points to the palette, R2 holds target color
 
-   ; R1 points to palette, R2 holds target color
-
-   ply                     ; y = index to last byte of the palette+1
+   PushW R0                ; push R0 - it's used as moving output pointer while fading..
 
 lerp_loop:
-   dey
-   lda (R1),y
-   sty R3H                 ; remember palette index   
+   phx
+
+   lda (R1)                ; load palette value
+   and #$F                 ; mask out the lower 4 bits, this is blue
    tax
-   lda R2H
+   lda R2L                 ; get target color
+   and #$F                 ; .. blue of target
    tay
    lda R3L                 ; load the factor
    jsr lerp416             ; a = lerped color
 
-   ldy R3H
-   sta (R0),y              ; store it
-   dey                     ; move on
+   sta (R0)                ; store it
 
-   lda (R1),y
-   pha
-   sty R3H                 ; remember palette index   
-   and #$F
-   tax
-   lda R2L   
-   and #$F
-   tay
-   lda R3L                 ; load the factor
-   jsr lerp416             ; a = lerped color
-
-   ldy R3H
-   sta (R0),y              ; store it
-
-   pla
+   lda (R1)                ; load palette value (this is faster than pushing and pulling the previously loaded value)
    rorn 4
-   and #$F
+   and #$F                 ; shift and mask to get the higher 4 bits, this is green
    tax
-   lda R2L   
+   lda R2L                 ; get target color
    rorn 4
-   and #$F
+   and #$F                 ; shift and mask to get the higher 4 bits, this is green  
+                           ; !!! OPTIMIZE -- target color factors into 3 registers, then all the shifting and masking only needs to
+                           ; be done once! and we directly can load y and be done with it!
    tay
    lda R3L                 ; load the factor
    jsr lerp416             ; a = lerped color
    asln 4
-   ldy R3H
-   ora (R0),y
-   sta (R0),y              ; store it
-   cpy #0
+   ora (R0)                ; combine green with blue
+   sta (R0)                ; store it
+
+
+   IncW R0                 ; advance the output pointer
+   IncW R1                 ; advance the palette pointer
+
+   lda (R1)                ; load source red
+   tax
+   lda R2H                 ; load target red
+   tay
+   lda R3L                 ; load the factor
+   jsr lerp416             ; a = lerped color
+
+   sta (R0)                ; store it
+
+   IncW R0                 ; advance the output pointer
+   IncW R1                 ; advance the palette pointer
+
+   plx                     ; get count
+   dex                     ; decrement
+   cpx #255                ; did we overflow? then we are done..
    bne lerp_loop
+
+   PopW R0
 
    lda R3L
    beq fade_complete
