@@ -24,6 +24,7 @@
    jsr test_mad816
    jsr test_negadd   
    jsr test_lerp
+   jsr test_lerp_lookup
 
    rts
 .endproc
@@ -67,6 +68,45 @@ loop:
    ut_exp_equal
    rts
 .endproc
+
+.proc test_lerp_lookup   
+   jsr init_lerp416_table
+
+   ldy #0
+loop:
+   LoadW R12, lerp_results
+   lda (R12),y
+   tax
+   tya
+   phy
+   jsr test_lerp_inner_lookup
+   ply
+   iny
+   cpy #16
+   bne loop
+   rts
+.endproc
+
+; a = factor 0..16
+; x = expected result
+.proc test_lerp_inner_lookup
+   pha
+   stx R0L
+   prints "lerp_lookup 7 to 15 for: "
+   print_dec
+   ldx #7
+   ldy #15
+   pla
+   jsr lerp416_lookup
+   pha
+   prints " = "
+   print_dec
+   pla 
+   cmp R0L
+   ut_exp_equal
+   rts
+.endproc
+
 
 .proc test_negadd
    LoadW R0, $1000

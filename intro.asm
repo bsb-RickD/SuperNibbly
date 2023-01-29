@@ -83,6 +83,9 @@ return_to_basic:
 
 ; init state for multiple runs
 .proc reset_intro_state
+   jsr rand_seed_time            ; seed the random generator
+   jsr init_lerp416_table        ; init the lerp table
+
    stz palfade_state
    stz palfade_in+5
    stz palfade_out+5
@@ -94,11 +97,10 @@ return_to_basic:
    LoadW jumping_fish+2, 17
    jsr switch_all_sprites_off
    jsr init_drop
-   jsr rand_seed_time   
    rts
 .endproc
 
-.proc main   
+.proc main      
    jsr reset_intro_state         ; init state for multiple runs
    
    LoadW R15, work_queue

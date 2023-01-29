@@ -197,5 +197,69 @@ mad816 = mul816+4
 	rts
 .endproc
 
+Lerp416_table = $400
+
+; 8 bit multiply add
+; a = a+r11H*r11L
+;mad88 = mul88+9
+
+.proc init_lerp416_table
+	stz R0L
+	lda #4
+	sta R0H
+	ldx #0
+outer_loop:	
+	ldy #0
+inner_loop:	
+	lda #4
+	stx R11H
+	sty R11L
+	jsr mad88
+	sta (R0)	
+	IncW R0
+	iny
+	cpy #16
+	bne inner_loop
+	inx
+	cpx #16
+	bne outer_loop
+	rts
+.endproc
+
+; lerp 4 bit numbers from x to y in 16 steps, a holds step 0..16
+; result in a
+;
+; clobbers R11 and R12L
+.proc lerp416_lookup
+	beq return_x		; a = 0, return x	
+	sta load_f+1        ; store it for later
+	nad 16 				; a = 16-f
+	beq return_y        ; if we are zero here, f was 16, so return y
+	stx orx+1           ; write x as or immediate
+	asln 4              ; (16-f)*16
+orx:	
+	ora #00             ; a = (16-f)*16+x, ready for the table lookup
+	tax	                ; store it in x, for later use
+load_f:
+	lda #$FF            ; a = f
+	sty ory+1           
+	asln 4         		; f*16, carry definitley zero
+ory:	
+	ora #00             ; a = f*16+y, ready for table lookup
+	tay                 ; remember it in y
+	lda Lerp416_table,x 
+	adc Lerp416_table,y
+
+	rorn 4
+	and #$0f 
+	rts
+return_y:
+	tya
+	rts	
+return_x:
+	txa
+	rts	
+.endproc
+
 
 .endif

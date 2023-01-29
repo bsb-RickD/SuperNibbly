@@ -141,7 +141,7 @@ lerp_loop:
    tax
    ldy R2L                 ; get blue of target color
    lda R3L                 ; load the factor
-   jsr lerp416             ; a = lerped color
+   jsr lerp416_lookup      ; a = lerped color
 
    sta (R0)                ; store it
 
@@ -151,7 +151,7 @@ lerp_loop:
    tax
    ldy R3H                 ; get green of target color
    lda R3L                 ; load the factor
-   jsr lerp416             ; a = lerped color
+   jsr lerp416_lookup      ; a = lerped color
    asln 4
    ora (R0)                ; combine green with blue
    sta (R0)                ; store it
@@ -165,7 +165,7 @@ lerp_loop:
    lda R3H                 ; load target red
    tay
    lda R3L                 ; load the factor
-   jsr lerp416             ; a = lerped color
+   jsr lerp416_lookup      ; a = lerped color
 
    sta (R0)                ; store it
 
