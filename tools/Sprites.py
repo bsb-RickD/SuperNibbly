@@ -1,9 +1,11 @@
 from PIL import Image
 from typing import List, Any
-from PaletteOptimizer import transparent_pixel
+from PaletteOptimizer import transparent_pixel, MAX_SUB_PALETTE_SIZE, MAX_FULL_PALETTE_SIZE
 from ImageUtils import map_colors_to_index, image_bytes, get_sub_images, get_img_bounding_box, write_data, SubImage, \
-    print_header
+    print_header, image_bytes_to_index
 from itertools import chain
+from math import log2
+import os
 
 SPRITE_SIZES = (8, 16, 32, 64)
 MAX_SPRITE_SIZE = SPRITE_SIZES[-1]
@@ -33,7 +35,8 @@ def pad_sprite_to_next_size(img, transparent_color):
 # this class gets constructed with the sprite coordinates, and it turns this into a number of Subimages
 class MultiSprite:
     def __init__(self, img, upper_left, lower_right, frames, name,
-                 transparency=transparent_pixel, optimize_size=True, layer=SPRITE_LAYER_FOREGROUND):
+                 transparency=transparent_pixel, optimize_size=True, layer=SPRITE_LAYER_FOREGROUND,
+                 max_part_x_size=MAX_SPRITE_SIZE, max_part_y_size=MAX_SPRITE_SIZE):
         self.img = img
         self.upper_left = upper_left
         self.lower_right = lower_right
@@ -42,15 +45,17 @@ class MultiSprite:
         self.transparency = transparency
         self.optimize_size = optimize_size
         self.layer = layer
-        self.images = [i for i in get_sub_images(img, upper_left, lower_right, frames, transparency(),
-                                                 max_size=MAX_SPRITE_SIZE)]
+        self.images = [i for i in
+                       get_sub_images(img, upper_left, lower_right, frames, transparency(), 255, max_part_x_size,
+                                      max_part_y_size)]
 
 
 # pseudo constructor for sprintes with a single frame
 # noinspection PyPep8Naming
 def Sprite(img, upper_left, lower_right, name, transparency=transparent_pixel, optimize_size=True,
-           layer=SPRITE_LAYER_FOREGROUND):
-    return MultiSprite(img, upper_left, lower_right, (1, 1), name, transparency, optimize_size, layer)
+           layer=SPRITE_LAYER_FOREGROUND, max_part_x_size=MAX_SPRITE_SIZE, max_part_y_size=MAX_SPRITE_SIZE):
+    return MultiSprite(img, upper_left, lower_right, (1, 1), name, transparency, optimize_size, layer, max_part_x_size,
+                       max_part_y_size)
 
 
 # this is the class that holds the actual sprite bitmap information
@@ -73,6 +78,13 @@ class SpriteBitmap:
 
         palindex, pal = palette_optimizer.get_index(sub_image.palette)
 
+        if len(pal) > MAX_SUB_PALETTE_SIZE:
+            assert palindex == 0
+            assert len(pal) <= MAX_FULL_PALETTE_SIZE
+            bits_per_pixel = 8
+        else:
+            bits_per_pixel = 4
+
         colors = list(pal)
         colors.insert(0, sub_image.transparent_color)
 
@@ -87,12 +99,18 @@ class SpriteBitmap:
             self.xoffset = bbox[0] + sub_image.part_x
             self.yoffset = bbox[1] + sub_image.part_y
             self.palette_index = palindex
-            self.data = image_bytes(map_colors_to_index(padded_sprite_frame, colors, 0), 4)
+            self.data = image_bytes(map_colors_to_index(padded_sprite_frame, colors, 0), bits_per_pixel)
             self.frame = sub_image.index
             self.part = sub_image.part_index
             self.name = "%s_%d" % (name, self.frame)
             if self.part is not None:
                 self.name += "_%d" % self.part
+        else:
+            raise UserWarning("Empty sprite / part encountered.. %s" % name)
+
+    def get_num_colors(self):
+        sprite_size = len(self.data)
+        return 256 if self.width * self.height == sprite_size else 16
 
 
 # a spritegroup is used to group Sprites together, to write the sprite data to a file
@@ -114,8 +132,12 @@ class SpriteGroup:
         self.sprite_bitmaps = []
         for s in self.sprites:
             for img in s.images:
-                sb = SpriteBitmap(img, s.name, palette_optimizer, s.optimize_size, s.layer)
-                self.sprite_bitmaps.append(sb)
+                try:
+                    sb = SpriteBitmap(img, s.name, palette_optimizer, s.optimize_size, s.layer)
+                    self.sprite_bitmaps.append(sb)
+                except UserWarning as ve:
+                    # empty sprites raise a UserWarning
+                    print("Info: %s" % ve)
         self.update_sprite_offsets(offset)
         self.get_sprite_data()
         total = len(self.sprite_data)
@@ -137,6 +159,33 @@ class SpriteGroup:
                 sb.data_offset = int(
                     co // 32)  # if size 0, it's a hidden sprite and that already knows it's data offset
             co += len(sb.data)
+
+    def save_as_png(self, po, folder="Debug"):
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+
+        for sb in self.sprite_bitmaps:
+            num_colors = sb.get_num_colors()
+            fn = os.path.join(folder, "%s_%dcols.png" % (sb.name, num_colors))
+
+            img = Image.new("P", (sb.width, sb.height))
+            imgdata = [i for i in image_bytes_to_index(sb.data, int(log2(num_colors)))]
+            img.putdata(imgdata)
+
+            # build palette
+            if num_colors == 16:
+                palette = list(po.palettes[sb.palette_index])
+            else:
+                palette = po.full_palette
+
+            paldata = bytearray()
+            paldata.extend((0, 0, 0))  # first entry is empty
+            for p in palette:
+                paldata.extend(p)
+
+            img.putpalette(paldata)
+
+            img.save(fn)
 
     def save(self, filename):
         write_data(self.sprite_data, filename)

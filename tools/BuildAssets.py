@@ -8,10 +8,11 @@ def super_nibbly_title():
     print_header("Super Nibbly Title")
     title = load_image(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\TITEL_BG_x16.png")
     titanm = load_image(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\titanm.png")
+    titanm_1 = load_image(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\titanm-1_x16.png")
     woodly2 = load_image(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\woodly2.png")
 
     # define the sprites
-    sg = SpriteGroup([
+    sg1 = SpriteGroup([
         MultiSprite(titanm, (117, 18), (132, 101), (1, 6), name="smoke"),
         MultiSprite(titanm, (80, 19), (111, 188), (1, 17), name="fish"),
         MultiSprite(titanm, (1, 19), (32, 210), (1, 16), name="plane"),
@@ -21,23 +22,36 @@ def super_nibbly_title():
         Sprite(woodly2, (150, 1), (204, 70), name="b2"),
         Sprite(woodly2, (209, 1), (260, 78), name="l"),
         Sprite(woodly2, (264, 1), (315, 82), name="y"),
+        Sprite(titanm_1, (10, 452), (57, 500), name="head"),
+        MultiSprite(titanm_1, (474, 455), (581, 496), (3, 1), name="necks"),
+        MultiSprite(titanm_1, (268, 1), (295, 171), (1, 19), name="eyes"),
+        MultiSprite(titanm_1, (10, 375), (297, 402), (6, 1), name="hats"),
+        MultiSprite(titanm_1, (10, 403), (297, 423), (6, 1), name="mouths"),
+
+        #MultiSprite(titanm_1, (9, 9), (88, 344), (1, 7), name="bubbles", max_part_x_size=32),
+        #Sprite(titanm_1, (317, 253), (392, 319), name="t1000", max_part_x_size=32, max_part_y_size=32),
     ])
 
     # background image
     it = ImageTiler(title, no_transparent_color())
 
     # optimize palette
-    po = PaletteOptimizer(it, sg)
+    po = PaletteOptimizer(it, sg1)
 
     # use optimized palette for tiles and sprites
     it.calc_tiles(po)
-    sg.calc_sprite_bitmaps(po, it.get_used_memory())
+    sg1.calc_sprite_bitmaps(po, it.get_used_memory())
+    #sg2.calc_sprite_bitmaps(po, it.get_used_memory())
+
+    # write the sprites as debug images
+    sg1.save_as_png(po)
 
     # save some space on sprites
-    it.hide_sprites_in_screen_buffer(sg)
+    it.hide_sprites_in_screen_buffer(sg1)
 
     # write everything to disk
-    sg.save("intro_sprites")
+    sg1.save("intro_sprites")
+    #sg2.save("intro_sprites_2")
     po.save("intro_palette")
     it.save("intro")
 
@@ -97,4 +111,4 @@ def super_nibbly_travel():
 
 if __name__ == "__main__":
     super_nibbly_title()
-    super_nibbly_travel()
+    #super_nibbly_travel()

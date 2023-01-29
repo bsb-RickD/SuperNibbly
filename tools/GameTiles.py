@@ -1,5 +1,4 @@
 from PIL import Image
-from ordered_set import OrderedSet
 from ImageTiler import image_bytes
 from ImageUtils import write_data, append_palette
 
@@ -18,49 +17,48 @@ def get_mask(img):
 
 
 def grab_tiles(img):
-    positions = ((5,5),(1,1),(2,1),(3,1),(1,2),(1,3),(3,3))
+    positions = ((5, 5), (1, 1), (2, 1), (3, 1), (1, 2), (1, 3), (3, 3))
 
-    tiles = Image.new(mode = "P", size = (16, 16*7), color = 0)
+    tiles = Image.new(mode="P", size=(16, 16 * 7), color=0)
     tiles.putpalette(img.getpalette())
 
-    for i, (x,y) in enumerate(positions):
-        tiles.paste(img.crop((x*16, y*16, x*16+16, y*16+16)), (0,i*16))
+    for i, (x, y) in enumerate(positions):
+        tiles.paste(img.crop((x * 16, y * 16, x * 16 + 16, y * 16 + 16)), (0, i * 16))
 
     return tiles
 
 
-
 def build_image(wall, pill=None):
-    lab = [ [1,0,1,1,0,0],
-        [0,0,0,0,0,0],
-        [1,0,1,1,0,0],
-        [1,0,1,0,0,0],
-        [0,0,0,0,0,0],
-        [0,0,0,0,0,0],
-        [1,1,0,0,0,0],
-        [0,0,0,0,0,0]
-       ]
+    lab = [[1, 0, 1, 1, 0, 0],
+           [0, 0, 0, 0, 0, 0],
+           [1, 0, 1, 1, 0, 0],
+           [1, 0, 1, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0],
+           [1, 1, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0]
+           ]
 
     wm = get_mask(wall)
 
     if pill is not None:
         pm = get_mask(pill)
 
-    tiled = Image.new(mode = "P", size = (16*6, 16*8), color = 6)
+    tiled = Image.new(mode="P", size=(16 * 6, 16 * 8), color=6)
     tiled.putpalette(wall.getpalette())
 
-    tiled.paste(Image.new(mode="P", size=(16 * 6, 16 * 2), color=0), (0, 16*6))
+    tiled.paste(Image.new(mode="P", size=(16 * 6, 16 * 2), color=0), (0, 16 * 6))
 
     for y in range(8):
         for x in range(6):
             entry = lab[y][x]
 
             if entry == 1:
-                tiled.paste(wall, (16*x,16*y), mask = wm)
-            elif (entry == 0) and (pill is not None) and y <7:
+                tiled.paste(wall, (16 * x, 16 * y), mask=wm)
+            elif (entry == 0) and (pill is not None) and y < 7:
                 tiled.paste(pill, (16 * x, 16 * y), mask=pm)
 
-    #tiled.show()
+    # tiled.show()
 
     return tiled
 
@@ -114,28 +112,30 @@ and so on..
 these 7 tiles are then combined with the 6 pill states (no pill, size 1, 2, 3, 4, 5)
 
 """
+
+
 def main():
     img = Image.open(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\level1.png")
 
-    pills  = (None, img.crop((81, 77, 97, 93)), img.crop((81, 60, 97, 76)), img.crop((81, 43, 97, 59)),\
+    pills = (None, img.crop((81, 77, 97, 93)), img.crop((81, 60, 97, 76)), img.crop((81, 43, 97, 59)), \
              img.crop((81, 26, 97, 42)), img.crop((81, 9, 97, 25)))
 
-    for n in range (1,8):
-        img = Image.open(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\level%d.png"%n)
-        wall = img.crop((21, 5, 42,26))
+    for n in range(1, 8):
+        img = Image.open(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\level%d.png" % n)
+        wall = img.crop((21, 5, 42, 26))
 
         tiled = Image.new(mode="P", size=(16, 16 * 47), color=0)
         tiled.putpalette(wall.getpalette())
 
         for i, p in enumerate(pills):
-            lab_img = build_image(wall,p)
-            tiled.paste(grab_tiles(lab_img),(0,7*16*i))
+            lab_img = build_image(wall, p)
+            tiled.paste(grab_tiles(lab_img), (0, 7 * 16 * i))
             if i == 0:
                 w1 = lab_img.crop((2 * 16, 6 * 16, 3 * 16, 7 * 16))
                 w2 = lab_img.crop((16, 7 * 16, 33, 8 * 16))
                 w3 = lab_img.crop((2 * 16, 7 * 16, 3 * 16, 8 * 16))
 
-        tiled.paste(wall,(0,16*42))
+        tiled.paste(wall, (0, 16 * 42))
 
         empty = Image.new(mode="P", size=(16, 16), color=0)
         tiled.paste(empty, (0, 16 * 43))
@@ -144,12 +144,12 @@ def main():
         tiled.paste(w2, (0, 16 * 45))
         tiled.paste(w3, (0, 16 * 46))
 
-        #tiled.show() # to debug
+        # tiled.show() # to debug
 
         write_data(bytearray(image_bytes(bytearray(tiled.getdata()), 4)), "wall_gfx_set_%d" % n)
 
         pal = wall.getpalette()
-        pal = [pal[i:i + 3] for i in range(3, 16*3, 3)]
+        pal = [pal[i:i + 3] for i in range(3, 16 * 3, 3)]
         pb = bytearray()
         append_palette(pal, pb)
 

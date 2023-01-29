@@ -1,4 +1,5 @@
 from PIL import Image
+import numpy as np
 from ordered_set import OrderedSet
 
 
@@ -17,6 +18,24 @@ def image_bytes(img, bits_per_pixel):
         return [(a << 4) + b for a, b in (img[i:i + 2] for i in range(0, len(img), 2))]
     if bits_per_pixel == 2:
         return [(a << 6) + (b << 4) + (c << 2) + d for a, b, c, d in (img[i:i + 4] for i in range(0, len(img), 4))]
+
+
+def image_bytes_to_index(img_bytes, bits_per_pixel):
+    if bits_per_pixel == 8:
+        for b in img_bytes:
+            yield b
+    elif bits_per_pixel == 4:
+        for b in img_bytes:
+            yield b >> 4
+            yield b & 15
+    elif bits_per_pixel == 2:
+        for b in img_bytes:
+            yield b >> 6
+            yield (b & 0b00110000) >> 4
+            yield (b & 0b00001100) >> 2
+            yield (b & 0b00000011)
+    else:
+        raise ValueError("Unexpoected bits per pixel value: %d" % bits_per_pixel)
 
 
 def print_header(message):
@@ -47,7 +66,7 @@ class SubImage:
 
 
 def get_sub_images(img, upper_left, lower_right, partitioning, transparent_color_getter, max_palette_size=15,
-                   max_size=(1 << 64)):
+                   max_x_size=(1 << 64), max_y_size=(1 << 64)):
     l, t = upper_left
     r, b = lower_right
     width = r - l + 1
@@ -65,21 +84,23 @@ def get_sub_images(img, upper_left, lower_right, partitioning, transparent_color
     for y in range(t, b, cell_height):
         for x in range(l, r, cell_width):
             cropped = img.crop((x, y, x + cell_width, y + cell_height))
+            tc = transparent_color_getter(cropped)
+
             # always chunk it up - it will only do one iteration anyway if the size fits
             part = 0
-            for sy in range(0, cell_height, max_size):
-                sh = min(cell_height - sy, max_size)
-                for sx in range(0, cell_width, max_size):
-                    sw = min(cell_width - sx, max_size)
+            for sy in range(0, cell_height, max_y_size):
+                sh = min(cell_height - sy, max_y_size)
+                for sx in range(0, cell_width, max_x_size):
+                    sw = min(cell_width - sx, max_x_size)
                     sc = cropped.crop((sx, sy, sx + sw, sy + sh))
                     # sc.show() # for debugging
 
                     colors = get_unique_colors(sc)
-                    tc = transparent_color_getter(cropped)
                     if tc in colors:
                         colors.remove(tc)
                     if len(colors) > max_palette_size:
-                        raise ValueError("Subimage with too many colors encountered")
+                        sc.show()
+                        raise ValueError("Subimage with too many colors (%d) encountered" % len(colors))
 
                     if sh == cell_height and sw == cell_width:
                         part = None
@@ -201,14 +222,37 @@ def append_palette(pal, palette_bytes):
 def load_image(filename):
     img = Image.open(filename)
     img = img.convert("RGB")
+    # Convert the image to a Numpy array
+    im_array = np.array(img)
+    # Normalize the RGB values from [0, 255] to [0, 1]
+    im_array = im_array / 255
+    # Quantize the colors using Numpy
+    quantized_array = (np.round(im_array / (17 / 255)) * (17 / 255)) * 255
+    # Convert back to [0, 255]
+    quantized_array = quantized_array.astype(np.uint8)
+    img = Image.fromarray(quantized_array)
+
     return img
 
 
 def load_image_plus_pal(filename):
     img = Image.open(filename)
-    pal = img.palette
+    palette = img.palette
+
+    # Normalize the RGB values from [0, 255] to [0, 1]
+    palette = np.array(palette) / 255
+
+    # Quantize the palette using Numpy
+    quantized_palette = (np.round(palette / (17 / 255)) * (17 / 255)) * 255
+
+    # Convert back to [0, 255]
+    quantized_palette = quantized_palette.astype(np.uint8)
+
+    # Update the palette in the image
+    img.putpalette(quantized_palette)
+
     img = img.convert("RGB")
-    return img, pal
+    return img, palette
 
 
 def create_screen_buffer_entry(tile_index, palette_index, h_flip, v_flip):
