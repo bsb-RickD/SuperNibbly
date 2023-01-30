@@ -141,8 +141,8 @@ lerp_loop:
    tax
    ldy R2L                 ; get blue of target color
    lda R3L                 ; load the factor
-   jsr lerp416_lookup      ; a = lerped color
-
+   jsr lerp416_lookup      ; x = lerped color*16
+   lda Rorn4_table,x       ; a = x/16 = lerped color
    sta orgb+1              ; store it
 
    lda (R1)                ; load palette value (this is faster than pushing and pulling the previously loaded value)
@@ -151,8 +151,8 @@ lerp_loop:
    tax
    ldy R2H                 ; get green of target color
    lda R3L                 ; load the factor
-   jsr lerp416_lookup      ; a = lerped color
-   asln 4
+   jsr lerp416_lookup      ; x = lerped color * 16
+   txa                     ; a = lerped green*16, ready for or
 orgb:   
    ora #00                 ; combine green with blue
    sta (R0)                ; store it
@@ -164,7 +164,8 @@ orgb:
    tax
    ldy R3H                 ; load target red
    lda R3L                 ; load the factor
-   jsr lerp416_lookup      ; a = lerped color
+   jsr lerp416_lookup      ; x = lerped color*16
+   lda Rorn4_table,x       ; a = x/16 = lerped color
 
    sta (R0)                ; store it
 

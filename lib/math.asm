@@ -248,7 +248,7 @@ ror_loop:
 .endproc
 
 ; lerp 4 bit numbers from x to y in 16 steps, a holds step 0..16
-; result in a
+; result in x : lerp result * 16
 ;
 .proc lerp416_lookup
 	beq return_x		; a = 0, return x	
@@ -268,15 +268,16 @@ ory:
 	adc Lerp416_table,y ; a = x*(16-f)+y*f
 
 	and #$f0			; mask it
-
-	rorn 4
+	tax 				; move it to x
 	 
 	rts
 return_y:
-	tya
+	lda Asln4_table,y 	; a = y*16
+	tax                 ; move to x
 	rts	
 return_x:
-	txa
+	lda Asln4_table,x 	; a = x*16
+	tax                 ; move to x
 	rts	
 .endproc
 
