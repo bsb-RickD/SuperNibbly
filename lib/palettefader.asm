@@ -143,27 +143,26 @@ lerp_loop:
    lda R3L                 ; load the factor
    jsr lerp416_lookup      ; a = lerped color
 
-   sta (R0)                ; store it
+   sta orgb+1              ; store it
 
    lda (R1)                ; load palette value (this is faster than pushing and pulling the previously loaded value)
    rorn 4
    and #$F                 ; shift and mask to get the higher 4 bits, this is green
    tax
-   ldy R3H                 ; get green of target color
+   ldy R2H                 ; get green of target color
    lda R3L                 ; load the factor
    jsr lerp416_lookup      ; a = lerped color
    asln 4
-   ora (R0)                ; combine green with blue
+orgb:   
+   ora #00                 ; combine green with blue
    sta (R0)                ; store it
-
 
    IncW R0                 ; advance the output pointer
    IncW R1                 ; advance the palette pointer
 
    lda (R1)                ; load source red
    tax
-   lda R3H                 ; load target red
-   tay
+   ldy R3H                 ; load target red
    lda R3L                 ; load the factor
    jsr lerp416_lookup      ; a = lerped color
 
