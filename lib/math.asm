@@ -199,6 +199,7 @@ mad816 = mul816+4
 
 Lerp416_table = $400
 Asln4_table = $500
+Rorn4_table = $500
 
 
 .proc init_lerp416_table
@@ -231,6 +232,18 @@ shift_loop:
 	inx
 	cpx #16
 	bne shift_loop
+	lda #$10
+	sta R0L
+	lda #5
+	sta R0H
+	ldx #1
+ror_loop:	
+	txa
+	sta (R0)
+	inx
+	AddVW 16,R0
+	cpx #16
+	bne ror_loop
 	rts
 .endproc
 
@@ -251,11 +264,13 @@ orx:
 ory:	
 	ora #00             ; a = y*16+f, ready for table lookup
 	tay                 ; remember it in y
-	lda Lerp416_table,x
-	adc Lerp416_table,y
+	lda Lerp416_table,x ; a = x*(16-f)
+	adc Lerp416_table,y ; a = x*(16-f)+y*f
+
+	and #$f0			; mask it
 
 	rorn 4
-	and #$0f 
+	 
 	rts
 return_y:
 	tya
