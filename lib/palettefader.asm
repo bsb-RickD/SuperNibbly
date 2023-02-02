@@ -106,53 +106,97 @@ color_r:
 ; target color             2 bytes                             offset 3
 ; state                    1 byte   (up/down/done)             offset 5
 ; current f                1 byte   (0..16)                    offset 6 
+;
+;
+; runtime behavior:
+;
+; R1:       points to output palette
+; R2L:      blue
+; R2H:      green
+; R3L:      16-f
+; R3H:      red
+; R4L:      target blue * factor
+; R4H:      target green * factor
+; R5L:      target red * factor
+; R5H:      (16-f) << 4
+;
 .proc palettefader_step_fade
    ldy #5                  ; point to state
    lda (R15),y             ; get state
    iny   
    add (R15),y             ; change f (= lerp factor), carry is clear afterwards
-   sta (R15),y
+   sta (R15),y             ; store the new factor
+   bne not_zero
+   ThisLoadW R15,R0,1,-    ; factor is zero, the fade is complete, make R0 point to the target palette
+   jmp fade_complete
+not_zero:
+   cmp #16
+   jeq output_destination_color
 
-   sta R3L                 ; R3L = factor, remember factor for later
-   ldy #0
-   lda (R15),y             ; get count
+   tax                     ; x = f
+   sta or_g_f+1            ; store f for green multiply
+   sta re_read_factor+1    ; store for comparison
+   nad 16                  ; a = 16-f
+   sta R3L                 ; R3L = 16-f
+   tay
+   lda Asln4_table,y       ; a = 16-f << 4
+   sta R5H                 ; R5H = 16-f << 4
+   lda Asln4_table,x       ; a = f*16
+   sta or_b_f+1            ; store f for blue multiply
+   sta or_r_f+1            ; store f for red multiply
+
+   ldy #3
+   lda (R15),y             ; load target blue and green 
+   and #$0f                ; a = blue
+or_b_f:   
+   ora #00                 ; a = f*16+blue, ready for table lookup
+   tax                     
+   lda Lerp416_table,x     ; multiply
+   sta R4L                 ; R4L = target blue * factor
+
+   lda (R15),y             ; load target blue and green 
+   and #$f0                ; a = green
+or_g_f:   
+   ora #00                 ; a = f*16+g, ready for table lookup
+   tax                     
+   lda Lerp416_table,x     ; multiply
+   sta R4H                 ; R4H = target green * factor
+
+   iny
+   lda (R15),y             ; a = red
+or_r_f:   
+   ora #00                 ; a = f*16+r, ready for table lookup
+   tax                     
+   lda Lerp416_table,x     ; multiply
+   sta R5L                 ; R5L = target red * factor
+
+   lda (R15)               ; get count
    tax                     ; x = count
 
-   iny 
+   ldy #1
    ThisLoadW R15, R1       ; R1 now points to the palette   
-   lda (R15),y             ; a now holds blue and green
-   rorn 4
-   and #$F
-   sta R2H                 ; R2H = green
-   lda (R15),y             ; a now holds blue and green
-   and #$F                 
-   sta R2L                 ; R2L = blue
-   iny
-   lda (R15),y
-   sta R3H                 ; R3H = red
 
    PushW R0                ; push R0 - it's used as moving output pointer while fading..
 
 lerp_loop:
-   phx
-
    lda (R1)                ; load palette value
-   and #$F                 ; mask out the lower 4 bits, this is blue
-   tax
-   ldy R2L                 ; get blue of target color
-   lda R3L                 ; load the factor
-   jsr lerp416_lookup      ; x = lerped color*16
-   lda Rorn4_table,x       ; a = x/16 = lerped color
-   sta orgb+1              ; store it
+   and #$0F                ; mask out the lower 4 bits, this is blue
+   ora R5H                 ; a = 16-f || blue, ready for table lookup
+   tay 
+   lda Lerp416_table,y     ; multiply
+   add R4L                 ; a = blended blue << 4
+   and #$f0
+   tay
+   lda Rorn4_table,y       ; shifted down again, final blue
+   sta orgb+1              ; store it for combining with 
 
-   lda (R1)                ; load palette value (this is faster than pushing and pulling the previously loaded value)
-   rorn 4
-   and #$F                 ; shift and mask to get the higher 4 bits, this is green
-   tax
-   ldy R2H                 ; get green of target color
-   lda R3L                 ; load the factor
-   jsr lerp416_lookup      ; x = lerped color * 16
-   txa                     ; a = lerped green*16, ready for or
+   lda (R1)                ; load palette value   
+   and #$F0                ; mask out the higher 4 bits, this is green
+   ora R3L                 ; a = green || 16-f, ready for table lookup
+   tay 
+   lda Lerp416_table,y     ; multiply
+   adc R4H                 ; a = blended green << 4
+   and #$F0
 orgb:   
    ora #00                 ; combine green with blue
    sta (R0)                ; store it
@@ -161,25 +205,23 @@ orgb:
    IncW R1                 ; advance the palette pointer
 
    lda (R1)                ; load source red
-   tax
-   ldy R3H                 ; load target red
-   lda R3L                 ; load the factor
-   jsr lerp416_lookup      ; x = lerped color*16
-   lda Rorn4_table,x       ; a = x/16 = lerped color
-
+   ora R5H                 ; a = 16-f || red, ready for table lookup
+   tay 
+   lda Lerp416_table,y     ; multiply
+   adc R5L                 ; a = blended red << 4
+   rorn 4                  ; shift down, to produce final red
    sta (R0)                ; store it
 
    IncW R0                 ; advance the output pointer
    IncW R1                 ; advance the palette pointer
 
-   plx                     ; get count
    dex                     ; decrement
-   cpx #255                ; did we overflow? then we are done..
    bne lerp_loop
 
    PopW R0
 
-   lda R3L
+re_read_factor:
+   lda #00
    beq fade_complete
    cmp #16                 ; 0..15: C = 0, 16: C = 1
    beq fade_complete
@@ -190,6 +232,33 @@ fade_complete:
    sta (R15),y             ; set state to zero
    sec                     ; set carry flag, to further indicate we're done!
    rts
+output_destination_color:
+   lda (R15)               ; get count
+   tax   
+   ldy #3
+   lda (R15),y             ; read g+b
+   sta loop+1              ; store it
+   iny
+   lda (R15),y             ; read r
+   sta red+1               ; store it
+   ldy #0
+   PushB R0H
+loop:
+   lda #00                 ; get g+b
+   sta (R0),y
+   iny                     ; y can't overflow here..
+red:
+   lda #00                 ; get r
+   sta (R0),y
+   iny
+   bne no_ov
+   inc R0H
+no_ov:   
+   dex                     ; decrement
+   cpx #255                ; did we overflow? then we are done..
+   bne loop
+   PopB R0H
+   bra fade_complete
 .endproc
 
 .endif

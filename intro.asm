@@ -207,7 +207,7 @@ palfade_state:
 
 .proc initial_fade_out
    jsr push_current_vera_address
-   lda #%00001111                   ; R0,R1,R2,R3
+   lda #%00111111                   ; R0,R1,R2,R3
    jsr push_registers_0_to_7 
    lda #%10011000                   ; R11,R12,R15
    jsr push_registers_8_to_15 
@@ -249,7 +249,7 @@ write_the_pal:
 done:
    lda #%10011000                   ; R11,R12,R15
    jsr pop_registers_8_to_15 
-   lda #%00001111                   ; R0,R1,R2,R3
+   lda #%00111111                   ; R0,R1,R2,R3,R4,R5
    jsr pop_registers_0_to_7 
    jsr pop_current_vera_address
 
