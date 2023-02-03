@@ -197,9 +197,9 @@ mad816 = mul816+4
 	rts
 .endproc
 
-Lerp416_table = $400
-Asln4_table = $500
-Rorn4_table = $500
+Lerp416_table 	= $400
+Asln4_table 	= $500
+Rorn4_table 	= $500
 
 
 .proc init_lerp416_table
@@ -268,8 +268,7 @@ ory:
 	adc Lerp416_table,y ; a = x*(16-f)+y*f
 
 	and #$f0			; mask it
-	tax 				; move it to x
-	 
+	tax 				; move it to x	 
 	rts
 return_y:
 	lda Asln4_table,y 	; a = y*16

@@ -21,27 +21,44 @@ def super_nibbly_title():
         Sprite(woodly2, (91, 1), (145, 75), name="b1"),
         Sprite(woodly2, (150, 1), (204, 70), name="b2"),
         Sprite(woodly2, (209, 1), (260, 78), name="l"),
-        Sprite(woodly2, (264, 1), (315, 82), name="y"),
+        Sprite(woodly2, (264, 1), (315, 82), name="y")
+        ])
+    sg2 = SpriteGroup([
         Sprite(titanm_1, (10, 452), (57, 500), name="head"),
         MultiSprite(titanm_1, (474, 455), (581, 496), (3, 1), name="necks"),
-        MultiSprite(titanm_1, (268, 1), (295, 171), (1, 19), name="eyes"),
+        MultiSprite(titanm_1, (273, 1), (290, 171), (1, 19), name="eyes_blinking"),
         MultiSprite(titanm_1, (10, 375), (297, 402), (6, 1), name="hats"),
         MultiSprite(titanm_1, (10, 403), (297, 423), (6, 1), name="mouths"),
-
-        #MultiSprite(titanm_1, (9, 9), (88, 344), (1, 7), name="bubbles", max_part_x_size=32),
-        #Sprite(titanm_1, (317, 253), (392, 319), name="t1000", max_part_x_size=32, max_part_y_size=32),
+        MultiSprite(titanm_1, (9, 9), (88, 344), (1, 7), name="bubbles", max_part_y_size=32),
+        Sprite(titanm_1, (106, 218), (128, 241), name="thinking"),
+        Sprite(titanm_1, (177, 179), (188, 202), name="jf_son"),
+        Sprite(titanm_1, (138, 50), (189, 125), name="45degree"),
+        MultiSprite(titanm_1, (206, 69), (221, 136), (1, 4), name="45deg_blinking"),
+        Sprite(titanm_1, (400, 81), (431, 112), name="mum"),
+        Sprite(titanm_1, (312, 7), (385, 80), name="bigmum"),
+        Sprite(titanm_1, (311, 98), (350, 115), name="head_crash"),
+        Sprite(titanm_1, (316, 209), (395, 240), name="jf_fat"),
+        Sprite(titanm_1, (410, 322), (460, 353), name="zack"),
+        MultiSprite(titanm_1, (421, 369), (452, 395), (1,3), name="toff_crash_slup"),
+        Sprite(titanm_1, (471, 334), (497, 365), name="debris_hat"),
+        Sprite(titanm_1, (501, 335), (521, 353), name="debris_tail"),
+        Sprite(titanm_1, (526, 334), (561, 368), name="debris_prop"),
+        Sprite(titanm_1, (574, 340), (621, 359), name="debris_wing", max_part_x_size=32),
+        MultiSprite(titanm_1, (589, 280), (636, 326), (3, 1), name="propeller"),
+        Sprite(titanm_1, (317, 253), (392, 319), name="t1000", max_part_x_size=32, max_part_y_size=32),
+        Sprite(titanm_1, (480, 250), (582, 327), name="bigplane", max_part_x_size=32),
     ])
 
     # background image
     it = ImageTiler(title, no_transparent_color())
 
     # optimize palette
-    po = PaletteOptimizer(it, sg1)
+    po = PaletteOptimizer(it, sg1, sg2)
 
     # use optimized palette for tiles and sprites
     it.calc_tiles(po)
     sg1.calc_sprite_bitmaps(po, it.get_used_memory())
-    #sg2.calc_sprite_bitmaps(po, it.get_used_memory())
+    sg2.calc_sprite_bitmaps(po, it.get_used_memory())
 
     # write the sprites as debug images
     sg1.save_as_png(po)
@@ -51,7 +68,7 @@ def super_nibbly_title():
 
     # write everything to disk
     sg1.save("intro_sprites")
-    #sg2.save("intro_sprites_2")
+    sg2.save("intro_sprites_2")
     po.save("intro_palette")
     it.save("intro")
 
