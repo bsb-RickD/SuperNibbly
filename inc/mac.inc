@@ -615,7 +615,7 @@ loop:
 .define neg_byte(n) (($FF-n)+1)
 
 ; string with leading length
-.macro lstr string, extra1, extra2, extra3, extra4, extra5, extra6, extra7, extra8, extra9, extra10
+.macro Lstr string, extra1, extra2, extra3, extra4, extra5, extra6, extra7, extra8, extra9, extra10
 .local start, end
 .byte end-start
 start:

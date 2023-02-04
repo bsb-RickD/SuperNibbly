@@ -26,8 +26,6 @@ Lstr "testload"
 bad_filename:
 Lstr "non_exist"
 
-.byte "erik war da", CHR_NL, CHR_NL, CHR_NL
-
 .proc load_test
    prints "file i/o test - load to banked ram", CHR_NL
 
@@ -52,7 +50,8 @@ opened_ok:
    lda #46              ; code for '.''
    jsr KRNL_CHROUT
 
-   stz BANK
+   lda #1
+   sta BANK
    lda #0
    lxy #$A000
    clc
@@ -68,7 +67,6 @@ worked:
    prints "macptr is happy :-) - all loaded"
 exit:
    jsr file_close
-   jsr KRNL_CLOSE_ALL
    rts
 .endproc
 
