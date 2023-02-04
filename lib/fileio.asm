@@ -1,3 +1,6 @@
+.ifndef FILEIO_ASM
+FILEIO_ASM = 1
+
 ERR_STRING_NOT_ZERO_TERMINATED_OR_TOO_LONG = $0A
 
 ; R11 points to string
@@ -99,3 +102,5 @@ error:
 error:   
    rts
 .endproc
+
+.endif
