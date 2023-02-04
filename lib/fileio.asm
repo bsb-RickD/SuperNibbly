@@ -1,6 +1,14 @@
 .ifndef FILEIO_ASM
 FILEIO_ASM = 1
 
+.ifndef KERNAL_INC
+.include "inc/kernal.inc"
+.endif
+
+.ifndef MAC_INC
+.include "inc/mac.inc"
+.endif
+
 ERR_STRING_NOT_ZERO_TERMINATED_OR_TOO_LONG = $0A
 
 ; R11 points to string
@@ -46,9 +54,9 @@ length_found:
    ldx #8         ; Device = "SD card" (emulation host FS)
    ldy #0         ; Secondary Address = 0, meaning we can specify where to load to on LOAD
    jsr KRNL_SETLFS   
-   phw R11
+   PushW R11
    jsr str_len
-   plw R11
+   PopW R11
    bcs prev_error ; error detected upstream, bail out
    cpx #0         ; if x > 0 - then the filename is longer than 255 bytes
    bne error
@@ -63,6 +71,45 @@ error:
 prev_error:   
    rts
 .endproc
+
+; in:
+;  R0 points to filename, leading length string
+; out:
+;  c clear: success
+;  c set:   fail     -> a holds kernal error code
+.proc file_open
+   lda #1         ; Logical Number = 1
+   ldx #8         ; Device = "SD card" (emulation host FS)
+   ldy #0         ; Secondary Address = 0, meaning we can specify where to load to on LOAD
+   jsr KRNL_SETLFS
+   bcs error
+
+   lda (R0)       ; a = length of filename
+   ldx R0L        
+   ldy R0H        ; move address to x,y
+   inx 
+   bne no_hi_inc
+   iny            
+no_hi_inc:        ; here x,y point to the filename - had to inc R0
+   jsr KRNL_SETNAM
+   bcs error
+   jsr KRNL_OPEN  ; open the file
+   bcs error
+   ldx #1         ; logical file numer 
+   jsr KRNL_CHKIN ; open channel for input
+error:   
+   rts   
+.endproc
+
+; currently just assumes logical file 1 has been opened
+; 
+.proc file_close
+   lda #1         ; Logical file Number = 1
+   jsr KRNL_CLOSE
+error:   
+   rts   
+.endproc
+
 
 ; in:
 ;  R11 points to filename, zero terminated

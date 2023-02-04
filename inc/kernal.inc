@@ -18,11 +18,14 @@ KRNL_SET_DATE_TIME   = $FF4D
 
 KRNL_SETLFS          = $FFBA
 KRNL_SETNAM          = $FFBD
+KRNL_OPEN            = $FFC0
+KRNL_CHKIN           = $FFC6
 KRNL_LOAD            = $FFD5
 KRNL_SAVE            = $FFD8
 KRNL_ACPTR           = $FFA5
 KRNL_MACPTR          = $FF44
 KRNL_CLOSE           = $FFC3
+KRNL_READST          = $FFB7
 
 KRNL_SCREEN          = $FFED
 KRNL_PLOT            = $FFF0
