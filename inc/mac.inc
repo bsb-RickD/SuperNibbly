@@ -422,7 +422,7 @@ loop:
       ror
 .endmacro
 
-; lxy - load word to x,y
+; lxy - load word to x (lobyte) , y (hibyte)
 .macro lxy source
    .if (.match (.left (1,{source}),#))
       ; immediate mode
@@ -434,9 +434,6 @@ loop:
       ldy source+1
    .endif
 .endmacro
-
-; define a string with leading length
-.define lstr(message) .byte .strlen(message), message
 
 
 ; helper macros for the ThisLoad / ThisStore macros below
@@ -618,11 +615,41 @@ loop:
 .define neg_byte(n) (($FF-n)+1)
 
 ; string with leading length
-.macro Lstr string
+.macro lstr string, extra1, extra2, extra3, extra4, extra5, extra6, extra7, extra8, extra9, extra10
 .local start, end
 .byte end-start
 start:
 .byte string
+.ifnblank extra1
+.byte extra1
+.ifnblank extra2
+.byte extra2
+.ifnblank extra3
+.byte extra3
+.ifnblank extra4
+.byte extra4
+.ifnblank extra5
+.byte extra5
+.ifnblank extra6
+.byte extra6
+.ifnblank extra7
+.byte extra7
+.ifnblank extra8
+.byte extra8
+.ifnblank extra9
+.byte extra9
+.ifnblank extra10
+.byte extra10
+.endif
+.endif
+.endif
+.endif
+.endif
+.endif
+.endif
+.endif
+.endif
+.endif
 end:
 .endmacro
 
