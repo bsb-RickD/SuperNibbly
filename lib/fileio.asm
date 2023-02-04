@@ -120,6 +120,75 @@ report_error:
    rts   
 .endproc
 
+; in:
+;  R0 = address to load to
+;  R1L = bank (used if R0 points into the $A000-$BFFF)
+; 
+;  R2L, R2H, R1H = max bytes to load
+;
+.proc file_read
+   ldx R0L              ; move address ..
+   ldy R0H              ; ... to x and y
+   cpy #$A0
+   blt no_bank
+   lda R1L
+   sta BANK
+no_bank:      
+keep_loading:   
+   lda R1H
+   bne load_amap  
+   lda R2H
+   bne load_amap
+   lda R2L              ; load only the last few bytes
+   beq finished         ; if it's zero, we're done
+   bra load_last_bit
+load_amap:              
+   lda #0               ; load as much as possible..
+load_last_bit:
+   clc                  ; increase the output addresse
+   jsr KRNL_MACPTR   
+   bcs error            ; was there a problem?
+   jsr KRNL_READST      ; read status
+   cmp #64              ; End of file reached?
+   beq finished
+   cmp #0
+   bne error            ; some error condition occured, abort
+   cpx #0
+   beq add_hi_byte
+   txa         
+   adc R0L              ; advance address
+   sta R0L
+add_hi_byte:   
+   tya
+   adc R0H              ; update high byte
+   sta R0H              ; R0 is now the new address to load to
+   cmp #$BF             ; have we left the 8k page range?
+   ble no_bank_switch
+   sub #32              
+   sta R0H              ; R0 is now the final address to load to
+   inc BANK
+no_bank_switch:   
+   lda R2L              ; update the number of bytes to load
+   stx R1L
+   sub R1L
+   sta R2L              ; new low byte        
+   lda R2H
+   sty R1L
+   sbc R1L
+   sta R2H              ; new high byte
+   lda R1H
+   sbc #0
+   sta R1H              ; new bank byte
+   bra keep_loading
+
+finished:
+   clc
+   rts
+error:
+   sec   
+   rts   
+.endproc
+
 
 ; in:
 ;  R11 points to filename, zero terminated
