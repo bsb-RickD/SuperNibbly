@@ -21,21 +21,28 @@
 .endproc
 
 filename:
-Lstr "testLzsa.o"
+Lstr "testload"
 
 .proc load_test
    prints "file i/o test - load to banked ram", CHR_NL
 
    LoadW R0, filename
    jsr file_open
-/*   
    bcc opened_ok
    prints "file open error",CHR_NL
+   bra exit
 opened_ok:
+   jsr KRNL_READST
+   stz BANK
+   lda #0
+   lxy #$A000
    clc
-*/   
-   jsr file_close
+   jsr KRNL_MACPTR
+   jsr KRNL_READST
 
+exit:
+   jsr file_close
+   jsr KRNL_READST
    rts
 .endproc
 

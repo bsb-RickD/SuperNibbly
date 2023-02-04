@@ -28,6 +28,7 @@ KRNL_CLOSE           = $FFC3
 KRNL_CLRCHN          = $FFCC
 KRNL_CLOSE_ALL       = $FF4A
 KRNL_READST          = $FFB7
+KRNL_TALK            = $FFB4
 
 KRNL_SCREEN          = $FFED
 KRNL_PLOT            = $FFF0

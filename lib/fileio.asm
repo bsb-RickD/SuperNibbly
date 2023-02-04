@@ -95,8 +95,10 @@ no_hi_inc:        ; here x,y point to the filename - had to inc R0
    bcs error
    jsr KRNL_OPEN  ; open the file
    bcs error
-   ldx #1         ; logical file numer 
-   jsr KRNL_CHKIN ; open channel for input
+   ;ldx #1         ; logical file numer 
+   ;jsr KRNL_CHKIN ; open channel for input
+   ;lda #8         ; logical devic number
+   ;jsr KRNL_TALK  ; tell it to talk..?
 error:   
    rts   
 .endproc
@@ -104,9 +106,9 @@ error:
 ; currently just assumes logical file 1 has been opened
 ; 
 .proc file_close
-   jsr KRNL_CLRCHN
-   lda #1         ; Logical file Number = 1
-   jsr KRNL_CLOSE
+   ;jsr KRNL_CLRCHN
+   ;lda #1         ; Logical file Number = 1
+   ;jsr KRNL_CLOSE
 error:   
    rts   
 .endproc
