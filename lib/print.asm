@@ -24,21 +24,47 @@ PRINT_ASM = 1
 .endmacro
 
 
-; print a string that was passed as parameter: prints "erik was here"
-.macro prints str,nl
+; print a string + extras that were passed as parameter: prints "erik was here",CHR_NL,"and he rocks"
+.macro prints str, extra1, extra2, extra3, extra4, extra5, extra6, extra7, extra8, extra9, extra10
    .local @msg
    .local @end
    print_push_state
    LoadW R11, @msg
    ldx #(@end-@msg)
    jsr print_x_length
-.if .paramcount = 2   
-   .assert (nl = CHR_NL), error, "only expect a CHR_NL trailing"
-   newline
-.endif
    bra @end
 @msg:
 .byte str
+.ifnblank extra1
+.byte extra1
+.ifnblank extra2
+.byte extra2
+.ifnblank extra3
+.byte extra3
+.ifnblank extra4
+.byte extra4
+.ifnblank extra5
+.byte extra5
+.ifnblank extra6
+.byte extra6
+.ifnblank extra7
+.byte extra7
+.ifnblank extra8
+.byte extra8
+.ifnblank extra9
+.byte extra9
+.ifnblank extra10
+.byte extra10
+.endif
+.endif
+.endif
+.endif
+.endif
+.endif
+.endif
+.endif
+.endif
+.endif
 @end:
    print_pop_state
 .endmacro
