@@ -76,14 +76,13 @@ prev_error:
 ;  R0 points to filename, leading length string
 ; out:
 ;  c clear: success
-;  c set:   fail     -> a holds kernal error code
+;  c set:   fail     -> a,x holds status and kernal error code
 .proc file_open
    lda #1         ; Logical Number = 1
    ldx #8         ; Device = "SD card" (emulation host FS)
    ldy #0         ; Secondary Address = 0, meaning we can specify where to load to on LOAD
    jsr KRNL_SETLFS
    bcs error
-
    lda (R0)       ; a = length of filename
    ldx R0L        
    ldy R0H        ; move address to x,y
@@ -95,21 +94,29 @@ no_hi_inc:        ; here x,y point to the filename - had to inc R0
    bcs error
    jsr KRNL_OPEN  ; open the file
    bcs error
-   ;ldx #1         ; logical file numer 
-   ;jsr KRNL_CHKIN ; open channel for input
-   ;lda #8         ; logical devic number
-   ;jsr KRNL_TALK  ; tell it to talk..?
-error:   
+   ; read status byte - this should be zero
+   pha
+   jsr KRNL_READST   ; a = status byte
+   plx
+   cmp #0
+   bne report_error
+   clc
+   rts
+error:
+   ; error condition - remember kernal error in x and get the status word on top 
+   pha
+   jsr KRNL_READST   ; a = status byte
+   plx               ; x = previous kernal error code
+report_error:   
+   sec               ; carry set - something was fishy
    rts   
 .endproc
 
 ; currently just assumes logical file 1 has been opened
 ; 
 .proc file_close
-   ;jsr KRNL_CLRCHN
-   ;lda #1         ; Logical file Number = 1
-   ;jsr KRNL_CLOSE
-error:   
+   lda #1         ; Logical file Number = 1
+   jsr KRNL_CLOSE
    rts   
 .endproc
 
