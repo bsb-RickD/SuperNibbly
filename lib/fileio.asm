@@ -153,12 +153,9 @@ load_last_bit:
    beq finished
    cmp #0
    bne error            ; some error condition occured, abort
-   cpx #0
-   beq add_hi_byte
    txa         
-   adc R0L              ; advance address
+   add R0L              ; advance address
    sta R0L
-add_hi_byte:   
    tya
    adc R0H              ; update high byte
    sta R0H              ; R0 is now the new address to load to
@@ -171,7 +168,7 @@ no_bank_switch:
    lda R2L              ; update the number of bytes to load
    stx R1L
    sub R1L
-   sta R2L              ; new low byte        
+   sta R2L              ; new low byte
    lda R2H
    sty R1L
    sbc R1L
@@ -179,8 +176,9 @@ no_bank_switch:
    lda R1H
    sbc #0
    sta R1H              ; new bank byte
+   ldx R0L              ; load new load position in x ...
+   ldy R0H              ; ... and y 
    bra keep_loading
-
 finished:
    clc
    rts

@@ -47,20 +47,11 @@ open_real_file:
    prints "file open error on good file?"
    jmp status_and_exit
 opened_ok:   
-   lda #46              ; code for '.''
-   jsr KRNL_CHROUT
-
-   lda #1
-   sta BANK
-   lda #0
-   lxy #$A000
-   clc
-   jsr KRNL_MACPTR   
-   jsr KRNL_READST
-   cmp #0
-   beq opened_ok
-   cmp #64
-   beq worked
+   LoadW R0, $A000      ; load to banked memory
+   LoadW R1, $FF01      ; bank 1, load as much as possible
+   LoadW R2, $0000      ; as much as possible
+   jsr file_read
+   bcc worked
    prints "macptr not happy?"
    bra exit
 worked:
