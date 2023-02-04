@@ -12,6 +12,7 @@ MAC_INC = 1
 .macpack longbranch
 
 
+
 .macro LoadB dest, value
 	.if .const(value) .and value=0
 		stz dest
@@ -330,7 +331,7 @@ MAC_INC = 1
 	ora addr+1
 .endmacro
 
-; --------------- Eriks stuff starts here -------------------------
+; ------------------------- Eriks additional macros starts here -------------------------
 
 ; branch greater equal
 .macro  bge     Arg
@@ -615,5 +616,15 @@ loop:
 
 .define neg_word(n) (($FFFF-n)+1)
 .define neg_byte(n) (($FF-n)+1)
+
+; string with leading length
+.macro Lstr string
+.local start, end
+.byte end-start
+start:
+.byte string
+end:
+.endmacro
+
 
 .endif
