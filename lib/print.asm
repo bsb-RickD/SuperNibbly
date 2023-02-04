@@ -25,13 +25,17 @@ PRINT_ASM = 1
 
 
 ; print a string that was passed as parameter: prints "erik was here"
-.macro prints str
+.macro prints str,nl
    .local @msg
    .local @end
    print_push_state
    LoadW R11, @msg
    ldx #(@end-@msg)
    jsr print_x_length
+.if .paramcount = 2   
+   .assert (nl = CHR_NL), error, "only expect a CHR_NL trailing"
+   newline
+.endif
    bra @end
 @msg:
 .byte str

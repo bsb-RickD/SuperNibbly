@@ -17,8 +17,8 @@ UTIL_ASM = 1
 .endproc
 
 ; a = bitmaks of registers to push
-; lsb = register 8
-; msb = register 15
+; lsb = register 0
+; msb = register 7
 ;
 ; e.g. a = %10010011 will push register 0,1,4,7
 ;

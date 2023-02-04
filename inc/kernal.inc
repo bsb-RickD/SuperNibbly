@@ -25,6 +25,8 @@ KRNL_SAVE            = $FFD8
 KRNL_ACPTR           = $FFA5
 KRNL_MACPTR          = $FF44
 KRNL_CLOSE           = $FFC3
+KRNL_CLRCHN          = $FFCC
+KRNL_CLOSE_ALL       = $FF4A
 KRNL_READST          = $FFB7
 
 KRNL_SCREEN          = $FFED

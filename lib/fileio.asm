@@ -104,6 +104,7 @@ error:
 ; currently just assumes logical file 1 has been opened
 ; 
 .proc file_close
+   jsr KRNL_CLRCHN
    lda #1         ; Logical file Number = 1
    jsr KRNL_CLOSE
 error:   
