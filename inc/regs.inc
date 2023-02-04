@@ -5,6 +5,11 @@ REGS_INC = 1
 ZEROPAGE_SCRATCH     = $22
 ZEROPAGE_SCRATCH_END = $80
 
+BANK 		= $00		; ram bank
+ROM_BANK 	= $01		; rom bank
+
+KERNAL_VERSION = $FF80	; address of the kernal version
+
 ;r0-r5: 	argument registers
 ;r11-r15: 	scratch registers
 
