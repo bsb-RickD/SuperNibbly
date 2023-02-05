@@ -71,8 +71,31 @@ GENERIC_WORKERS_ASM = 1
 ; word thisptr ; offset 4,8,12,16, ...
 ;
 .proc worker_sequence
-   sec                     ; indicate we're done
+   ldy #1
+   lda (R15),y                      ; get current
+   cmp (R15)                        ; is current == count?
+   beq re_init
+   asln 2                           ; current * 4
+   adc #2                           ; (current * 4)+2
+   tay                              ; y now points to the worker
+   PushW R15                        ; save our this
+   ThisLoadW R15, jsr_to_patch+1    ; get address and fill in the jsr destination
+   ThisLoadW R15, R15, -            ; load this pointer into R15
+jsr_to_patch:   
+   jsr $CA11                        ; dispatch the call
+   PopW R15                         ; bring this back
+   bcc done                         ; work not complete - just return here next call
+   ldy #1
+   lda (R15),y                      ; get current
+   inc                              ; advance..
+   sta (R15),y                      ; ..and store
+   cmp (R15)                        ; is current == count? beauty of it: the carry flag is set correctly by this operation
+done:   
    rts
+re_init:
+   lda #0                           ; initialize current..
+   sta (R15),y                      ; ..to zero, and store it
+   bra worker_sequence+2            ; start over
 .endproc
 
 ; range 8 structure

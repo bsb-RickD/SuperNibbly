@@ -150,7 +150,7 @@ seq_worker:
    make_sequence                                                 \
       worker_decrement_8, seq_range8,                            \
       worker_initialize_random_range, seq_random_range,          \
-      worker_generate_random, seq_random_range_obj
+      worker_generate_random, seq_generate_random
 
 .proc worker_sequence_test
    prints "worker_sequence_test"
@@ -158,7 +158,56 @@ seq_worker:
    LoadB seq_range8, 80                ; init
    LoadW seq_generation_dest, 0        ; init
    
-   ut_fail
+   LoadW R15, seq_worker   
+   jsr worker_sequence
+   bcs too_early_termination
+   lda seq_range8
+   cmp #79
+   jne decrement_error
+
+   LoadW R15, seq_worker   
+   jsr worker_sequence
+   bcs too_early_termination
+   lda seq_range8
+   cmp #78
+   jne decrement_error
+
+   LoadW R15, seq_worker
+   jsr worker_sequence
+   bcs too_early_termination
+   lda seq_range8
+   cmp #77
+   jne decrement_error
+
+   ; random range init
+   LoadW R15, seq_worker
+   jsr worker_sequence
+   jcs too_early_termination
+
+   ; random range output
+   LoadW R15, seq_worker
+   jsr worker_sequence
+   jcc too_late_termination
+   lda seq_generation_dest
+   jeq no_random_generated
    
+   ut_pass
    rts
+too_early_termination:
+   ut_fail
+   prints " (expected more steps)", CHR_NL
+   rts
+decrement_error:
+   ut_fail
+   prints " (decrement value mismatch)", CHR_NL
+   rts
+too_late_termination:
+   ut_fail
+   prints " (expected sequence end)", CHR_NL
+   rts
+no_random_generated:
+   ut_fail
+   prints " (expected random number)", CHR_NL
+   rts
+
 .endproc   
