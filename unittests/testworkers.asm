@@ -146,6 +146,12 @@ seq_generate_random:
 seq_generation_dest:
 .word 0
 
+seq_worker:
+   make_sequence                                                 \
+      worker_decrement_8, seq_range8,                            \
+      worker_initialize_random_range, seq_random_range,          \
+      worker_generate_random, seq_random_range_obj
+
 .proc worker_sequence_test
    prints "worker_sequence_test"
 

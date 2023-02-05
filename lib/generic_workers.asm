@@ -6,29 +6,49 @@ GENERIC_WORKERS_ASM = 1
 .endif
 
 .macro make_sequence w0, t0, w1, t1, w2, t2, w3, t3, w4, t4, w5, t5, w6, t6, w7, t7, w8, t8, w9, t9
-.assert (.paramcount .mod 2) = 0, error "Params to make_squence need to come in pairs - always one worker and one this pointer together"
+.assert ((.paramcount .mod 2) = 0), error, "Params to make_squence need to come in pairs - always one worker and one this pointer together"
 .byte .paramcount / 2   ; count of elements
 .byte 0                 ; current element of sequence
 .ifnblank w0
+.ifnblank t0
 .word w0,t0
+.endif
 .ifnblank w1
+.ifnblank t1
 .word w1,t1
+.endif
 .ifnblank w2
+.ifnblank t2
 .word w2,t2
+.endif
 .ifnblank w3
+.ifnblank t3
 .word w3,t3
+.endif
 .ifnblank w4
+.ifnblank t4
 .word w4,t4
+.endif
 .ifnblank w5
+.ifnblank t5
 .word w5,t5
+.endif
 .ifnblank w6
+.ifnblank t6
 .word w6,t6
+.endif
 .ifnblank w7
+.ifnblank t7
 .word w7,t7
+.endif
 .ifnblank w8
+.ifnblank t8
 .word w8,t8
+.endif
 .ifnblank w9
+.ifnblank t9
 .word w9,t9
+.endif
 .endif
 .endif
 .endif
