@@ -58,7 +58,7 @@ ptr_animate_smoke:                        ; 5 - smoke animation
 
                                           ; 6 - init fish pause random range
    .word worker_initialize_random_range, fish_pause_range   
-   commands_to_add INTRO_FPB,7            ; get the random pause and kick it off
+   no_commands_to_add                    
 
                                           ; 7 - init fish x random range
    .word worker_initialize_random_range, fish_x_range
