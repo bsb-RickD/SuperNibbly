@@ -1,6 +1,37 @@
 .ifndef INTRO_FUNCTION_PTRS_INC
 INTRO_FUNCTION_PTRS_INC = 1
 
+; the fish jump sequence: 
+;    first generate the random pause and pos
+;    then wait for pause to pass
+;    then the fish jumps
+;    then the fish gets turned off
+;
+;    (now we can repeat) 
+seq_jumping_fish:
+   make_sequence                                      \
+      switch_sprite_off, jumping_fish,                \
+      worker_generate_random, fish_generate_pause,    \ 
+      worker_generate_random, fish_generate_x,        \
+      worker_generate_random, fish_generate_y,        \
+      worker_decrement_16, fish_pause_counter,        \
+      animate_sprite, jumping_fish,                   \
+      switch_sprite_off, jumping_fish
+
+; the nibbly drop sequence:
+;
+; self explaining, drop one after the other
+;
+seq_dropping_nibbly:
+   make_sequence                                      \
+      drop_letter, dropping_n,                        \
+      drop_letter, dropping_i,                        \
+      drop_letter, dropping_b1,                       \
+      drop_letter, dropping_b2,                       \
+      drop_letter, dropping_l,                        \
+      drop_letter, dropping_y                         \
+
+
 INTRO_FPB = *                             ; intro function pointer base
 INTRO_FPI = ((INTRO_FPB-function_ptrs)/8)
    .word 0,0                              ; 0 - nullptr
@@ -15,11 +46,11 @@ ptr_unpack_intro:                         ; 2 - unpack screen data
 
 ptr_wait_for_fade_out:                    ; 3 - wait for fading out the palette
    .word fade_out_and_switch_to_tiled_mode, palfade_out         
-   commands_to_add INTRO_FPB,4,5,14,9     ; after fading out, fade back in and, start smoke, generate pause
+   commands_to_add INTRO_FPB,4,5,9        ; after fading out, fade back in and, start smoke, start fish
 
 ptr_fade_in:                              ; 4 - fade pal in
    .word fade_intro_in, palfade_in
-   commands_to_add INTRO_FPB, 15
+   commands_to_add INTRO_FPB, 10          ; start dropping nibbly
 
 ptr_animate_smoke:                        ; 5 - smoke animation
    .word loop_sprite, animated_smoke
@@ -37,46 +68,13 @@ ptr_animate_smoke:                        ; 5 - smoke animation
    .word worker_initialize_random_range, fish_y_range   
    no_commands_to_add
 
-                                          ; 9 create random pause for fish
-   .word worker_generate_random, fish_generate_pause
-   commands_to_add INTRO_FPB,10,11,12
+                                          ; 9 - the fish sequence
+   .word worker_sequence, seq_jumping_fish   
+   commands_to_add INTRO_FPB, 9           ; the fish loops, jumping randomly for ever
 
-                                          ; 10 start fish pause
-   .word worker_decrement_16, fish_pause_counter
-   commands_to_add INTRO_FPB,13
 
-                                          ; 11 create random x for fish
-   .word worker_generate_random, fish_generate_x
-   no_commands_to_add
-
-                                          ; 12 create random y for fish
-   .word worker_generate_random, fish_generate_y
-   no_commands_to_add
-
-                                          ; 13 let the fish jump - this implicitly turns the sprite on
-   .word animate_sprite, jumping_fish
-   commands_to_add INTRO_FPB,14,9         ; hide fish, generate new pause
-
-                                          ; 14 turn the fish off
-   .word switch_sprite_off, jumping_fish
-   no_commands_to_add                     
-
-   .word drop_letter, dropping_n          ; 15 drop n
-   commands_to_add INTRO_FPB,16           ; drop next one
-                                          
-   .word drop_letter, dropping_i          ; 16 show nibbly
-   commands_to_add INTRO_FPB,17           ; drop next one
-                                          
-   .word drop_letter, dropping_b1         ; 17 show nibbly
-   commands_to_add INTRO_FPB,18           ; drop next one
-
-   .word drop_letter, dropping_b2         ; 18 show nibbly
-   commands_to_add INTRO_FPB,19           ; drop next one
-
-   .word drop_letter, dropping_l          ; 19 show nibbly
-   commands_to_add INTRO_FPB,20           ; drop next one
-
-   .word drop_letter, dropping_y          ; 20 show nibbly
+                                          ; 10 - the dropping nibbly sequence
+   .word worker_sequence, seq_dropping_nibbly
    no_commands_to_add
 
 .endif
