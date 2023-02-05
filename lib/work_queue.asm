@@ -109,8 +109,10 @@ work_loop_empty:
 ;  C = 1: worker has completed its work
 ;
 .proc call_worker
-   ldy #0
-   ; load address to jump to and write it to jsr below
+   ;ldy #0   
+   ThisLoadW R0, jsr_to_patch+1, 0     ; load address to jump to and write it to jsr below
+   ThisLoadW R0, R15, -                ; load this pointer for call into R15
+   /*
    lda (R0),y
    sta jsr_to_patch+1
    iny 
@@ -122,12 +124,11 @@ work_loop_empty:
    sta R15L
    iny
    lda (R0),y
-   sta R15H      
-   PushW R0                      ; save R0
+   sta R15H      */
+   PushW R0                            ; save R0
 jsr_to_patch:   
-   jsr $CA11                     ; dispatch the call
+   jsr $CA11                           ; dispatch the call
    PopW R0
-
    rts
 .endproc
 
