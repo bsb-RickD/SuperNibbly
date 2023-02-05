@@ -36,6 +36,18 @@ str_ut_failed_end:
    jsr ut_pass_on_not_equal
 .endmacro
 
+; use this to fail unconditionally
+.macro ut_fail
+   lda #0
+   ut_exp_neq
+.endmacro
+
+; use this to pass unconditionally
+.macro ut_pass
+   lda #0
+   ut_exp_equal
+.endmacro
+
 .macro ut_exp_memory_equal mem1, mem2, len
    compare_memory mem1, mem2, len
    ut_exp_equal

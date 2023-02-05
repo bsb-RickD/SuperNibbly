@@ -5,11 +5,60 @@ GENERIC_WORKERS_ASM = 1
 .include "random.asm"
 .endif
 
+.macro make_sequence w0, t0, w1, t1, w2, t2, w3, t3, w4, t4, w5, t5, w6, t6, w7, t7, w8, t8, w9, t9
+.assert (.paramcount .mod 2) = 0, error "Params to make_squence need to come in pairs - always one worker and one this pointer together"
+.byte .paramcount / 2   ; count of elements
+.byte 0                 ; current element of sequence
+.ifnblank w0
+.word w0,t0
+.ifnblank w1
+.word w1,t1
+.ifnblank w2
+.word w2,t2
+.ifnblank w3
+.word w3,t3
+.ifnblank w4
+.word w4,t4
+.ifnblank w5
+.word w5,t5
+.ifnblank w6
+.word w6,t6
+.ifnblank w7
+.word w7,t7
+.ifnblank w8
+.word w8,t8
+.ifnblank w9
+.word w9,t9
+.endif
+.endif
+.endif
+.endif
+.endif
+.endif
+.endif
+.endif
+.endif
+.endif
+.endmacro
+
+; sequence structure
+;
+; byte count   ; offset 0 - how many elements are in the sequence
+; byte current ; offset 1 - which element is currently being executed?
+;
+; -- repeat count times --- the list of workers
+; word worker  ; offset 2,6,10,14, ...
+; word thisptr ; offset 4,8,12,16, ...
+;
+.proc worker_sequence
+   sec                     ; indicate we're done
+   rts
+.endproc
+
 ; range 8 structure
 ;
 ; byte start   ; offset 0
 ; byte end     ; offset end
-
 
 ; decrement start until its equal to end
 ;

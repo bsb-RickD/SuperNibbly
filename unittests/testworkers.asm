@@ -22,6 +22,7 @@
    jsr worker_decrement_16_test
    jsr worker_initialize_random_range_test
    jsr worker_generate_random_test
+   jsr worker_sequence_test
    rts
 .endproc
 
@@ -119,7 +120,39 @@ generation_not_expect:
 
    ut_exp_memory_neq generation_not_expect, generation_dest, 2
    rts
-.endproc   
+.endproc
 
 generation_dest:
 .word 0
+
+seq_range8:
+.byte 80
+.byte 77
+
+seq_random_range:
+.word 150, 250                ; from 150 to 250
+.byte 0                       ; chunk: all
+.word seq_random_range_obj    ; store here
+
+seq_random_range_obj:
+.res 5,0
+
+; word points to destination              ; offset 0 - here the random number is stored
+; word points to random range object      ; offset 2 - points to the generator, expected to be initialized 
+seq_generate_random:
+.word seq_generation_dest
+.word seq_random_range_obj
+
+seq_generation_dest:
+.word 0
+
+.proc worker_sequence_test
+   prints "worker_sequence_test"
+
+   LoadB seq_range8, 80                ; init
+   LoadW seq_generation_dest, 0        ; init
+   
+   ut_fail
+   
+   rts
+.endproc   
