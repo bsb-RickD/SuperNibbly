@@ -337,7 +337,8 @@ ngetsrc:
 	beq :+
 	rts
 :	inc r0H            ; after increasing the high byte, check if we exceeded a bank
-	pha                
+	pha
+	php                
 	lda r0H            ; load high word
  	cmp #$C0           ; are we at the bank boundary?
  	bcc :+
@@ -345,6 +346,7 @@ ngetsrc:
  	sta r0H         
  	inc $00            ; increase bank 
 : 	
+	plp                ; restore c - getsrc is not supposed to change it
 	pla                ; restore a
 	rts
 
