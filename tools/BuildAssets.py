@@ -12,7 +12,7 @@ def super_nibbly_title():
     woodly2 = load_image(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\woodly2.png")
 
     # define the sprites
-    sg1 = SpriteGroup([
+    sg_base = SpriteGroup([
         MultiSprite(titanm, (117, 18), (132, 101), (1, 6), name="smoke"),
         MultiSprite(titanm, (80, 19), (111, 188), (1, 17), name="fish"),
         MultiSprite(titanm, (1, 19), (32, 210), (1, 16), name="plane"),
@@ -23,7 +23,7 @@ def super_nibbly_title():
         Sprite(woodly2, (209, 1), (260, 78), name="l"),
         Sprite(woodly2, (264, 1), (315, 82), name="y")
         ])
-    sg2 = SpriteGroup([
+    sg_intro = SpriteGroup([
         Sprite(titanm_1, (10, 452), (57, 500), name="head"),
         MultiSprite(titanm_1, (474, 455), (581, 496), (3, 1), name="necks"),
         MultiSprite(titanm_1, (273, 1), (290, 171), (1, 19), name="eyes_blinking"),
@@ -53,22 +53,22 @@ def super_nibbly_title():
     it = ImageTiler(title, no_transparent_color())
 
     # optimize palette
-    po = PaletteOptimizer(it, sg1, sg2)
+    po = PaletteOptimizer(it, sg_base, sg_intro)
 
     # use optimized palette for tiles and sprites
     it.calc_tiles(po)
-    sg1.calc_sprite_bitmaps(po, it.get_used_memory())
-    sg2.calc_sprite_bitmaps(po, it.get_used_memory())
+    sg_base.calc_sprite_bitmaps(po, it.get_used_memory())
+    sg_intro.calc_sprite_bitmaps(po, it.get_used_memory()+sg_base.get_used_memory())
 
     # write the sprites as debug images
-    sg1.save_as_png(po)
+    sg_base.save_as_png(po)
 
     # save some space on sprites
-    it.hide_sprites_in_screen_buffer(sg1)
+    it.hide_sprites_in_screen_buffer(sg_base)
 
     # write everything to disk
-    sg1.save("intro_sprites")
-    sg2.save("intro_sprites_2")
+    sg_base.save("intro_sprites_base")
+    sg_intro.save("intro_sprites")
     po.save("intro_palette")
     it.save("intro")
 

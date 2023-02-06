@@ -2,10 +2,11 @@
 
 echo ============= intro assets ====================
 
-copy /b ..\intro_screen.bin+..\intro_tiles.bin+..\intro_sprites.bin assets\intro_data.raw
+copy /b ..\intro_screen.bin+..\intro_tiles.bin+..\intro_sprites_base.bin assets\intro_data.raw
 lzsa -v -r -f2 assets\intro_data.raw assets\intro_data.bin
 del assets\intro_data.raw
-lzsa -v -r -f2 ..\intro_sprites_2.bin assets\intro_sprites_2.bin
+lzsa -v -r -f2 ..\intro_sprites.bin assets\intro_sprites.bin
+copy ..\intro_sprites_base.inc intro\intro_sprites_base.inc
 copy ..\intro_sprites.inc intro\intro_sprites.inc
 copy ..\intro_palette.bin assets
 copy ..\intro_palette_mapping.bin assets

@@ -6,7 +6,7 @@ JUMPING_FISH_ASM = 1
 .endif
 
 .ifndef sprite_smoke_0 
-.include "intro/intro_sprites.inc" 
+.include "intro/intro_sprites_base.inc" 
 .endif
 
 
