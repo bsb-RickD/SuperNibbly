@@ -228,7 +228,7 @@ next_test:
    dex
    jne next_test
    rts
-msg: lstr "multiply "
+msg: Lstr "multiply "
 .endproc
 
 multiply_testcases_816:
@@ -311,5 +311,5 @@ result:
    dex
    jne next_test
    rts
-msg: lstr "multiply (16) "
+msg: Lstr "multiply (16) "
 .endproc

@@ -260,7 +260,7 @@ reference_buffer:
    ut_exp_equal   
 
    rts
-msg: lstr "lzsa decompress vram"
+msg: Lstr "lzsa decompress vram"
 .endproc
 
 
@@ -350,7 +350,7 @@ next_round:
 done:   
 
    rts
-msg: lstr "lzsa decompress vram moving dest "
+msg: Lstr "lzsa decompress vram moving dest "
 .endproc
 
 
@@ -386,7 +386,7 @@ msg: lstr "lzsa decompress vram moving dest "
    ut_exp_equal
    
    rts
-msg: lstr "krnl decompress vram"
+msg: Lstr "krnl decompress vram"
 .endproc
 
 
@@ -403,7 +403,7 @@ msg: lstr "krnl decompress vram"
    compare_memory memory_1, lzsa_output, MEMORY_len
    ut_exp_equal
    rts
-msg: lstr "mem same "
+msg: Lstr "mem same "
 .endproc
 
 .proc test_mem_different
@@ -420,12 +420,12 @@ MEMORY_len = *-memory_1
 memory_2: .byte 1,2,3,4,7,6,7,8,9,10
 
 lzsa_reference:
-.incbin "test.bin"
+.incbin "unittests/data/test.bin"
 
 LZSA_reference_len = *-lzsa_reference
 
 lzsa_input:
-.incbin "test.cpr"
+.incbin "unittests/data/test.cpr"
 
 LZSA_input_len = *-lzsa_input
 
