@@ -23,9 +23,18 @@
 .include "lib/lzsa.asm"
 .endif
 
+.ifndef MEMORY_ASM
+.include "lib/memory.asm"
+.endif
+
+
 .proc main   
    printl str_ut_welcome
    
+   ; setup: copy compressed data across a bank border
+   lda #1
+   sta BANK
+   copy_2_banked_memory lzsa_input, ($BFFF-(LZSA_input_len/2)), LZSA_input_len
    
    jsr test_mem_different
    jsr test_mem_equal
@@ -411,8 +420,6 @@ msg: Lstr "mem same "
    compare_memory memory_1, memory_2, lzsa_output
    ut_exp_neq  ; we expect compary to report difference!
    rts
-msg:
-
 .endproc
 
 memory_1: .byte 1,2,3,4,5,6,7,8,9,10

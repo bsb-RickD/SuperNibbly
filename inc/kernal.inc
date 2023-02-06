@@ -96,38 +96,24 @@ CHR_COLOR_LT_GREEN   = 153
 CHR_COLOR_LT_BLUE    = 154
 CHR_COLOR_LT_GRAY    = 155
 
-COLOR_BLACK    = 0
-COLOR_WHITE    = 1
-COLOR_RED      = 2
-COLOR_CYAN     = 3
-COLOR_PURPLE   = 4
-COLOR_GREEN    = 5
-COLOR_BLUE     = 6
-COLOR_YELLOW   = 7
-COLOR_ORANGE   = 8
-COLOR_BROWN    = 9
-COLOR_LT_RED   = 10
+COLOR_BLACK     = 0
+COLOR_WHITE     = 1
+COLOR_RED       = 2
+COLOR_CYAN      = 3
+COLOR_PURPLE    = 4
+COLOR_GREEN     = 5
+COLOR_BLUE      = 6
+COLOR_YELLOW    = 7
+COLOR_ORANGE    = 8
+COLOR_BROWN     = 9
+COLOR_LT_RED    = 10
 COLOR_DARK_GRAY = 11
-COLOR_GRAY     = 12
-COLOR_LT_GREEN    = 13
-COLOR_LT_BLUE  = 14
-COLOR_LT_GRAY  = 15
+COLOR_GRAY      = 12
+COLOR_LT_GREEN  = 13
+COLOR_LT_BLUE   = 14
+COLOR_LT_GRAY   = 15
 
-IRQVec               = $0314
+IRQVec              = $0314
 CHARACTER_COLOR     = $0367
-
-.macro fill_memory start, count, value
-   LoadW R0, start
-   LoadW R1, count
-   lda #value
-   jsr KRNL_MEM_FILL
-.endmacro
-
-.macro copy_memory source, dest, count
-   LoadW R0, source
-   LoadW R1, dest
-   LoadW R2, count
-   jsr KRNL_MEM_COPY
-.endmacro
 
 .endif

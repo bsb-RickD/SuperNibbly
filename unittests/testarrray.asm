@@ -15,6 +15,11 @@
 .include "lib/array.asm"
 .endif
 
+.ifndef MEMORY_ASM
+.include "lib/memory.asm"
+.endif
+
+
 .proc main   
    printl str_ut_welcome
 

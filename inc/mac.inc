@@ -100,12 +100,14 @@ MAC_INC = 1
 	sbc source
 .endmacro
 
+; dest -= source
 .macro SubB source, dest
 	lda dest
 	sub source
 	sta dest
 .endmacro
 
+; dest -= source
 .macro SubW source, dest
 	SubB source+0, dest+0
 	lda dest+1

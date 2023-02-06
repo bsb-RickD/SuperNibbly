@@ -27,6 +27,11 @@
 .include "lib/lzsa.asm"
 .endif
 
+.ifndef MEMORY_ASM
+.include "lib/memory.asm"
+.endif
+
+
 tileset:
 .byte 0
 
