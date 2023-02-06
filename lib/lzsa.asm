@@ -336,7 +336,16 @@ ngetsrc:
 	inc r0L
 	beq :+
 	rts
-:	inc r0H
+:	inc r0H            ; after increasing the high byte, check if we exceeded a bank
+	pha                
+	lda r0H            ; load high word
+ 	cmp #$C0           ; are we at the bank boundary?
+ 	bcc :+
+ 	lda #$a0           ; wrap around to next bank
+ 	sta r0H         
+ 	inc $00            ; increase bank 
+: 	
+	pla                ; restore a
 	rts
 
 ; -----------------------------------------------------------------------------

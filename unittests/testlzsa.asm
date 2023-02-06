@@ -30,17 +30,13 @@
 
 .proc main   
    printl str_ut_welcome
-   
-   ; setup: copy compressed data across a bank border
-   lda #1
-   sta BANK
-   copy_2_banked_memory lzsa_input, ($BFFF-(LZSA_input_len/2)), LZSA_input_len
-   
+      
    jsr test_mem_different
    jsr test_mem_equal
    jsr test_krnl_decompress
    jsr test_krnl_decompress_vram
    jsr test_lzsa_decompress   
+   jsr test_lzsa_decompress_bank_boundary
    jsr test_lzsa_decompress_vram   
    jsr test_lzsa_decompress_vram_moving
    jsr test_vram_copy_krnl_d0
@@ -226,6 +222,29 @@ reference_buffer:
    ut_exp_equal
    rts
 .endproc
+
+
+.proc test_lzsa_decompress_bank_boundary
+   prints "lzsa decompress source on bank bounds"
+
+   ; setup - init memory to ff
+   fill_memory lzsa_output, LZSA_reference_len, $FF
+   ; setup - copy compressed data across a bank border
+   lda #1
+   sta BANK
+   copy_2_banked_memory lzsa_input, ($BFFF-(LZSA_input_len/2)), LZSA_input_len
+   ; decompress
+   lda #1
+   sta BANK
+   LoadW R0, ($BFFF-(LZSA_input_len/2))
+   LoadW R1, lzsa_output
+   jsr memory_decompress
+   ; compare and print result
+   compare_memory lzsa_output, lzsa_reference, LZSA_reference_len
+   ut_exp_equal
+   rts
+.endproc
+
 
 .proc test_lzsa_decompress_vram
    printl msg
