@@ -5,60 +5,34 @@ GENERIC_WORKERS_ASM = 1
 .include "random.asm"
 .endif
 
-.macro make_sequence w0, t0, w1, t1, w2, t2, w3, t3, w4, t4, w5, t5, w6, t6, w7, t7, w8, t8, w9, t9
+.macro dw2_ w1,w2
+.ifnblank w1
+.ifnblank w2
+.word w1,w2
+.endif
+.endif
+.endmacro
+
+.macro make_sequence w0,t0, w1,t1, w2,t2, w3,t3, w4,t4, w5,t5, w6,t6, w7,t7, w8,t8, w9,t9, wa,ta, wb,tb, wc,tc, wd,td, we,te, wf,tf
 .assert ((.paramcount .mod 2) = 0), error, "Params to make_squence need to come in pairs - always one worker and one this pointer together"
 .byte .paramcount / 2   ; count of elements
 .byte 0                 ; current element of sequence
-.ifnblank w0
-.ifnblank t0
-.word w0,t0
-.endif
-.ifnblank w1
-.ifnblank t1
-.word w1,t1
-.endif
-.ifnblank w2
-.ifnblank t2
-.word w2,t2
-.endif
-.ifnblank w3
-.ifnblank t3
-.word w3,t3
-.endif
-.ifnblank w4
-.ifnblank t4
-.word w4,t4
-.endif
-.ifnblank w5
-.ifnblank t5
-.word w5,t5
-.endif
-.ifnblank w6
-.ifnblank t6
-.word w6,t6
-.endif
-.ifnblank w7
-.ifnblank t7
-.word w7,t7
-.endif
-.ifnblank w8
-.ifnblank t8
-.word w8,t8
-.endif
-.ifnblank w9
-.ifnblank t9
-.word w9,t9
-.endif
-.endif
-.endif
-.endif
-.endif
-.endif
-.endif
-.endif
-.endif
-.endif
-.endif
+dw2_ w0,t0 
+dw2_ w1,t1
+dw2_ w2,t2
+dw2_ w3,t3
+dw2_ w4,t4
+dw2_ w5,t5
+dw2_ w6,t6
+dw2_ w7,t7
+dw2_ w8,t8
+dw2_ w9,t9
+dw2_ wa,ta
+dw2_ wb,tb
+dw2_ wc,tc
+dw2_ wd,td
+dw2_ we,te
+dw2_ wf,tf
 .endmacro
 
 ; sequence structure
@@ -97,6 +71,28 @@ re_init:
    sta (R15),y                      ; ..to zero, and store it
    bra worker_sequence+2            ; start over
 .endproc
+
+.macro make_parallel w0,t0, w1,t1, w2,t2, w3,t3, w4,t4, w5,t5, w6,t6, w7,t7, w8,t8, w9,t9, wa,ta, wb,tb, wc,tc, wd,td, we,te, wf,tf
+.assert ((.paramcount .mod 2) = 0), error, "Params to make_squence need to come in pairs - always one worker and one this pointer together"
+.byte .paramcount / 2         ; count of elements
+.res (.paramcount / 2)+1, 0   ; list of active elements, declared as empty   
+dw2_ w0,t0 
+dw2_ w1,t1
+dw2_ w2,t2
+dw2_ w3,t3
+dw2_ w4,t4
+dw2_ w5,t5
+dw2_ w6,t6
+dw2_ w7,t7
+dw2_ w8,t8
+dw2_ w9,t9
+dw2_ wa,ta
+dw2_ wb,tb
+dw2_ wc,tc
+dw2_ wd,td
+dw2_ we,te
+dw2_ wf,tf
+.endmacro
 
 ; range 8 structure
 ;
