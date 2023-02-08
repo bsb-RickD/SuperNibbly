@@ -5,6 +5,54 @@ UTIL_ASM = 1
 .include "inc/regs.inc"
 .endif
 
+.macro save_return_address
+   ; save return address   
+   ply
+   sty restore_return_address+4
+   ply
+   sty restore_return_address+1
+.endmacro
+
+;
+; push registers R0-R15
+;
+.proc push_all_registers
+   save_return_address
+
+   ldy #31
+loop:   
+   lda R0L,y               ; push H
+   pha
+   lda R0L-1,y             ; push L
+   pha
+   dey
+   dey
+   bpl loop
+
+   bra restore_return_address
+.endproc
+
+
+;
+; pop registers R0-R15
+;
+.proc pop_all_registers
+   save_return_address
+
+   ldy #0
+loop:   
+   pla                     ; pop L
+   sta R0L,y               
+   pla                     ; pop H
+   sta R0H,y   
+   iny
+   iny
+   cpy #32
+   bne loop
+   bra restore_return_address
+.endproc   
+
+
 ; a = bitmaks of registers to push
 ; lsb = register 8
 ; msb = register 15
@@ -28,11 +76,7 @@ UTIL_ASM = 1
 .endproc
 
 .proc push_registers_internal
-   ; save return address   
-   ply
-   sty restore_return_address+4
-   ply
-   sty restore_return_address+1
+   save_return_address
 
    ; update base register address
    stx update_here+1
@@ -86,11 +130,7 @@ restore_return_address:
 
 
 .proc pop_registers_internal
-   ; save return address   
-   ply
-   sty restore_return_address+4
-   ply
-   sty restore_return_address+1
+   save_return_address
 
    ; update base register address
    stx update_here+1

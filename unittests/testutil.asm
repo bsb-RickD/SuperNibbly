@@ -23,6 +23,7 @@
    printl str_ut_welcome
       
    jsr test_push_pop
+   jsr test_push_pop_all
 
    rts
 .endproc
@@ -78,3 +79,84 @@ different:
    ut_exp_equal
    rts
 .endproc 
+
+.proc test_push_pop_all
+   prints "push_all_registers"
+   LoadW R0,  $0102
+   LoadW R1,  $0304
+   LoadW R2,  $0506
+   LoadW R3,  $0708
+   LoadW R4,  $090A
+   LoadW R5,  $0B0C
+   LoadW R6,  $0D0E
+   LoadW R7,  $0F10
+   LoadW R8,  $1112
+   LoadW R9,  $1314
+   LoadW R10, $1516
+   LoadW R11, $1718
+   LoadW R12, $191A
+   LoadW R13, $1B1C
+   LoadW R14, $1D1E
+   LoadW R15, $1F20
+
+   jsr push_all_registers
+
+   LoadW R0,  $0000
+   LoadW R1,  $0000
+   LoadW R2,  $0000
+   LoadW R3,  $0000
+   LoadW R4,  $0000
+   LoadW R5,  $0000
+   LoadW R6,  $0000
+   LoadW R7,  $0000
+   LoadW R8,  $0000
+   LoadW R9,  $0000
+   LoadW R10, $0000
+   LoadW R11, $0000
+   LoadW R12, $0000
+   LoadW R13, $0000
+   LoadW R14, $0000
+   LoadW R15, $0000
+
+   jsr pop_all_registers
+
+   CmpWI R0,  $0102
+   jne fail
+   CmpWI R1,  $0304
+   jne fail
+   CmpWI R2,  $0506
+   jne fail
+   CmpWI R3,  $0708
+   jne fail
+   CmpWI R4,  $090A
+   jne fail
+   CmpWI R5,  $0B0C
+   jne fail
+   CmpWI R6,  $0D0E
+   jne fail
+   CmpWI R7,  $0F10
+   jne fail
+   CmpWI R8,  $1112
+   jne fail
+   CmpWI R9,  $1314
+   jne fail
+   CmpWI R10, $1516
+   jne fail
+   CmpWI R11, $1718
+   jne fail
+   CmpWI R12, $191A
+   jne fail
+   CmpWI R13, $1B1C
+   jne fail
+   CmpWI R14, $1D1E
+   jne fail
+   CmpWI R15, $1F20
+   jne fail
+
+   ut_pass
+   rts
+fail:
+   ut_fail
+   rts   
+.endproc 
+
