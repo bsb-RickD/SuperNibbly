@@ -47,13 +47,6 @@
 .include "lib/work_queue.asm"
 .endif
 
-.ifndef FILEIO_ASM
-.include "lib/fileio.asm"
-.endif
-
-.ifndef PRINT_ASM
-.include "lib/print.asm"
-.endif
 
 
 ; num colors to fade       1 byte   (+1, 0 meaning 1, etc.)    offset 0
@@ -88,22 +81,6 @@ function_ptrs:
 return_to_basic:
    .byte 0
 
-
-; these are the buffers used by the wq_instance
-intro_exec_queue:
-   .res 128,0
-intro_add_queue:
-   .res 16,0
-intro_remove_queue:
-   .res 16,0
-
-
-intro_wq_instance:
-.word intro_exec_queue
-.word intro_add_queue
-.word intro_remove_queue
-
-
 ; init state for multiple runs
 .proc reset_intro_state
    jsr rand_seed_time            ; seed the random generator
@@ -113,8 +90,9 @@ intro_wq_instance:
    stz palfade_in+5
    stz palfade_out+5
    stz return_to_basic
-   LoadW R15,intro_wq_instance
-   jsr init_work_queue
+   stz work_queue
+   stz workers_to_add
+   stz workers_to_remove
    LoadW jumping_fish, $0606
    LoadW jumping_fish+2, 17
    jsr switch_all_sprites_off
@@ -122,57 +100,15 @@ intro_wq_instance:
    rts
 .endproc
 
-sprite_data_file:
-Lstr "introsprites.bin"
-
-.proc load_sprite_data
-   LoadW R0, sprite_data_file
-   jsr file_open
-   ;bcs done
-
-   LoadW R0, $A000
-   LoadW R1, $FF01
-   LoadW R2, 0
-   jsr file_read
-   ;bcs done
-
-   jsr file_close
-   ;bcs done
-
-   set_vera_address 0
-
-   LoadB BANK, 1
-   LoadW R0, $A000
-   LoadW R1, VERA_data0
-   jsr memory_decompress 
-   clc    
-
-done:
-   rts
-.endproc   
-
-
 .proc main      
    jsr reset_intro_state         ; init state for multiple runs
-
-   /*
-   jsr load_sprite_data          ; load the sprites
-   bcs report_error
-
-   LoadB BANK, 1
-   LoadW R0, $A000
-   LoadW R1H, $FF
-   LoadW R2, 0
-   jsr file_read
-   */
-
    
-   LoadW R15, intro_wq_instance
+   LoadW R15, work_queue
    lda #(INTRO_FPI+1)
-   jsr add_to_work_queue         ; append check for exit to worker queue
+   jsr array_append              ; append check for exit to worker queue
 
    lda #(INTRO_FPI+2)
-   jsr add_to_work_queue         ; append unpacking of intro data to work queue
+   jsr array_append              ; append unpacking of intro data to work queue
 
    init_vsync_irq initial_fade_out   
 
@@ -180,7 +116,6 @@ done:
 iterate_main_loop:   
    jsr wait_for_vsync
 
-   LoadW R15, intro_wq_instance
    jsr execute_work_queue
 
    lda return_to_basic           ; shall we quit?
@@ -191,9 +126,6 @@ iterate_main_loop:
 
    jsr switch_to_textmode   
    
-   rts
-report_error:
-   prints "file load error"   
    rts
 .endproc
 

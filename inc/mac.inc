@@ -39,32 +39,14 @@ MAC_INC = 1
 	.endif
 .endmacro
 
-; modified by Erik to be able to specify a/x/y optionally - the register used for moving
-; if none is specified, it is a
-.macro MoveB source, dest, axy
-.if .blank(axy)
-	MoveB source, dest, a
-.else
-	.if .xmatch({axy}, a)
-		lda source
-		sta dest
-	.elseif .xmatch({axy}, x)
-		ldx source
-		stx dest
-	.elseif .xmatch({axy}, y)
-		ldy source
-		sty dest
-	.else
-		.error "You need to specify either <blank> or a or x or y for MoveB"
-	.endif
-.endif
+.macro MoveB source, dest
+	lda source
+	sta dest
 .endmacro
 
-; modified by Erik to be able to specify a/x/y optionally - the register used for moving
-; if none is specified, it is a
-.macro MoveW source, dest, axy
-	MoveB source+0, dest+0, axy
-	MoveB source+1, dest+1, axy
+.macro MoveW source, dest
+	MoveB source+0, dest+0
+	MoveB source+1, dest+1
 .endmacro
 
 .macro add source, reg
@@ -76,14 +58,12 @@ MAC_INC = 1
 .endif	
 .endmacro
 
-; dest += source
 .macro AddB source, dest
 	lda source
 	add dest
 	sta dest
 .endmacro
 
-; dest += source
 .macro AddW source, dest
 	AddB source+0, dest+0
 	lda source+1
@@ -179,60 +159,26 @@ MAC_INC = 1
 @j:
 .endmacro
 
-; modified by Erik to be able to specify a/x/y optionally - the register used for pushing
-; if none is specified, it is a
-.macro PushB source, axy
-.if .blank(axy)
-	PushB source, a
-.else
-	.if .xmatch({axy}, a)
-		lda source
-		pha
-	.elseif .xmatch({axy}, x)
-		ldx source
-		phx
-	.elseif .xmatch({axy}, y)
-		ldy source
-		phy
-	.else
-		.error "You need to specify either <blank> or a or x or y for PushB"
-	.endif
-.endif
+.macro PushB source
+	lda source
+	pha
 .endmacro
 
 
 ; modified by Erik to include immediate #values
 ; source can be either a source or a #value 
-.macro _PushW_internal source, reg
+.macro PushW source
 .if (.match (.left (1, {source}), #))
   	; source is a #value
-	PushB #<(.right (.tcount ({source})-1, {source})), reg
-	PushB #>(.right (.tcount ({source})-1, {source})), reg
+	PushB #<(.right (.tcount ({source})-1, {source}))
+	PushB #>(.right (.tcount ({source})-1, {source}))
 .else
   	; assume absolute or zero page for sorv
-	PushB source+0, reg
-	PushB source+1, reg
+	PushB source+0
+	PushB source+1
 .endif
-.endmacro
 
-; modified by Erik to be able to specify a/x/y optionally - the register used for pushing
-; if none is specified, it is a
-.macro PushW source, axy
-.if .blank(axy)
-	_PushW_internal source, a
-.else
-	.if .xmatch({axy}, a)
-		_PushW_internal source, a
-	.elseif .xmatch({axy}, x)
-		_PushW_internal source, x
-	.elseif .xmatch({axy}, y)
-		_PushW_internal source, y
-	.else
-		.error "You need to specify either <blank> or a or x or y for PushW"
-	.endif
-.endif	
 .endmacro
-
 
 .macro PopB dest
 	pla
