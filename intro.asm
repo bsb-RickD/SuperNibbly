@@ -109,15 +109,20 @@ intro_wq_instance:
    jsr rand_seed_time            ; seed the random generator
    jsr init_lerp416_table        ; init the lerp table
 
+   jsr switch_all_sprites_off
+   
    stz palfade_state
    stz palfade_in+5
    stz palfade_out+5
    stz return_to_basic
+   
    LoadW R15,intro_wq_instance
    jsr init_work_queue
+
+   stz seq_jumping_fish+1
    LoadW jumping_fish, $0606
    LoadW jumping_fish+2, 17
-   jsr switch_all_sprites_off
+   
    jsr init_drop
    rts
 .endproc
@@ -188,7 +193,6 @@ iterate_main_loop:
 
    ; cleanup
    clear_vsync_irq
-
    jsr switch_to_textmode   
    
    rts

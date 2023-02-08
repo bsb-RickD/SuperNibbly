@@ -15,6 +15,9 @@ init_drop_timings:
 .byte 1,10
 
 .proc init_drop
+   ; reset sequence object
+   stz seq_dropping_nibbly+1
+
    ; reset y positions
    LoadW R0,init_drop_y_positions
    LoadW R1,dropping_n+4
@@ -89,44 +92,44 @@ done:
 ; .byte 6              ; 8:   number of sprites in this oversize sprite
 
 dropping_n:
-.byte 1                 ; count
-.byte 10                ; speed
+.byte 0                 ; count
+.byte 0                 ; speed
 ; ----------- oversize sprite starts here ------------------------
-.word 25,neg_word(89)   ; 0-3: position
+.word 25,0              ; 0-3: position
 .addr sprite_n_0_0      ; 4,5: sprite frame pointer
 .word spritenum(114)    ; 6,7: sprite# to use - stored as address of the sprite data in VRAM 
 .byte 2                 ; 8:   number of sprites in this oversize sprite
 
 dropping_i:
-.byte 1                 ; count
-.byte 10                ; speed
+.byte 0                 ; count
+.byte 0                 ; speed
 ; ----------- oversize sprite starts here ------------------------
-.word 67,neg_word(98)   ; 0-3: position
+.word 67,0              ; 0-3: position
 .addr sprite_i_0_0      ; 4,5: sprite frame pointer
 .word spritenum(116)    ; 6,7: sprite# to use - stored as address of the sprite data in VRAM 
 .byte 2                 ; 8:   number of sprites in this oversize sprite
 
 dropping_b1:
-.byte 1                 ; count
-.byte 10                ; speed
+.byte 0                 ; count
+.byte 0                 ; speed
 ; ----------- oversize sprite starts here ------------------------
-.word 93,neg_word(107)  ; 0-3: position
+.word 93,0              ; 0-3: position
 .addr sprite_b1_0_0     ; 4,5: sprite frame pointer
 .word spritenum(118)    ; 6,7: sprite# to use - stored as address of the sprite data in VRAM 
 .byte 2                 ; 8:   number of sprites in this oversize sprite
 
 dropping_b2:
-.byte 1                 ; count
-.byte 10                ; speed
+.byte 0                 ; count
+.byte 0                 ; speed
 ; ----------- oversize sprite starts here ------------------------
-.word 149,neg_word(108) ; 0-3: position
+.word 149,0             ; 0-3: position
 .addr sprite_b2_0_0     ; 4,5: sprite frame pointer
 .word spritenum(124)    ; 6,7: sprite# to use - stored as address of the sprite data in VRAM 
 .byte 2                 ; 8:   number of sprites in this oversize sprite
 
 dropping_l:
-.byte 1                 ; count
-.byte 10                ; speed
+.byte 0                 ; count
+.byte 0                 ; speed
 ; ----------- oversize sprite starts here ------------------------
 .word 201,neg_word(106) ; 0-3: position
 .addr sprite_l_0_0      ; 4,5: sprite frame pointer
@@ -134,10 +137,10 @@ dropping_l:
 .byte 2                 ; 8:   number of sprites in this oversize sprite
 
 dropping_y:
-.byte 1                 ; count
-.byte 10                ; speed
+.byte 0                 ; count
+.byte 0                 ; speed
 ; ----------- oversize sprite starts here ------------------------
-.word 244,neg_word(96)  ; 0-3: position
+.word 244,0             ; 0-3: position
 .addr sprite_y_0_0      ; 4,5: sprite frame pointer
 .word spritenum(120)    ; 6,7: sprite# to use - stored as address of the sprite data in VRAM 
 .byte 2                 ; 8:   number of sprites in this oversize sprite
