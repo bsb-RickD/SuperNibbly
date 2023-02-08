@@ -75,6 +75,22 @@ TEST_FPB = *                              ; test function pointer base
    rts
 .endproc
 
+
+ut_work_queue:
+   .res 32,17
+
+ut_workers_to_add:
+   .res 8,16
+
+ut_workers_to_remove:
+   .res 8,15
+
+ut_wq:
+.word ut_work_queue
+.word ut_workers_to_add
+.word ut_workers_to_remove
+
+
 .proc main      
    printl str_ut_welcome
 
@@ -86,10 +102,10 @@ TEST_FPB = *                              ; test function pointer base
    LoadB variable_5,27
 
    ; empty queue
-   LoadW R15, work_queue
-   lda #0
-   sta (R15)
+   LoadW R15, ut_wq
+   jsr init_work_queue
 
+   ; run the tests
    jsr trigger_empty
    jsr trigger_first
    jsr trigger_follow_ups
@@ -100,6 +116,7 @@ TEST_FPB = *                              ; test function pointer base
 .proc trigger_empty
    prints "trigger empty queue"
 
+   LoadW R15, ut_wq
    jsr execute_work_queue                    ; run empty queue
 
    compare_memory variable_1, expected, 5    ; expect memory unchanged
@@ -114,10 +131,9 @@ expected:
 .proc trigger_first
    prints "trigger first worker"
 
-   LoadW R15, work_queue
+   LoadW R15, ut_wq
    lda #1
-   jsr array_append                          ; append first worker to queue - this one should pull the others in
-
+   jsr add_to_work_queue                     ; append first worker to queue - this one should pull the others in
    jsr execute_work_queue                    ; run queue
 
    compare_memory variable_1, expected, 5    ; expected memory check
@@ -132,6 +148,7 @@ expected:
 .proc trigger_follow_ups
    prints "triggered follow ups?"
 
+   LoadW R15, ut_wq
    jsr execute_work_queue                    ; run queue
 
    compare_memory variable_1, expected, 5    ; expected memory check
@@ -145,6 +162,7 @@ expected:
 .proc trigger_once_more
    prints "triggered dec's once more?"
 
+   LoadW R15, ut_wq
    jsr execute_work_queue                    ; run queue
 
    compare_memory variable_1, expected, 5    ; expected memory check
