@@ -90,18 +90,31 @@ return_to_basic:
 
 
 ; these are the buffers used by the wq_instance
-intro_exec_queue:
-   .res 128,0
-intro_add_queue:
+main_exec_queue:
+   .res 64,0
+main_add_queue:
    .res 16,0
-intro_remove_queue:
+main_remove_queue:
    .res 16,0
 
+wq_main_instance:
+.word main_exec_queue
+.word main_add_queue
+.word main_remove_queue
 
-intro_wq_instance:
-.word intro_exec_queue
-.word intro_add_queue
-.word intro_remove_queue
+; these are the buffers used by the wq_instance
+vsync_exec_queue:
+   .res 64,0
+vsync_add_queue:
+   .res 16,0
+vsync_remove_queue:
+   .res 16,0
+
+wq_vsync_instance:
+.word vsync_exec_queue
+.word vsync_add_queue
+.word vsync_remove_queue
+
 
 
 ; init state for multiple runs
@@ -116,7 +129,10 @@ intro_wq_instance:
    stz palfade_out+5
    stz return_to_basic
    
-   LoadW R15,intro_wq_instance
+   LoadW R15,wq_main_instance
+   jsr init_work_queue
+
+   LoadW R15,wq_vsync_instance
    jsr init_work_queue
 
    stz seq_jumping_fish+1
@@ -185,7 +201,7 @@ done:
 iterate_main_loop:   
    jsr wait_for_vsync
 
-   LoadW R15, intro_wq_instance
+   LoadW R15, intro_main_instance
    jsr execute_work_queue
 
    lda return_to_basic           ; shall we quit?
