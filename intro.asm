@@ -192,10 +192,13 @@ done:
    lda #intro_fp_index(ptr_check_return_to_basic)
    jsr add_to_work_queue         ; append check for exit to worker queue
 
+   /*
    lda #intro_fp_index(ptr_unpack_intro)
    jsr add_to_work_queue         ; append unpacking of intro data to work queue
+   */
 
-   init_vsync_irq initial_fade_out   
+   ; install vsync work queue
+   init_vsync_irq vsync_work_queue_handler   
 
    ; main game loop - iterate the objects and update them
 iterate_main_loop:   
@@ -218,20 +221,16 @@ report_error:
 .endproc
 
 .proc vsync_work_queue_handler
-   sei
    jsr push_all_registers
    jsr push_both_vera_addresses
-   cli
-
+   
    LoadW R15,wq_vsync_instance
    jsr execute_work_queue
    
 done:
-   sei
    jsr pop_both_vera_addresses
    jsr pop_all_registers
-   cli
-
+   
    jmp vsync_irq_exit
 .endproc 
 
