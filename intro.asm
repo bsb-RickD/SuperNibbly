@@ -68,6 +68,17 @@ palfade_out:
    .byte 0
    .byte 0
 
+; palette fader structure
+;
+; .word palfade         ; offset 0 - ptr to palfade structure
+; .word buffer          ; offset 2 - ptr to fade buffer
+; .word mapping         ; offset 4 - ptr to palette mapping
+;
+text_fade_out:
+   .word palfade_out
+   .word fadebuffer
+   .word standard_pal_mapping   
+
 ; num colors to fade       1 byte   (+1, 0 meaning 1, etc.)    offset 0
 ; pointer to palette       2 bytes                             offset 1
 ; target color             2 bytes                             offset 3
@@ -79,6 +90,18 @@ palfade_in:
    .byte $0a, $0
    .byte 0
    .byte 0
+
+; palette fader structure
+;
+; .word palfade         ; offset 0 - ptr to palfade structure
+; .word buffer          ; offset 2 - ptr to fade buffer
+; .word mapping         ; offset 4 - ptr to palette mapping
+;
+intro_fade_in:
+   .word palfade_in
+   .word fadebuffer
+   .word intro_pal_mapping   
+
 
 function_ptrs:
 .ifndef INTRO_FUNCTION_PTRS_INC
@@ -114,7 +137,6 @@ wq_vsync_instance:
 .word vsync_exec_queue
 .word vsync_add_queue
 .word vsync_remove_queue
-
 
 
 ; init state for multiple runs
@@ -290,32 +312,7 @@ complete:
    rts
 .endproc
 
-
-; worker procedure to check whether we shall quit or not
-.proc check_return_to_basic
-   jsr KRNL_GETIN    ; read key
-   cmp #KEY_Q         
-   bne carry_on
-   ; q pressed - signal that we want to return to basic
-   lda #1
-   sta return_to_basic
-   sec
-   rts
-carry_on:  
-   clc 
-   rts
-.endproc   
-
-
-palfade_state:
-.byte 0
-
 .proc initial_fade_out
-   jsr push_current_vera_address
-   lda #%00111111                   ; R0,R1,R2,R3
-   jsr push_registers_0_to_7 
-   lda #%10011000                   ; R11,R12,R15
-   jsr push_registers_8_to_15 
 
    LoadW R15, palfade_out
    lda palfade_state
@@ -348,28 +345,33 @@ write_the_pal:
    cmp #2
    bne done
 
-   ; our work here is done...
-   clear_vsync_worker
-
 done:
-   lda #%10011000                   ; R11,R12,R15
-   jsr pop_registers_8_to_15 
-   lda #%00111111                   ; R0,R1,R2,R3,R4,R5
-   jsr pop_registers_0_to_7 
-   jsr pop_current_vera_address
-
-   jmp vsync_irq_exit
+   rts
 .endproc 
 
-.proc set_palette_from_buffer
-   MoveW R0, R11 
-   ldx #15
-   lda #0
-   sei
-   jsr write_to_palette
-   cli
+
+
+; worker procedure to check whether we shall quit or not
+.proc check_return_to_basic
+   jsr KRNL_GETIN    ; read key
+   cmp #KEY_Q         
+   bne carry_on
+   ; q pressed - signal that we want to return to basic
+   lda #1
+   sta return_to_basic
+   sec
+   rts
+carry_on:  
+   clc 
    rts
 .endproc   
+
+
+palfade_state:
+.byte 0
+
+
+
 
 .proc switch_to_tiled_mode
    stz VERA_ctrl              ; dcsel and adrsel both to 0
@@ -468,6 +470,8 @@ INTRO_PALETTE_SIZE = *-intro_pal
 intro_pal_mapping:
 .incbin "assets/intro_palette_mapping.bin"
 
+standard_pal_mapping:
+.byte 16,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
 
 ; this is where we fade into
 fadebuffer:

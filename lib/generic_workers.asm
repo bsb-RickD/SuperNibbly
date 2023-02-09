@@ -2,8 +2,17 @@
 GENERIC_WORKERS_ASM = 1
 
 .ifndef RANDOM_ASM
-.include "random.asm"
+.include "lib/random.asm"
 .endif
+
+.ifndef VERA_ASM
+.include "lib/vera.asm"
+.endif
+
+.ifndef PALETTEFADER_ASM
+.include "lib/palettefader.asm"
+.endif
+
 
 .macro dw2_ w1,w2
 .ifnblank w1
@@ -93,6 +102,46 @@ dw2_ wd,td
 dw2_ we,te
 dw2_ wf,tf
 .endmacro
+
+
+; palette fader structure
+;
+; .word palfade         ; offset 0 - ptr to palfade structure
+; .word buffer          ; offset 2 - ptr to fade buffer
+; .word mapping         ; offset 4 - ptr to palette mapping
+;
+.proc worker_palette_fade
+   MoveW R15,R14                 ; keep this pointer around
+
+   ThisLoadW R14,R15,0           ; bring in this pointer for palfade object
+   ThisLoadW R14,R0,-            ; bring in pointer for the fade buffer   
+   ldy #5
+   lda (R15),y
+   bne fade_further              ; are we here the first time?
+
+   sec
+   jsr palettefader_start_fade   ; initialize pal fade
+   bra write_the_pal
+
+fade_further:
+   jsr palettefader_step_fade     ; second time round, fade..
+
+write_the_pal:
+   ThisLoadW R14,R1,4            ; bring in pointer for the mapping
+   lda #0
+   jsr write_to_palette_mapped
+
+   ldy #5
+   lda (R15),y
+   beq complete                  ; are we done?
+
+   clc                           ; fade not done, carry on
+   rts                  
+complete:
+   sec                           ; indicate that we're done
+   rts
+.endproc
+
 
 ; range 8 structure
 ;
