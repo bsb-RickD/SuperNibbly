@@ -32,8 +32,10 @@ seq_dropping_nibbly:
       drop_letter, dropping_y                         \
 
 
+.define intro_fp_index(ptr) (ptr-function_ptrs)/8
+
 INTRO_FPB = *                             ; intro function pointer base
-INTRO_FPI = ((INTRO_FPB-function_ptrs)/8)
+INTRO_FPI = intro_fp_index INTRO_FPB
    .word 0,0                              ; 0 - nullptr
    no_commands_to_add
 ptr_check_return_to_basic:                ; 1 - check for exit
