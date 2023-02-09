@@ -219,6 +219,10 @@ done:
    jsr add_to_work_queue         ; append unpacking of intro data to work queue
    */
 
+   LoadW R15, wq_vsync_instance
+   lda #intro_fp_index(ptr_initial_fade_out)
+   jsr add_to_work_queue         ; append initial fade out to vsync queue
+
    ; install vsync work queue
    init_vsync_irq vsync_work_queue_handler   
 

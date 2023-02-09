@@ -79,4 +79,9 @@ ptr_animate_smoke:                        ; 5 - smoke animation
    .word worker_sequence, seq_dropping_nibbly
    no_commands_to_add
 
+ptr_initial_fade_out:                     ; 11 - fade out the initial text screen
+   .word worker_palette_fade, text_fade_out         
+   no_commands_to_add
+
+
 .endif
