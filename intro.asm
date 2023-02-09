@@ -72,11 +72,13 @@ palfade_out:
 ;
 ; .word palfade         ; offset 0 - ptr to palfade structure
 ; .word buffer          ; offset 2 - ptr to fade buffer
-; .word mapping         ; offset 4 - ptr to palette mapping
+; .byte fadedirectrion  ; offset 4 - 0 to fade to target, 1 to fade from target color
+; .word mapping         ; offset 5 - ptr to palette mapping
 ;
 text_fade_out:
    .word palfade_out
    .word fadebuffer
+   .byte 0
    .word standard_pal_mapping   
 
 ; num colors to fade       1 byte   (+1, 0 meaning 1, etc.)    offset 0
@@ -95,11 +97,13 @@ palfade_in:
 ;
 ; .word palfade         ; offset 0 - ptr to palfade structure
 ; .word buffer          ; offset 2 - ptr to fade buffer
-; .word mapping         ; offset 4 - ptr to palette mapping
+; .byte fadedirectrion  ; offset 4 - 0 to fade to target, 1 to fade from target color
+; .word mapping         ; offset 5 - ptr to palette mapping
 ;
 intro_fade_in:
    .word palfade_in
    .word fadebuffer
+   .byte 1
    .word intro_pal_mapping   
 
 

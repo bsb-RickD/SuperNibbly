@@ -108,7 +108,8 @@ dw2_ wf,tf
 ;
 ; .word palfade         ; offset 0 - ptr to palfade structure
 ; .word buffer          ; offset 2 - ptr to fade buffer
-; .word mapping         ; offset 4 - ptr to palette mapping
+; .byte fadedirectrion  ; offset 4 - 0 to fade to target, 1 to fade from target color
+; .word mapping         ; offset 5 - ptr to palette mapping
 ;
 .proc worker_palette_fade
    MoveW R15,R14                 ; keep this pointer around
@@ -119,7 +120,9 @@ dw2_ wf,tf
    lda (R15),y
    bne fade_further              ; are we here the first time?
 
-   sec
+   ldy #4
+   lda (R14),y                   ; load the fade direction
+   ror                           ; shift the direction into the carry flag - to determine the direction
    jsr palettefader_start_fade   ; initialize pal fade
    bra write_the_pal
 
@@ -127,7 +130,7 @@ fade_further:
    jsr palettefader_step_fade     ; second time round, fade..
 
 write_the_pal:
-   ThisLoadW R14,R1,4            ; bring in pointer for the mapping
+   ThisLoadW R14,R1,5            ; bring in pointer for the mapping
    lda #0
    jsr write_to_palette_mapped
 
