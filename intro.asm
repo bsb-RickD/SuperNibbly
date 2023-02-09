@@ -55,6 +55,8 @@
 .include "lib/print.asm"
 .endif
 
+sem_unpack:
+   .byte 1
 
 ; num colors to fade       1 byte   (+1, 0 meaning 1, etc.)    offset 0
 ; pointer to palette       2 bytes                             offset 1
@@ -164,6 +166,8 @@ wq_vsync_instance:
    stz seq_jumping_fish+1
    LoadW jumping_fish, $0606
    LoadW jumping_fish+2, 17
+
+   stz seq_wait_for_unpack+1
    
    jsr init_drop
    rts
@@ -215,7 +219,7 @@ done:
 
    
    LoadW R15, wq_main_instance
-   lda #intro_fp_index(ptr_check_return_to_basic)
+   lda #intro_fp_index ptr_check_return_to_basic
    jsr add_to_work_queue         ; append check for exit to worker queue
 
    /*
@@ -224,8 +228,8 @@ done:
    */
 
    LoadW R15, wq_vsync_instance
-   lda #intro_fp_index(ptr_initial_fade_out)
-   jsr add_to_work_queue         ; append initial fade out to vsync queue
+   lda #intro_fp_index ptr_intro_startup 
+   jsr add_to_work_queue         ; append intro startup to vsync queue
 
    ; install vsync work queue
    init_vsync_irq vsync_work_queue_handler   
@@ -250,6 +254,7 @@ report_error:
    rts
 .endproc
 
+; this is the vsync routine, that executes the work queue
 .proc vsync_work_queue_handler
    jsr push_all_registers
    jsr push_both_vera_addresses
@@ -264,100 +269,18 @@ done:
    jmp vsync_irq_exit
 .endproc 
 
-
-; check on the palette fade out  to be complete..
-.proc fade_out_and_switch_to_tiled_mode
-   ldy #5
-   lda (R15),y             ; get fade state - 0 means fade is complete    
-   beq complete
-   clc                     ; indicate that worker is not done yet
-   rts
-complete:
-
-   ; set all used colors to fade target
-   ldx intro_pal_mapping   ; load the number of palette entries used
+; after the palette fade out - enable our tiling mode
+.proc all_blue_and_switch_to_tiled_mode   
+   ldx intro_pal_mapping                  ; load the number of palette entries used
    lda #0
    MoveW palfade_out+3, R11
-   jsr write_to_palette_const_color
+   jsr write_to_palette_const_color       ; set all used colors to fade target
+   
+   jsr switch_to_tiled_mode               ; switch to the intro screen - but it's still "invisible" because it's all a single color
 
-   ; switch to the intro screen - but it's still "invisible" because it's all a single color
-   jsr switch_to_tiled_mode
-
-   sec                     ; fade complete - carry on with new workers
+   sec                                    ; one shot, mark as done
    rts   
 .endproc
-
-.proc fade_intro_in
-   ; are we here the first time?
-   ldy #5
-   lda (R15),y
-   bne fade_further
-
-   ; initialize pal fade
-   LoadW R0, fadebuffer
-   sec
-   jsr palettefader_start_fade
-   bra write_the_pal
-
-fade_further:
-   ; second time round, fade..
-   LoadW R0, fadebuffer
-   jsr palettefader_step_fade
-
-write_the_pal:
-   LoadW R1, intro_pal_mapping
-   lda #0
-   jsr write_to_palette_mapped
-
-   ldy #5
-   lda (R15),y
-   beq complete                  ; are we done?
-
-   clc                           ; fade not done, carry on
-   rts                  
-complete:
-   sec                           ; indicate that we're done
-   rts
-.endproc
-
-.proc initial_fade_out
-
-   LoadW R15, palfade_out
-   lda palfade_state
-   bne init_done
-
-   ; first time round, initialize everything..
-   inc palfade_state
-   clc
-   LoadW R0, fadebuffer
-   jsr palettefader_start_fade
-   bra write_the_pal
-init_done:
-
-   ; second time round, fade..
-   LoadW R0, fadebuffer
-   jsr palettefader_step_fade
-   bcc write_the_pal
-
-   ; we should stop next frame
-   inc palfade_state
-
-write_the_pal:
-   MoveW R0, R11 
-   ldx #15
-   lda #0
-   sei
-   jsr write_to_palette
-
-   lda palfade_state
-   cmp #2
-   bne done
-
-done:
-   rts
-.endproc 
-
-
 
 ; worker procedure to check whether we shall quit or not
 .proc check_return_to_basic

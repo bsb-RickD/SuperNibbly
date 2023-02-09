@@ -103,6 +103,25 @@ dw2_ we,te
 dw2_ wf,tf
 .endmacro
 
+; if semaphore at R15 is zero, this signals done
+.proc worker_wait_semaphore
+   lda (R15)
+   bne wait
+   sec
+   rts
+wait:
+   clc
+   rts   
+.endproc
+
+; decrement the semaphore, one shot
+.proc worker_signal_semaphore
+   lda (R15)
+   dec
+   sta (R15)
+   sec
+   rts
+.endproc
 
 ; palette fader structure
 ;
