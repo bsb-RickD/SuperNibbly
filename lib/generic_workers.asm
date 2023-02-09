@@ -136,7 +136,7 @@ wait:
    ThisLoadW R15, VERA_addr_low, 0  ; 1st word of address
    lda (R15),y
    and #01
-   ora (VERA_increment_1 + VERA_increment_addresses)     
+   ora #(VERA_increment_1 + VERA_increment_addresses)     
    sta VERA_addr_high               ; last part of address + direction and increment
 
    iny
@@ -146,7 +146,7 @@ wait:
    jsr memory_decompress
 
    LoadB VERA_ctrl, VERA_port_0     ; data port 0
-   ThisLoadW R15,R14,5,-            ; R14 points to output address
+   ThisLoadW R15,R14,6,-            ; R14 points to output address
    ldy #0
 copy_address:   
    lda VERA_addr_low,y              ; copy byte ... 

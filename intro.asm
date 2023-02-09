@@ -198,7 +198,7 @@ wq_vsync_instance:
 
    lda #1
    sta sem_unpack
-   
+
    rts
 .endproc
 
@@ -357,18 +357,6 @@ palfade_state:
    LoadB VERA_L0_vscroll_l, 8
 
    rts
-.endproc
-
-; uncompress the screen data 
-; plus some sprites
-.proc fill_screen
-   ; vera address0 set to 0, increment 1
-   set_vera_address 0   
-   LoadW R0, intro_screen     ; screendata to R0 (source)        
-   LoadW R1, VERA_data0       ; vera data #0 to R1 (destination)
-   jsr memory_decompress
-   sec                        ; set carry flag to indicate that the next worker task should start
-   rts   
 .endproc
 
 .proc waitkey
