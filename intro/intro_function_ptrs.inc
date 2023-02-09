@@ -19,7 +19,16 @@ ptr_intro_startup:                        ; 2 - fade and wait for unpacking
                                           ; 3 - fade pal in
    .word worker_palette_fade, intro_fade_in
    no_commands_to_add
-   ;commands_to_add INTRO_FPB, 10          ; start dropping nibbly
+   ;commands_to_add INTRO_FPB, 10         ; start dropping nibbly
+
+ptr_intro_decompress_base_data:           ; 4 - decompress base data
+   .word worker_decompress_to_vram, intro_decompress_base_data
+   commands_to_add INTRO_FPB,5            ; signal that decompression is done
+
+                                          ; 5 - signal decompression is done
+   .word worker_signal_semaphore, sem_unpack
+   no_commands_to_add                     ; 
+
 
 /*
 ptr_unpack_intro:                         ; 2 - unpack screen data

@@ -123,6 +123,44 @@ wait:
    rts
 .endproc
 
+; decompress to vram structure
+;
+; .word vram_lm         ; offset 0 - low and med byte of address
+; .byte vram_h          ; offset 1 - high byte of address
+; .word source          ; offset 3 - ptr to compressed memory
+; .byte bank            ; offset 5 - bank of the source memory
+; .word store_address   ; offset 6 - ptr to memory to receive the address of the next byte in vram after decoding
+;
+.proc worker_decompress_to_vram
+   LoadB VERA_ctrl, VERA_port_0     ; data port 0
+   ThisLoadW R15, VERA_addr_low, 0  ; 1st word of address
+   lda (R15),y
+   and #01
+   ora (VERA_increment_1 + VERA_increment_addresses)     
+   sta VERA_addr_high               ; last part of address + direction and increment
+
+   iny
+   ThisLoadW R15, R0                ; compressed data to R0 (source)
+   ThisLoadB R15, BANK              ; set bank byte
+   LoadW R1, VERA_data0             ; vera data #0 to R1 (destination)
+   jsr memory_decompress
+
+   LoadB VERA_ctrl, VERA_port_0     ; data port 0
+   ThisLoadW R15,R14,5,-            ; R14 points to output address
+   ldy #0
+copy_address:   
+   lda VERA_addr_low,y              ; copy byte ... 
+   sta (R14),y                      ; .. by byte ..
+   iny
+   cpy #3                           ; .. until ...
+   bne copy_address                 ; .. we're done
+
+   sec                              ; set carry flag to indicate that the next worker task should start
+   rts      
+.endproc
+
+
+
 ; palette fader structure
 ;
 ; .word palfade         ; offset 0 - ptr to palfade structure

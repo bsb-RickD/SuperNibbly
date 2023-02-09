@@ -106,7 +106,32 @@ intro_fade_in:
    .word palfade_in
    .word fadebuffer
    .byte 1
-   .word intro_pal_mapping   
+   .word intro_pal_mapping  
+
+;
+; .word vram_lm         ; offset 0 - low and med byte of address
+; .byte vram_h          ; offset 1 - high byte of address
+; .word source          ; offset 3 - ptr to compressed memory
+; .byte bank            ; offset 5 - bank of the source memory
+; .word store_address   ; offset 6 - ptr to memory to receive the address of the next byte in vram after decoding
+;
+intro_decompress_base_data:
+   .word 0
+   .byte 0                 ; decompress to vram 0
+   .word intro_screen      ; source data
+   .byte 0                 ; bank is irrelevant
+   .word intro_decompress_additional_data 
+
+intro_decompress_additional_data:
+   .word 0                 ; address to be filled in..
+   .byte 0                 ; ..by previous call
+   .word $A000             ; source data
+   .byte 1                 ; bank 1
+   .word decompress_additional_data_end 
+
+decompress_additional_data_end:
+   .word 0
+   .byte 0
 
 
 function_ptrs:
@@ -170,6 +195,10 @@ wq_vsync_instance:
    stz seq_wait_for_unpack+1
    
    jsr init_drop
+
+   lda #1
+   sta sem_unpack
+   
    rts
 .endproc
 
@@ -221,6 +250,8 @@ done:
    LoadW R15, wq_main_instance
    lda #intro_fp_index ptr_check_return_to_basic
    jsr add_to_work_queue         ; append check for exit to worker queue
+   lda #intro_fp_index ptr_intro_decompress_base_data
+   jsr add_to_work_queue         ; append decompression to worker queue
 
    /*
    lda #intro_fp_index(ptr_unpack_intro)
@@ -258,11 +289,15 @@ report_error:
 .proc vsync_work_queue_handler
    jsr push_all_registers
    jsr push_both_vera_addresses
+   lda BANK                       ; also push ...
+   pha                            ; ... the bank
    
    LoadW R15,wq_vsync_instance
    jsr execute_work_queue
    
 done:
+   pla                             ; pop the ...
+   sta BANK                        ; ... bank
    jsr pop_both_vera_addresses
    jsr pop_all_registers
    

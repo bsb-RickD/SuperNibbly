@@ -1,4 +1,4 @@
-.ifndef VERA_ASM
+ .ifndef VERA_ASM
 VERA_ASM = 1
 
 .ifndef REGS_INC
