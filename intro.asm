@@ -189,7 +189,7 @@ wq_vsync_instance:
    jsr init_work_queue
 
    stz seq_jumping_fish+1
-   LoadW jumping_fish, $0606
+   LoadW jumping_fish+9, $0600
    LoadW jumping_fish+2, 17
 
    stz seq_wait_for_unpack+1
@@ -247,7 +247,6 @@ done:
    LoadW R2, 0
    jsr file_read
    */
-
    
    LoadW R15, wq_main_instance
    lda #intro_fp_index ptr_check_return_to_basic
@@ -255,10 +254,6 @@ done:
    lda #intro_fp_index ptr_intro_decompress_base_data
    jsr add_to_work_queue         ; append decompression of intro base data to worker queue
 
-   /*
-   lda #intro_fp_index(ptr_unpack_intro)
-   jsr add_to_work_queue         ; append unpacking of intro data to work queue
-   */
 
    LoadW R15, wq_vsync_instance
    lda #intro_fp_index ptr_intro_startup 
@@ -337,9 +332,6 @@ carry_on:
 
 palfade_state:
 .byte 0
-
-
-
 
 .proc switch_to_tiled_mode
    stz VERA_ctrl              ; dcsel and adrsel both to 0
