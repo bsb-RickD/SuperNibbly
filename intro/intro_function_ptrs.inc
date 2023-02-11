@@ -14,12 +14,11 @@ ptr_check_return_to_basic:                ; 1 - check for exit
 
 ptr_intro_startup:                        ; 2 - fade and wait for unpacking
    .word worker_sequence, seq_wait_for_unpack         
-   commands_to_add INTRO_FPB,3            ; now fade in, and kick off others
+   commands_to_add INTRO_FPB,3,6,7        ; now fade in, and kick off fish and smoke
 
                                           ; 3 - fade pal in
    .word worker_palette_fade, intro_fade_in
-   no_commands_to_add
-   ;commands_to_add INTRO_FPB, 10         ; start dropping nibbly
+   commands_to_add INTRO_FPB,8            ; start dropping n
 
 ptr_intro_decompress_base_data:           ; 4 - decompress base data
    .word worker_decompress_to_vram, intro_decompress_base_data
@@ -28,6 +27,20 @@ ptr_intro_decompress_base_data:           ; 4 - decompress base data
                                           ; 5 - signal decompression is done
    .word worker_signal_semaphore, sem_unpack
    no_commands_to_add                     ; 
+
+ptr_animate_smoke:                        ; 6 - smoke animation
+   .word loop_sprite, animated_smoke
+   no_commands_to_add
+
+                                          ; 7 - the fish sequence
+   .word worker_sequence, seq_jumping_fish   
+   commands_to_add INTRO_FPB, 7           ; the fish loops, jumping randomly for ever
+
+
+                                          ; 8 - the dropping nibbly sequence
+   .word worker_sequence, seq_dropping_nibbly
+   no_commands_to_add
+
 
 
 /*
@@ -69,14 +82,25 @@ ptr_animate_smoke:                        ; 5 - smoke animation
    no_commands_to_add
 */   
 
+; the start sequence:
+;
+; init the random ranges for the fish, these can all be done in one frame
+;
+par_init_fish_random:
+   make_parallel                                         \
+      worker_initialize_random_range, fish_pause_range,  \ 
+      worker_initialize_random_range, fish_x_range,      \
+      worker_initialize_random_range, fish_y_range
+
 
 ; the start sequence:
 ;
-; fade out, switch to tile mode, wait for unpacking to be done
+; fade out, init random ranges, switch to tile mode, wait for unpacking to be done
 ;
 seq_wait_for_unpack:
    make_sequence                                      \
       worker_palette_fade, text_fade_out,             \
+      worker_parallel, par_init_fish_random,          \
       worker_wait_semaphore, sem_unpack,              \         
       all_blue_and_switch_to_tiled_mode, 0
 

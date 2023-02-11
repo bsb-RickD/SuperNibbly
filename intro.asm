@@ -193,6 +193,8 @@ wq_vsync_instance:
    LoadW jumping_fish+2, 17
 
    stz seq_wait_for_unpack+1
+
+   stz par_init_fish_random+1
    
    jsr init_drop
 
@@ -251,7 +253,7 @@ done:
    lda #intro_fp_index ptr_check_return_to_basic
    jsr add_to_work_queue         ; append check for exit to worker queue
    lda #intro_fp_index ptr_intro_decompress_base_data
-   jsr add_to_work_queue         ; append decompression to worker queue
+   jsr add_to_work_queue         ; append decompression of intro base data to worker queue
 
    /*
    lda #intro_fp_index(ptr_unpack_intro)
