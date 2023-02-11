@@ -15,6 +15,11 @@
 .include "lib/generic_workers.asm"
 .endif
 
+.ifndef MEMORY_ASM
+.include "lib/memory.asm"
+.endif
+
+
 .proc main      
    printl str_ut_welcome
 
@@ -23,6 +28,7 @@
    jsr worker_initialize_random_range_test
    jsr worker_generate_random_test
    jsr worker_sequence_test
+   jsr worker_parallel_test
    rts
 .endproc
 
@@ -193,6 +199,8 @@ seq_worker:
    
    ut_pass
    rts
+.endproc 
+
 too_early_termination:
    ut_fail
    prints " (expected more steps)", CHR_NL
@@ -208,6 +216,113 @@ too_late_termination:
 no_random_generated:
    ut_fail
    prints " (expected random number)", CHR_NL
-   rts
+   rts   
 
-.endproc   
+
+par_range8_1:
+.byte 150
+.byte 147
+
+par_range8_2:
+.byte 16
+.byte 10
+
+
+par_random_range:
+.word 150, 250                ; from 150 to 250
+.byte 0                       ; chunk: all
+.word par_random_range_obj    ; store here
+
+par_random_range_obj:
+.res 5,0
+
+empty:
+.res 5,0
+
+par_worker:
+   make_parallel                                                 \
+      worker_decrement_8, par_range8_1,                          \
+      worker_initialize_random_range, par_random_range,          \
+      worker_decrement_8, par_range8_2
+
+.proc worker_parallel_test
+   prints "worker_parallel_test"
+
+   LoadB par_range8_1, 150                ; init
+   LoadB par_range8_2, 16                 ; init
+   fill_memory par_random_range_obj,5,0   ; init
+   LoadW R15, par_worker
+   jsr worker_parallel_reset              ; init
+
+   LoadW R15, par_worker
+   jsr worker_parallel
+   jcs too_early_termination
+   lda par_range8_1
+   cmp #149
+   jne decrement_error
+   lda par_range8_2
+   cmp #15
+   jne decrement_error
+   compare_memory empty, par_random_range_obj, 5
+   jeq no_random_generator_init
+
+   LoadW R15, par_worker
+   jsr worker_parallel
+   jcs too_early_termination
+   lda par_range8_1
+   cmp #148
+   jne decrement_error
+   lda par_range8_2
+   cmp #14
+   jne decrement_error
+
+   LoadW R15, par_worker
+   jsr worker_parallel
+   jcs too_early_termination
+   lda par_range8_1
+   cmp #147
+   jne decrement_error
+   lda par_range8_2
+   cmp #13
+   jne decrement_error
+
+   LoadW R15, par_worker
+   jsr worker_parallel
+   jcs too_early_termination
+   lda par_range8_1
+   cmp #147
+   jne decrement_too_far_error
+   lda par_range8_2
+   cmp #12
+   jne decrement_error
+
+   LoadW R15, par_worker
+   jsr worker_parallel
+   jcs too_early_termination
+   lda par_range8_1
+   cmp #147
+   jne decrement_too_far_error
+   lda par_range8_2
+   cmp #11
+   jne decrement_error
+
+   LoadW R15, par_worker
+   jsr worker_parallel
+   jcc too_late_termination
+   lda par_range8_1
+   cmp #147
+   jne decrement_too_far_error
+   lda par_range8_2
+   cmp #10
+   jne decrement_error
+
+   ut_pass
+   rts
+decrement_too_far_error:
+   ut_fail
+   prints " (expected decr to stop)", CHR_NL
+no_random_generator_init:
+   ut_fail
+   prints " (expected random initialization)", CHR_NL
+   rts   
+.endproc  

@@ -13,6 +13,13 @@ GENERIC_WORKERS_ASM = 1
 .include "lib/palettefader.asm"
 .endif
 
+.ifndef LZSA_ASM
+.include "lib/lzsa.asm"
+.endif
+
+.ifndef ARRAY_ASM
+.include "lib/array.asm"
+.endif
 
 .macro dw2_ w1,w2
 .ifnblank w1
@@ -61,12 +68,7 @@ dw2_ wf,tf
    asln 2                           ; current * 4
    adc #2                           ; (current * 4)+2
    tay                              ; y now points to the worker
-   PushW R15                        ; save our this
-   ThisLoadW R15, jsr_to_patch+1    ; get address and fill in the jsr destination
-   ThisLoadW R15, R15, -            ; load this pointer into R15
-jsr_to_patch:   
-   jsr $CA11                        ; dispatch the call
-   PopW R15                         ; bring this back
+   jsr call_worker_at_r15_y         ; do the actuall call
    bcc done                         ; work not complete - just return here next call
    ldy #1
    lda (R15),y                      ; get current
@@ -79,6 +81,31 @@ re_init:
    lda #0                           ; initialize current..
    sta (R15),y                      ; ..to zero, and store it
    bra worker_sequence+2            ; start over
+.endproc
+
+;
+; helper fuction for sequence and parallel to call the contained workers
+;
+.proc call_worker_at_r15_y
+   PushW R15                        ; save our this
+   ThisLoadW R15, R1                ; get address to R1 for indirect call
+   ThisLoadW R15, R15, -            ; load this pointer into R15
+   jsr jsr_indirect                 ; dispatch the call
+   PopW R15                         ; bring this back
+   rts
+jsr_indirect:
+   jmp (R1)   
+.endproc
+
+;
+; reset a sequence or parallel object, so it can be re-started
+;
+worker_parallel_reset:
+.proc worker_sequence_reset
+   ldy #1
+   lda #0
+   sta (R15),y                     
+   rts
 .endproc
 
 .macro make_parallel w0,t0, w1,t1, w2,t2, w3,t3, w4,t4, w5,t5, w6,t6, w7,t7, w8,t8, w9,t9, wa,ta, wb,tb, wc,tc, wd,td, we,te, wf,tf
@@ -102,6 +129,75 @@ dw2_ wd,td
 dw2_ we,te
 dw2_ wf,tf
 .endmacro
+
+
+; parallel structure
+;
+; byte count      ; offset 0 - how many elements are to be executed in parallel?
+; count+1 bytes   ; offset 1 - list of active elements
+;
+; -- repeat count times --- the list of workers
+; word worker     ; offset count+2, count+6, count+10, count+14, ...
+; word thisptr    ; offset count+4, count+8, count+12, count+16, ...
+;
+.proc worker_parallel
+   ldy #1
+   lda (R15),y                ; get number of current workers
+   beq re_init                ; all empty? re-init!
+   tax                        ; x = count
+   lda (R15)                  ; get total count of workers
+   add #2                     ; add the two extra bytes for list header and count 
+   sta R0L                    ; this is our offset from R15 to where the worker pointers start
+call_workers:
+   iny                        ; advance to next index
+   phy                        ; save index
+   phx                        ; save count
+   lda (R15),y                ; a = index of worker to call   
+   sta R0H                    ; remember it for potential removal
+   asl
+   asl                        ; multiply by 4, clear carry
+   adc R0L                    ; add offset
+   tay                        ; y points to the worker in the array
+   PushW R0                   ; remember our offset
+   jsr call_worker_at_r15_y   ; call worker
+   PopW R0                    ; restore it
+   plx                        ; bring the index back, bring the count back
+   ply                        ; we do this early because we need to manipulate x,y in case we remove from the list, while we iterate it
+   bcc nothing_to_remove      ; worker not done, come back next time
+   IncW R15                   ; advance R15 to point to list
+   lda R0H                    ; index of element to remove (because work is complete)
+   jsr array_remove           ; remove the worker index - this keeps x,y intact!
+   DecW R15                   ; R15 is our this pointer again
+   dey                        ; decrement the index - we just lost an element, and the list "scrolled" towards the index
+nothing_to_remove:
+   dex                        ; do the loop decrement..
+   bne call_workers           ; .. and jump
+list_completed:   
+
+   ldy #1
+   lda (R15),y                ; get number of workers
+   bne work_left              ; not zero? there's still work
+finished:
+   sec                        ; signal all work is done
+   rts
+work_left:
+   clc                        ; signal there is still work left
+   rts   
+;--------------------------------------------------------------------------------------------------------   
+re_init:
+   lda (R15)            ; load count
+   beq finished         ; security measure - if the count is zero this is an empty parallel - just leave!
+   sta (R15),y          ; store as list length
+   tax                  ; x = count
+   lda #0               ; start with zero
+init_list:   
+   iny
+   sta (R15),y          ; store index
+   inc                  ; increment index
+   dex                  ; decrement count
+   bne init_list
+   bra worker_parallel  ; second time round, it will all work :-)
+.endproc
 
 ; if semaphore at R15 is zero, this signals done
 .proc worker_wait_semaphore

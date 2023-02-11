@@ -182,14 +182,9 @@ call_worker:
    PopW R0                             ; restore R0 - this is needed for getting the commands to add
    PopB R1L                            ; restore it
    rts
-
-.endproc
-
-
-; load R1 with the address to jsr to
-.proc jsr_indirect
+jsr_indirect:
    jmp (R1)
-.endproc   
+.endproc
 
 
 
