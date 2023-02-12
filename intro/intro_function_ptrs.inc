@@ -42,12 +42,11 @@ ptr_animate_smoke:                        ; 6 - smoke animation
    no_commands_to_add
 
                                           ; 9 - the tiny planes sequence
-   .word move_plane, plane_movement_1
-   commands_to_add INTRO_FPB, 8           ; the fish loops, jumping randomly for ever
+   .word worker_parallel, par_tiny_planes
+   commands_to_add INTRO_FPB, 8           ; after the planes, drop nibbly
 
 
 
-; the start sequence:
 ;
 ; init the random ranges for the fish, these can all be done in one frame
 ;
@@ -56,6 +55,15 @@ par_init_fish_random:
       worker_initialize_random_range, fish_pause_range,  \ 
       worker_initialize_random_range, fish_x_range,      \
       worker_initialize_random_range, fish_y_range
+
+;
+; let the three planes fly..
+;
+par_tiny_planes:
+   make_parallel                          \
+      move_plane, plane_movement_1,       \ 
+      move_plane, plane_movement_2,       \
+      move_plane, plane_movement_3
 
 
 ; the start sequence:
