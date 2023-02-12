@@ -18,7 +18,7 @@ ptr_intro_startup:                        ; 2 - fade and wait for unpacking
 
                                           ; 3 - fade pal in
    .word worker_palette_fade, intro_fade_in
-   commands_to_add INTRO_FPB,8            ; start dropping n
+   commands_to_add INTRO_FPB,9            ; start tiny planes drawing "super"
 
 ptr_intro_decompress_base_data:           ; 4 - decompress base data
    .word worker_decompress_to_vram, intro_decompress_base_data
@@ -40,6 +40,11 @@ ptr_animate_smoke:                        ; 6 - smoke animation
                                           ; 8 - the dropping nibbly sequence
    .word worker_sequence, seq_dropping_nibbly
    no_commands_to_add
+
+                                          ; 9 - the tiny planes sequence
+   .word move_plane, plane_movement_1
+   commands_to_add INTRO_FPB, 8           ; the fish loops, jumping randomly for ever
+
 
 
 ; the start sequence:

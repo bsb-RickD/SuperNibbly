@@ -400,8 +400,90 @@ plane_movement_3:
    .byte 1,254,3
    .byte 0,251,0
 
+;
+; Animate plane according to the movement data
+; 
+; R15 points to a plane movement structure
+;
+; -------- oversize sprite definition -------------------------------------------------------------------------
+; .word x,y                          ; 0-3: position
+; .addr sprite_plane_0               ; 4,5: sprite frame pointer (of first sprite)
+; .word spritenum(17)                ; 6,7: sprite# to use - stored as address of the sprite data in VRAM 
+; .byte 1                            ; 8:   number of sprites in this oversize sprite
+; -------- movement org data ----------------------------------------------------------------------------------
+; .byte count                        ; offset 9 - length of movement table
+; .word current                      ; offset 10 - pointer to current data
+; -------- actual movement data ------------------------------------------------------------------------------
+; .byte x-add, y-add, sprite-frame   ; offset 12 plus - the actual data
+;    (x and y add are signed bytes)
+.proc move_plane
+   ThisLoadW R15,R14,10,-            ; load current ptr into R14
+   ThisLoadW R14,R0,0                ; load x,y add into R0
+   ThisLoadB R14,R1L,-               ; load sprite anim frame into R1L
+   AddVW 3,R14                       ; increment R14 by 3 - this becomes the new current pointer
+   ThisStoreW R15,R14,10,-           ; update current ptr
 
-.proc init_planes
+   lda R0L                           ; get x add value into a
+   ldy #0                            ; y to point to x pos
+   jsr signed_add_byte_to_word       ; add, update x word, y to point to y pos
+   lda R0H                           ; get y add value into a
+   jsr signed_add_byte_to_word       ; add, update y word, y to point to sprite address
+
+   lda R1L                           ; bring in sprite index
+   asl
+   sta R1L                           ; times 2, carry clear
+   asl
+   asl
+   adc R1L                           ; times 10, carry clear
+   sta R1L
+   lda #.lobyte(sprite_plane_0)
+   adc R1L                           ; add index*10 to sprite_plane_0 address
+   sta (R15),y                       ; lobyte of sprite frame
+   lda #.hibyte(sprite_plane_0)
+   adc #0
+   iny
+   sta (R15),y                       ; hibyte of sprite frame
+
+   jsr show_sprite                   ; housekeeping done, positions updated, sprite frame selected, show the sprite!
+
+   ldy #9                            ; 9 = position of count
+   lda (R15),y
+   dec
+   sta (R15),y                       ; store decremented count
+   beq done
+once_more:
+   clc
+   rts
+done:
+   sec
+   rts
+
+; add a to word at R15,y
+signed_add_byte_to_word:
+   cmp #$80
+   blt unsigned
+   clc
+   adc (R15),y
+   sta (R15),y
+   iny
+   lda (R15),y
+   adc #255
+   sta (R15),y
+   bra add_done
+unsigned:
+   adc (R15),y
+   sta (R15),y
+   iny
+   bcc add_done
+   lda (R15),y
+   inc
+   sta (R15),y
+add_done:
+   iny  
+   rts
+.endproc
+
+.proc init_tiny_planes
    LoadW plane_movement_1+0, 0
    LoadW plane_movement_1+2, 80
    LoadB plane_movement_1+9, 79

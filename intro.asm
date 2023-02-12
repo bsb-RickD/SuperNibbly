@@ -55,6 +55,19 @@
 .include "lib/print.asm"
 .endif
 
+.ifndef TINY_PLANES_ASM
+.include "intro/tiny_planes.asm"
+.endif
+
+.ifndef JUMPING_FISH_ASM
+.include "intro/jumping_fish.asm"
+.endif
+
+.ifndef DROPPING_NIBBLY_ASM
+.include "intro/dropping_nibbly.asm"
+.endif
+
+
 sem_unpack:
    .byte 1
 
@@ -133,6 +146,29 @@ decompress_additional_data_end:
    .word 0
    .byte 0
 
+; animated sprite example class definition
+;
+; -------------------------------------- we start with the oversize sprite def ----------------------------
+; .word 240,87         ; 0-3: position
+; .addr sprite_smoke_0 ; 4,5: sprite frame pointer (of first sprite)
+; .word spritenum(17)  ; 6,7: sprite# to use - stored as address of the sprite data in VRAM 
+; .byte 6              ; 8:   number of sprites in this oversize sprite
+; -------------------------------------- additional anim parameters follow --------------------------------
+; .byte 0              ; 9:   current anim-frame
+; .byte 5              ; 10:  frames to wait before switching to next anim frame 
+; .byte 5              ; 11:  current delay count
+
+
+; this is the sprite class
+animated_smoke:
+.word 240,87         ; 0-3: position
+.addr sprite_smoke_0 ; 4,5: sprite frame pointer
+.word spritenum(126) ; 6,7: sprite# to use - stored as address of the sprite data in VRAM 
+.byte 6              ; 8:   number of sprites in this oversize sprite
+.byte 0              ; 9:   current anim-frame
+.byte 5              ; 10:  frames to wait before switching to next anim frame 
+.byte 5              ; 11:  current delay count
+                     ; 12:  size of struct
 
 function_ptrs:
 .ifndef INTRO_FUNCTION_PTRS_INC
@@ -197,6 +233,8 @@ wq_vsync_instance:
    stz par_init_fish_random+1
    
    jsr init_drop
+
+   jsr init_tiny_planes
 
    lda #1
    sta sem_unpack
@@ -373,38 +411,6 @@ palfade_state:
 .ifndef LZSA_ASM
 .include "lib/lzsa.asm"
 .endif
-
-.ifndef JUMPING_FISH_ASM
-.include "intro/jumping_fish.asm"
-.endif
-
-.ifndef DROPPING_NIBBLY_ASM
-.include "intro/dropping_nibbly.asm"
-.endif
-
-; animated sprite example class definition
-;
-; -------------------------------------- we start with the oversize sprite def ----------------------------
-; .word 240,87         ; 0-3: position
-; .addr sprite_smoke_0 ; 4,5: sprite frame pointer (of first sprite)
-; .word spritenum(17)  ; 6,7: sprite# to use - stored as address of the sprite data in VRAM 
-; .byte 6              ; 8:   number of sprites in this oversize sprite
-; -------------------------------------- additional anim parameters follow --------------------------------
-; .byte 0              ; 9:   current anim-frame
-; .byte 5              ; 10:  frames to wait before switching to next anim frame 
-; .byte 5              ; 11:  current delay count
-
-
-; this is the sprite class
-animated_smoke:
-.word 240,87         ; 0-3: position
-.addr sprite_smoke_0 ; 4,5: sprite frame pointer
-.word spritenum(126) ; 6,7: sprite# to use - stored as address of the sprite data in VRAM 
-.byte 6              ; 8:   number of sprites in this oversize sprite
-.byte 0              ; 9:   current anim-frame
-.byte 5              ; 10:  frames to wait before switching to next anim frame 
-.byte 5              ; 11:  current delay count
-                     ; 12:  size of struct
 
 intro_screen:
 .incbin "assets/intro_data.bin"
