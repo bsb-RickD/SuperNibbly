@@ -1,13 +1,15 @@
 ; tiny plane movement table for plane 1
 ; .word x,y                             ; offset 0, startpos
-; .word count                           ; offset 4 - count
+; .byte count                           ; offset 4 - count
+; .byte sprite#                         ; offset 5 - sprite number
 ; .word current                         ; offset 6 - pointer to current data
 ; .byte x-add, y-add, sprite-frame      ; offset 8 plus - the actual data
 ;    (x and y add are signed bytes)
 plane_movement_1:
-        .word 0,80
-        .word 79
-        .word *+2
+        .word 0,80                      ; x,y
+        .byte 79                        ; count
+        .byte 0                         ; sprite #
+        .word *+2                       ; data ptr
         .byte 2,0,0
         .byte 2,0,0
         .byte 2,0,0
@@ -90,14 +92,16 @@ plane_movement_1:
 
 ; tiny plane movement table for plane 2
 ; .word x,y                             ; offset 0, startpos
-; .word count                           ; offset 4 - count
+; .byte count                           ; offset 4 - count
+; .byte sprite#                         ; offset 5 - sprite number
 ; .word current                         ; offset 6 - pointer to current data
 ; .byte x-add, y-add, sprite-frame      ; offset 8 plus - the actual data
 ;    (x and y add are signed bytes)
 plane_movement_2:
-        .word 78,8
-        .word 137
-        .word 0
+        .word 78,8                      ; x,y
+        .byte 137                       ; count
+        .byte 1                         ; sprite #
+        .word *+2                       ; data ptr
         .byte 0,0,0
         .byte 0,0,0
         .byte 0,0,0
@@ -238,13 +242,16 @@ plane_movement_2:
 
 ; tiny plane movement table for plane 3
 ; .word x,y                             ; offset 0, startpos
-; .word count                           ; offset 4 - count
+; .byte count                           ; offset 4 - count
+; .byte sprite#                         ; offset 5 - sprite number
 ; .word current                         ; offset 6 - pointer to current data
 ; .byte x-add, y-add, sprite-frame      ; offset 8 plus - the actual data
 ;    (x and y add are signed bytes)
-        .word 170,8
-        .word 113
-        .word 0
+plane_movement_3:
+        .word 170,8                     ; x,y
+        .byte 113                       ; count
+        .byte 2                         ; sprite #
+        .word *+2                       ; data ptr
         .byte 255,3,11
         .byte 255,3,11
         .byte 255,3,11
