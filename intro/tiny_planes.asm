@@ -1,3 +1,10 @@
+.ifndef TINY_PLANES_ASM
+TINY_PLANES_ASM = 1
+
+.ifndef SPRITES_ASM
+.include "lib/sprites.asm"
+.endif
+
 ; tiny plane movement table for plane 1
 ; .word x,y                             ; offset 0 - startpos
 ; .byte count                           ; offset 4 - count
@@ -6,10 +13,10 @@
 ; .byte x-add, y-add, sprite-frame      ; offset 8 plus - the actual data
 ;    (x and y add are signed bytes)
 plane_movement_1:
-        .word 0,80                      ; x,y
-        .byte 79                        ; count
-        .byte 0                         ; sprite #
-        .word *+2                       ; data ptr
+        .word unknwn,unknwn             ; x,y - unknwn values are set in the init_planes proc
+        .byte 79                        ; count - also gets initialized, but left here for informational purposes
+        .byte unknwn                    ; sprite #
+        .word unknwn                    ; data ptr
         .byte 2,0,0
         .byte 2,0,0
         .byte 2,0,0
@@ -98,10 +105,10 @@ plane_movement_1:
 ; .byte x-add, y-add, sprite-frame      ; offset 8 plus - the actual data
 ;    (x and y add are signed bytes)
 plane_movement_2:
-        .word 78,8                      ; x,y
+        .word unknwn,unknwn             ; x,y - unknwn values are set in the init_planes proc
         .byte 137                       ; count
-        .byte 1                         ; sprite #
-        .word *+2                       ; data ptr
+        .byte unknwn                    ; sprite #
+        .word unknwn                    ; data ptr
         .byte 0,0,0
         .byte 0,0,0
         .byte 0,0,0
@@ -248,10 +255,10 @@ plane_movement_2:
 ; .byte x-add, y-add, sprite-frame      ; offset 8 plus - the actual data
 ;    (x and y add are signed bytes)
 plane_movement_3:
-        .word 170,8                     ; x,y
+        .word unknwn,unknwn             ; x,y - unknwn values are set in the init_planes proc
         .byte 113                       ; count
-        .byte 2                         ; sprite #
-        .word *+2                       ; data ptr
+        .byte unknwn                    ; sprite #
+        .word unknwn                    ; data ptr
         .byte 255,3,11
         .byte 255,3,11
         .byte 255,3,11
@@ -365,3 +372,26 @@ plane_movement_3:
         .byte 1,254,3
         .byte 1,254,3
         .byte 0,251,0
+
+.proc init_planes
+   LoadW plane_movement_1+0, 0
+   LoadW plane_movement_1+2, 80
+   LoadB plane_movement_1+4, 79
+   LoadB plane_movement_1+5, 0
+   LoadW plane_movement_1+6, plane_movement_1+8
+
+   LoadW plane_movement_2+0, 78
+   LoadW plane_movement_2+2, 8
+   LoadB plane_movement_2+4, 137
+   LoadB plane_movement_2+5, 1
+   LoadW plane_movement_2+6, plane_movement_2+8
+
+   LoadW plane_movement_3+0, 170
+   LoadW plane_movement_3+2, 8
+   LoadB plane_movement_3+4, 113
+   LoadB plane_movement_3+5, 3
+   LoadW plane_movement_3+6, plane_movement_3+8
+   rts
+.endproc
+
+.endif

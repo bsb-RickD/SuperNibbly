@@ -709,5 +709,6 @@ start:
 end:
 .endmacro
 
+.define unknwn 0
 
 .endif

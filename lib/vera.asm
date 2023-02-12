@@ -5,11 +5,11 @@ VERA_ASM = 1
 .include "inc/regs.inc"
 .endif
 
-.ifndef REGS_INC
+.ifndef MAC_INC
 .include "inc/mac.inc"
 .endif
 
-.ifndef REGS_INC
+.ifndef VERA_INC
 .include "inc/vera.inc"
 .endif
 
