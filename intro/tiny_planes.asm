@@ -1,11 +1,13 @@
 ; tiny plane movement table for plane 1
-; .word count
-; .word current
-; .byte x-add, y-add, sprite-frame
+; .word x,y                             ; offset 0, startpos
+; .word count                           ; offset 4 - count
+; .word current                         ; offset 6 - pointer to current data
+; .byte x-add, y-add, sprite-frame      ; offset 8 plus - the actual data
 ;    (x and y add are signed bytes)
 plane_movement_1:
+        .word 0,80
         .word 79
-        .word 0
+        .word *+2
         .byte 2,0,0
         .byte 2,0,0
         .byte 2,0,0
@@ -87,11 +89,13 @@ plane_movement_1:
         .byte 0,251,0
 
 ; tiny plane movement table for plane 2
-; .word count
-; .word current
-; .byte x-add, y-add, sprite-frame
+; .word x,y                             ; offset 0, startpos
+; .word count                           ; offset 4 - count
+; .word current                         ; offset 6 - pointer to current data
+; .byte x-add, y-add, sprite-frame      ; offset 8 plus - the actual data
 ;    (x and y add are signed bytes)
 plane_movement_2:
+        .word 78,8
         .word 137
         .word 0
         .byte 0,0,0
@@ -233,10 +237,12 @@ plane_movement_2:
         .byte 0,251,0
 
 ; tiny plane movement table for plane 3
-; .word count
-; .word current
-; .byte x-add, y-add, sprite-frame
+; .word x,y                             ; offset 0, startpos
+; .word count                           ; offset 4 - count
+; .word current                         ; offset 6 - pointer to current data
+; .byte x-add, y-add, sprite-frame      ; offset 8 plus - the actual data
 ;    (x and y add are signed bytes)
+        .word 170,8
         .word 113
         .word 0
         .byte 255,3,11
