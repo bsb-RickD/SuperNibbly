@@ -134,9 +134,9 @@ plane_movement_2:
    .byte 0,0,0
    .byte 0,0,0
    .byte 0,0,0
-   .byte 0,0,0
-   .byte 0,0,0
-   .byte 0,0,0
+   .byte 0,3,12
+   .byte 0,3,12
+   .byte 0,3,12
    .byte 0,3,12
    .byte 0,3,12
    .byte 0,3,12
@@ -484,18 +484,18 @@ add_done:
 .endproc
 
 .proc init_tiny_planes
-   LoadW plane_movement_1+0, 0
-   LoadW plane_movement_1+2, 80
+   LoadW plane_movement_1+0, neg_word(20)
+   LoadW plane_movement_1+2, 67
    LoadB plane_movement_1+9, 79
    LoadW plane_movement_1+10, plane_movement_1+12
 
-   LoadW plane_movement_2+0, 78
-   LoadW plane_movement_2+2, 8
+   LoadW plane_movement_2+0, 58
+   LoadW plane_movement_2+2, neg_word(14)
    LoadB plane_movement_2+9, 137
    LoadW plane_movement_2+10, plane_movement_2+12
 
-   LoadW plane_movement_3+0, 170
-   LoadW plane_movement_3+2, 8
+   LoadW plane_movement_3+0, 150
+   LoadW plane_movement_3+2, neg_word(5)
    LoadB plane_movement_3+9, 113
    LoadW plane_movement_3+10, plane_movement_3+12
    rts
