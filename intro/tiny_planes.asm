@@ -1,5 +1,5 @@
 ; tiny plane movement table for plane 1
-; .word x,y                             ; offset 0, startpos
+; .word x,y                             ; offset 0 - startpos
 ; .byte count                           ; offset 4 - count
 ; .byte sprite#                         ; offset 5 - sprite number
 ; .word current                         ; offset 6 - pointer to current data
@@ -91,7 +91,7 @@ plane_movement_1:
         .byte 0,251,0
 
 ; tiny plane movement table for plane 2
-; .word x,y                             ; offset 0, startpos
+; .word x,y                             ; offset 0 - startpos
 ; .byte count                           ; offset 4 - count
 ; .byte sprite#                         ; offset 5 - sprite number
 ; .word current                         ; offset 6 - pointer to current data
@@ -241,7 +241,7 @@ plane_movement_2:
         .byte 0,251,0
 
 ; tiny plane movement table for plane 3
-; .word x,y                             ; offset 0, startpos
+; .word x,y                             ; offset 0 - startpos
 ; .byte count                           ; offset 4 - count
 ; .byte sprite#                         ; offset 5 - sprite number
 ; .word current                         ; offset 6 - pointer to current data
