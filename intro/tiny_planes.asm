@@ -400,6 +400,10 @@ plane_movement_3:
    .byte 1,254,3
    .byte 0,251,0
 
+
+plane_delay:
+.byte  21
+
 ;
 ; Animate plane according to the movement data
 ; 
@@ -417,6 +421,17 @@ plane_movement_3:
 ; .byte x-add, y-add, sprite-frame   ; offset 12 plus - the actual data
 ;    (x and y add are signed bytes)
 .proc move_plane
+   lda plane_delay
+   dec 
+   sta plane_delay
+   cmp #3
+   bgt once_more
+   cmp #0
+   bne do_it
+   lda #21
+   sta plane_delay
+do_it:   
+
    ThisLoadW R15,R14,10,-            ; load current ptr into R14
    ThisLoadW R14,R0,0                ; load x,y add into R0
    ThisLoadB R14,R1L,-               ; load sprite anim frame into R1L
