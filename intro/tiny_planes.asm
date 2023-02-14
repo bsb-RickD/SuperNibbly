@@ -135,11 +135,11 @@ plane_movement_2:
    .byte 0,3,12
    .byte 0,3,12
    .byte 0,3,12
-   .byte 1,3,13
-   .byte 1,3,13
-   .byte 1,3,13
-   .byte 1,3,13
-   .byte 1,3,13
+   .byte 0,3,12
+   .byte 0,3,12
+   .byte 0,3,12
+   .byte 0,3,12
+   .byte 0,3,12
    .byte 1,3,13
    .byte 1,3,13
    .byte 1,3,13
@@ -150,7 +150,9 @@ plane_movement_2:
    .byte 1,3,13
    .byte 1,3,13
    .byte 2,2,14
+   .byte 2,2,15
    .byte 3,1,15
+   .byte 3,0,0
    .byte 2,255,0
    .byte 2,255,1
    .byte 1,254,2
@@ -206,22 +208,20 @@ plane_movement_2:
    .byte 255,254,5
    .byte 255,254,5
    .byte 255,254,5
-   .byte 0,254,4
-   .byte 1,254,3
-   .byte 2,2,2
+   .byte 255,254,5
+   .byte 1,255,4
+   .byte 1,0,3
+   .byte 2,255,2
    .byte 2,255,1
    .byte 2,255,1
-   .byte 2,255,1
-   .byte 2,255,1
-   .byte 2,0,0
    .byte 2,0,0
    .byte 2,0,0
    .byte 2,1,15
    .byte 2,2,14
    .byte 2,3,13
-   .byte 0,3,12
-   .byte 0,3,12
-   .byte 0,3,12
+   .byte 0,2,12
+   .byte 0,2,12
+   .byte 0,2,12
    .byte 255,2,11
    .byte 254,2,10
    .byte 254,1,9
@@ -238,24 +238,24 @@ plane_movement_2:
    .byte 255,254,5
    .byte 255,254,5
    .byte 255,254,5
-   .byte 0,254,4
-   .byte 0,254,4
-   .byte 0,254,4
-   .byte 0,254,4
-   .byte 0,254,4
-   .byte 0,254,4
-   .byte 0,254,4
-   .byte 0,254,4
-   .byte 0,254,4
-   .byte 0,254,4
-   .byte 0,254,4
-   .byte 0,254,4
-   .byte 0,254,4
-   .byte 0,254,4
-   .byte 0,254,4
-   .byte 0,254,4
-   .byte 0,254,4
-   .byte 0,251,0
+   .byte 255,254,5
+   .byte 255,254,5
+   .byte 255,254,5
+   .byte 255,254,5
+   .byte 255,254,5
+   .byte 255,254,5
+   .byte 255,254,5
+   .byte 255,254,5
+   .byte 255,254,5
+   .byte 255,254,5
+   .byte 255,254,5
+   .byte 255,254,5
+   .byte 255,254,5
+   .byte 255,254,5
+   .byte 255,254,5
+   .byte 255,254,5
+   .byte 255,254,5
+   .byte 255,254,5
 
 ; tiny plane movement table for plane 3
 ; -------- oversize sprite definition -------------------------------------------------------------------------
@@ -394,7 +394,7 @@ plane_movement_3:
 
 
 plane_delay:
-.byte  21
+.byte  7
 
 ;
 ; Animate plane according to the movement data
@@ -416,13 +416,9 @@ plane_delay:
    lda plane_delay
    dec 
    sta plane_delay
-   cmp #3
-   bgt once_more
-   cmp #0
-   bne do_it
-   lda #21
+   bne once_more
+   lda #7
    sta plane_delay
-do_it:   
 
    ThisLoadW R15,R14,10,-            ; load current ptr into R14
    ThisLoadW R14,R0,0                ; load x,y add into R0
@@ -497,8 +493,8 @@ add_done:
    LoadB plane_movement_1+9, 71
    LoadW plane_movement_1+10, plane_movement_1+12
 
-   LoadW plane_movement_2+0, 58
-   LoadW plane_movement_2+2, neg_word(14)
+   LoadW plane_movement_2+0, 46
+   LoadW plane_movement_2+2, neg_word(19)
    LoadB plane_movement_2+9, 137
    LoadW plane_movement_2+10, plane_movement_2+12
 

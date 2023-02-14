@@ -61,9 +61,7 @@ par_init_fish_random:
 ;
 par_tiny_planes:
    make_parallel                          \
-      move_plane, plane_movement_1,       \ 
-      move_plane, plane_movement_2,       \
-      move_plane, plane_movement_3
+      move_plane, plane_movement_2        \
 
 
 ; the start sequence:
