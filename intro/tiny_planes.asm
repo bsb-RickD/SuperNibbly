@@ -23,7 +23,7 @@ plane_movement_1:
    .word spritenum(0)                ; sprite# to use - stored as address of the sprite data in VRAM 
    .byte 1                           ; number of sprites
    ;-----------
-   .byte 79                          ; length of movement table below - also initialized in the init function
+   .byte 71                          ; length of movement table below - also initialized in the init function
    .word unknwn                      ; current data ptr
    ;-----------
    .byte 2,0,0                       ; start of movement data
@@ -52,19 +52,11 @@ plane_movement_1:
    .byte 2,0,0
    .byte 2,0,0
    .byte 2,0,0
-   .byte 2,0,0
-   .byte 2,0,0
-   .byte 2,0,0
-   .byte 2,0,0
-   .byte 2,0,0
-   .byte 2,0,0
-   .byte 2,0,0
-   .byte 2,0,0
-   .byte 2,0,0
-   .byte 2,0,0
+   .byte 2,255,1
    .byte 2,255,1
    .byte 2,254,2
    .byte 1,254,3
+   .byte 0,254,4
    .byte 0,254,4
    .byte 0,254,4
    .byte 0,254,4
@@ -499,9 +491,10 @@ add_done:
 .endproc
 
 .proc init_tiny_planes
-   LoadW plane_movement_1+0, neg_word(20)
-   LoadW plane_movement_1+2, 67
-   LoadB plane_movement_1+9, 79
+   stz par_tiny_planes+1
+   LoadW plane_movement_1+0, neg_word(15)
+   LoadW plane_movement_1+2, 64
+   LoadB plane_movement_1+9, 71
    LoadW plane_movement_1+10, plane_movement_1+12
 
    LoadW plane_movement_2+0, 58
