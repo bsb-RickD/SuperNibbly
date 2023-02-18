@@ -7,13 +7,15 @@
 
    jmp main
 
-.ifndef UT_ASM
-.include "lib/ut.asm"
+.ifndef UT_INC
+.include "lib/ut.inc"
 .endif
 
-.ifndef MATH_ASM
-.include "lib/math.asm"
+.ifndef PRINT_INC
+.include "lib/print.inc"
 .endif
+
+.import print_x_length
 
 .proc main   
    printl str_ut_welcome

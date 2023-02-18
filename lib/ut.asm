@@ -1,65 +1,26 @@
 .ifndef UT_ASM
 UT_ASM = 1
 
+.segment "CODE"
+
 .ifndef COMMON_INC
 .include "inc/common.inc"
 .endif
 
-.ifndef PRINT_ASM
-.include "lib/print.asm"
+.ifndef PRINT_INC
+.include "lib/print.inc"
 .endif
 
-str_ut_welcome:
-.byte (str_ut_passed-1-*),"=== unit test framework ===", CHR_NL, CHR_NL
+.import print_length_leading
 
-str_ut_passed:
-.byte (str_ut_failed-1-*), CHR_COLOR_GREEN, "passed", CHR_COLOR_WHITE, CHR_NL
+.export ut_pass_on_equal, str_ut_welcome
 
-str_ut_failed:
-.byte (str_ut_failed_end-1-*), CHR_COLOR_RED, "failed", CHR_COLOR_WHITE, CHR_NL
-str_ut_failed_end:
-
-.macro compare_memory mem1, mem2, len
-   LoadW R11, mem1
-   LoadW R12, mem2
-   lxy #len
-   jsr compare_memory_
-.endmacro
-
-; it is a pass Z is set
-.macro ut_exp_equal
-   jsr ut_pass_on_equal
-.endmacro
-
-; it is a pass if Z is clear
-.macro ut_exp_neq
-   jsr ut_pass_on_not_equal
-.endmacro
-
-; use this to fail unconditionally
-.macro ut_fail
-   lda #0
-   ut_exp_neq
-.endmacro
-
-; use this to pass unconditionally
-.macro ut_pass
-   lda #0
-   ut_exp_equal
-.endmacro
-
-.macro ut_exp_memory_equal mem1, mem2, len
-   compare_memory mem1, mem2, len
-   ut_exp_equal
-.endmacro
-
-.macro ut_exp_memory_neq mem1, mem2, len
-   compare_memory mem1, mem2, len
-   ut_exp_neq
-.endmacro
-
+str_ut_welcome: Lstr "=== unit test framework ===", CHR_NL, CHR_NL
+str_ut_passed: Lstr CHR_COLOR_GREEN, "passed", CHR_COLOR_WHITE, CHR_NL
+str_ut_failed: Lstr CHR_COLOR_RED, "failed", CHR_COLOR_WHITE, CHR_NL
 
 ; print unit test result - passed if Z is set
+.ifref ut_pass_on_equal
 .proc ut_pass_on_equal
    php
    sec
@@ -75,8 +36,10 @@ failed:
    printl str_ut_failed
    rts
 .endproc
+.endif
 
 ; print unit test result - passed if Z is clear
+.ifref ut_pass_on_not_equal
 .proc ut_pass_on_not_equal
    ; negate Z
    beq zero_set
@@ -86,6 +49,7 @@ zero_set:
    lda #1
    bra ut_pass_on_equal
 .endproc
+.endif
 
 ; R11 points to mem1
 ; R12 points to mem2
@@ -93,6 +57,7 @@ zero_set:
 ;
 ; Z set: memory equal
 ; Z clear: memory different (R11, R12 point to differing memory)
+.ifref compare_memory_
 .proc compare_memory_
    lda (R11)
    cmp (R12)
@@ -110,5 +75,7 @@ same:
 done:
    rts
 .endproc
+.endif
+
 
 .endif

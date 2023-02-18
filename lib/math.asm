@@ -9,6 +9,8 @@ MATH_ASM = 1
 .include "inc/mac.inc"
 .endif
 
+.export mul88, mad88, mul816, mad816, div88, div1616, init_lerp416_table, lerp416, lerp416_lookup
+
 ; 8 bit division, unsigned
 ;
 ; taken from http://6502org.wikidot.com/software-math-intdiv
@@ -34,11 +36,12 @@ MATH_ASM = 1
 
 ; 8 bit division, unsigned
 ; r11H = r11H/r11L, a = remainder
+.ifref div88
 .proc div88
 	div88_ r11H, r11L
 	rts
 .endproc
-
+.endif
 
 ; 16-bit division, 16-bit_result
 ;
