@@ -62,20 +62,24 @@ def calc_plane_positions(x, y, data):
 
 
 def get_all_plane_positions():
-    return calc_plane_positions(-15, 69, plane1), calc_plane_positions(45, -14, plane2), calc_plane_positions(130, -5,
-                                                                                                             plane3)
+    return calc_plane_positions(-15, 78, plane1), calc_plane_positions(45, -14, plane2), calc_plane_positions(130, -5,
+                                                                                                              plane3)
 
 
 def calc_appearance(it, found_clouds, appear_list, positions):
-    for (x,y),frame in positions:
-        index = (y//8)*it.stride+(x//8)
-        if it.screen_buffer_bytes[index] != 0:
+    for (x, y), frame in positions:
+        char_y = y // 8
+        char_x = x // 8
+        index = char_y * it.stride + char_x
+        tileId = it.screen_buffer_bytes[index]
+        paletteId = it.screen_buffer_bytes[index+1]
+        if tileId != 0:
             if index in found_clouds:
                 found_clouds[index] += 1
             else:
                 found_clouds[index] = 1
-            if found_clouds[index] == 3:
-                appear_list.append((frame, index, it.screen_buffer_bytes[index], it.screen_buffer_bytes[index+1]))
+            if found_clouds[index] == 2:
+                appear_list.append((frame, index, it.screen_buffer_bytes[index], it.screen_buffer_bytes[index + 1]))
 
 
 def super_nibbly_title():
@@ -138,7 +142,6 @@ def super_nibbly_title():
     found_clouds = dict()
     appear_list = []
     calc_appearance(it, found_clouds, appear_list, (p for p in p1 if p[0][0] > 27))
-
 
     # write the sprites as debug images
     sg_base.save_as_png(po)
@@ -234,7 +237,25 @@ def trace_planes():
     img.show()
 
 
+def myHex(n):
+    h = hex(min(n, 255))[2:]
+    if len(h) < 2:
+        h = '0' + h
+    return h
+
+
+def generate_palette(step):
+    return [myHex(r) + myHex(g) + myHex(b) for r in range(0, 257, step) for g in range(0, 257, step) for b in
+            range(0, 257, step)]
+
+
 if __name__ == "__main__":
+    """pal = generate_palette(15)
+    print(len(pal))
+    for i,p in enumerate(pal):
+        print ('"%s", ' % p, end="")
+        if (i+1) % 9 == 0:
+            print("")"""
     # trace_planes()
     super_nibbly_title()
     # super_nibbly_travel()
