@@ -1,12 +1,8 @@
 .ifndef FILEIO_ASM
 FILEIO_ASM = 1
 
-.ifndef KERNAL_INC
-.include "inc/kernal.inc"
-.endif
-
-.ifndef MAC_INC
-.include "inc/mac.inc"
+.ifndef COMMON_INC
+.include "inc/common.inc"
 .endif
 
 ERR_STRING_NOT_ZERO_TERMINATED_OR_TOO_LONG = $0A
