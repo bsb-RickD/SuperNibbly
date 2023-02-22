@@ -1,25 +1,14 @@
 .ifndef GENERIC_WORKERS_ASM
 GENERIC_WORKERS_ASM = 1
 
-.ifndef RANDOM_ASM
-.include "lib/random.asm"
+.ifndef COMMON_INC
+.include "inc/common.inc"
 .endif
 
-.ifndef VERA_ASM
-.include "lib/vera.asm"
-.endif
-
-.ifndef PALETTEFADER_ASM
-.include "lib/palettefader.asm"
-.endif
-
-.ifndef LZSA_ASM
-.include "lib/lzsa.asm"
-.endif
-
-.ifndef ARRAY_ASM
-.include "lib/array.asm"
-.endif
+.import rand_range, rand_range_init
+.import write_to_palette_mapped, palettefader_start_fade, palettefader_step_fade
+.import memory_decompress
+.import array_remove 
 
 .macro dw2_ w1,w2
 .ifnblank w1
@@ -393,4 +382,4 @@ done:
    rts
 .endproc
 
-.endif
+.endif 

@@ -5,9 +5,7 @@ PALETTEFADER_ASM = 1
 .include "inc/common.inc"
 .endif
 
-.ifndef MATH_ASM
-.include "lib/math.asm"
-.endif
+.import Rorn4_table, Lerp416_table, Asln4_table
 
 ; palette fader class layout
 ;

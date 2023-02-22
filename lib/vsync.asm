@@ -5,6 +5,11 @@ VSYNC_ASM = 1
 .include "lib/irq.asm"
 .endif
 
+.ifndef VERA_INC
+.include "inc/vera.inc"
+.endif
+
+
 ; globals
 vsync_count:      .word 0
 
@@ -106,7 +111,7 @@ hi_byte_empty:
    lda (R0),y                          ; color
    sta hsync_irq+6
    AddW3 R0, #4, copper_ptr            ; set up ptr
-   set_vera_address $1FA00, VERA_port_1; vera data port 0 - reset to pal 0
+   set_vera_address $1FA00, VERA_port_1; vera data port 1 - reset to pal 0
    stz VERA_ctrl
 empty_list:   
    PopW R0

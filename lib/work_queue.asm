@@ -9,6 +9,8 @@ WORK_QUEUE_ASM = 1
 .include "lib/array.asm"
 .endif
 
+.import function_ptrs
+
 .macro commands_to_add base, p1, p2, p3, p4
 .local OFFSET
 OFFSET = ((base-function_ptrs)/8)

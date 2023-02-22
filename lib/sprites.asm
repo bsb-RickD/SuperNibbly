@@ -9,8 +9,8 @@ SPRITES_ASM = 1
 .include "inc/mac.inc"
 .endif
 
-.ifndef VERA_ASM
-.include "lib/vera.asm"
+.ifndef VERA_INC
+.include "inc/vera.inc"
 .endif
 
 ; use this macro to calculate sprite number -> address in VRAM for parameters

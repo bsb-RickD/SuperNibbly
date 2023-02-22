@@ -21,9 +21,9 @@ clean:
 	rm -rf $(LIB_BUILD_DIR) $(LIBRARY)
 
 $(LIB_OBJ_FILES): $(LIB_BUILD_DIR)/%.o : $(LIB_DIR)/%.asm
-	$(ASSEMBLER) $(ASM_FLAGS) $(INC_DIRS) $< -o $@
+	$(ASSEMBLER) $(ASM_FLAGS) $(INC_DIRS) -l $(patsubst %.o,%.list,$@) $< -o $@
 
-$(LIBRARY): $(LIB_BUILD_DIR) | $(LIB_OBJ_FILES)
+$(LIBRARY): $(LIB_BUILD_DIR) $(LIB_OBJ_FILES)
 	$(ARCHIVER) r $(LIBRARY) $(LIB_OBJ_FILES)
 
 $(LIB_BUILD_DIR):
