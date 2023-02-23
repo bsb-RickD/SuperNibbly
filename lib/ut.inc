@@ -1,12 +1,8 @@
-.ifndef UT_ASM
-UT_ASM = 1
+.ifndef UT_INC
+UT_INC = 1
 
 .ifndef COMMON_INC
 .include "inc/common.inc"
-.endif
-
-.ifndef PRINT_INC
-.include "lib/print.inc"
 .endif
 
 .macro compare_memory mem1, mem2, len
