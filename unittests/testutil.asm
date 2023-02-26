@@ -1,6 +1,6 @@
 .org $080D
-.segment "ONCE"
 .segment "CODE"
+.forceimport __STARTUP__
 
 .feature c_comments
 .linecont +

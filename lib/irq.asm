@@ -1,6 +1,8 @@
 .ifndef IRQ_ASM
 IRQ_ASM = 1
 
+.segment "CODE"
+
 .ifndef KERNAL_INC
 .include "inc/kernal.inc"
 .endif

@@ -1,6 +1,8 @@
 .ifndef VSYNC_ASM
 VSYNC_ASM = 1
 
+.segment "CODE"
+
 .ifndef IRQ_ASM
 .include "lib/irq.asm"
 .endif

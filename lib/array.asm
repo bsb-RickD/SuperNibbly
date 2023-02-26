@@ -1,6 +1,8 @@
 .ifndef ARRAY_ASM
 ARRAY_ASM = 1
 
+.segment "CODE"
+
 .ifndef REGS_INC
 .include "inc/regs.inc"
 .endif

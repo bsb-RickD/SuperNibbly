@@ -39,7 +39,6 @@ failed:
 .endif
 
 ; print unit test result - passed if Z is clear
-.ifref ut_pass_on_not_equal
 .proc ut_pass_on_not_equal
    ; negate Z
    beq zero_set
@@ -49,7 +48,6 @@ zero_set:
    lda #1
    bra ut_pass_on_equal
 .endproc
-.endif
 
 ; R11 points to mem1
 ; R12 points to mem2
@@ -57,7 +55,6 @@ zero_set:
 ;
 ; Z set: memory equal
 ; Z clear: memory different (R11, R12 point to differing memory)
-.ifref compare_memory_
 .proc compare_memory_
    lda (R11)
    cmp (R12)
@@ -75,7 +72,6 @@ same:
 done:
    rts
 .endproc
-.endif
 
 
 .endif

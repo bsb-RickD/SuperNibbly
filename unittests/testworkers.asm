@@ -7,17 +7,30 @@
 
    jmp main
 
-.ifndef UT_ASM
-.include "lib/ut.asm"
+.ifndef UT_INC
+.include "lib/ut.inc"
 .endif
 
-.ifndef GENERIC_WORKERS_ASM
-.include "lib/generic_workers.asm"
+.ifndef PRINT_INC
+.include "lib/print.inc"
 .endif
 
-.ifndef MEMORY_ASM
-.include "lib/memory.asm"
+.import ut_pass_on_not_equal, ut_pass_on_equal
+.import print_x_length, print_length_leading, compare_memory_
+.import str_ut_welcome
+
+
+.ifndef GENERIC_WORKERS_INC
+.include "lib/generic_workers.inc"
 .endif
+
+.ifndef MEMORY_INC
+.include "lib/memory.inc"
+.endif
+
+.import worker_parallel, worker_parallel_reset, worker_sequence
+.import worker_generate_random, worker_initialize_random_range
+.import worker_decrement_16, worker_decrement_8
 
 
 .proc main      

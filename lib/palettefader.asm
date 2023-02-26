@@ -1,11 +1,15 @@
 .ifndef PALETTEFADER_ASM
 PALETTEFADER_ASM = 1
 
+.segment "CODE"
+
 .ifndef COMMON_INC
 .include "inc/common.inc"
 .endif
 
-.import Rorn4_table, Lerp416_table, Asln4_table
+.ifndef MATH_INC
+.include "lib/math.inc"
+.endif
 
 ; palette fader class layout
 ;

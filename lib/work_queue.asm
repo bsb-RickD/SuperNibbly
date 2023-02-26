@@ -1,6 +1,8 @@
 .ifndef WORK_QUEUE_ASM
 WORK_QUEUE_ASM = 1
 
+.segment "CODE"
+
 .ifndef COMMON_INC
 .include "inc/common.inc"
 .endif

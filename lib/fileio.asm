@@ -1,6 +1,8 @@
 .ifndef FILEIO_ASM
 FILEIO_ASM = 1
 
+.segment "CODE"
+
 .ifndef COMMON_INC
 .include "inc/common.inc"
 .endif

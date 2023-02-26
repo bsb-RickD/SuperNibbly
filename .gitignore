@@ -1,11 +1,9 @@
-
+build
 *.map
 *.list
 *.o
-out.prg
+*.prg
 dump.bin
-out.prg
-out.prg
 *.pyc
 dump-1.bin
 now

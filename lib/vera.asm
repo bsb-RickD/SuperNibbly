@@ -1,6 +1,8 @@
  .ifndef VERA_ASM
 VERA_ASM = 1
 
+.segment "CODE"
+
 .ifndef REGS_INC
 .include "inc/regs.inc"
 .endif
