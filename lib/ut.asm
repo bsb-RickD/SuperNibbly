@@ -13,7 +13,7 @@ UT_ASM = 1
 
 .import print_length_leading
 
-.export ut_pass_on_equal, ut_pass_on_not_equal, compare_memory_, str_ut_welcome
+.export ut_pass_on_equal, ut_pass_on_not_equal, compare_memory, str_ut_welcome
 
 str_ut_welcome: Lstr "=== unit test framework ===", CHR_NL, CHR_NL
 str_ut_passed: Lstr CHR_COLOR_GREEN, "passed", CHR_COLOR_WHITE, CHR_NL
@@ -53,18 +53,18 @@ zero_set:
 ;
 ; Z set: memory equal
 ; Z clear: memory different (R11, R12 point to differing memory)
-.proc compare_memory_
+.proc compare_memory
    lda (R11)
    cmp (R12)
    bne done
    IncW R11
    IncW R12
    dex
-   bne compare_memory_
+   bne compare_memory
    dey
    bmi same
    ldx #$FF
-   bra compare_memory_
+   bra compare_memory
 same:
    lda #0   
 done:

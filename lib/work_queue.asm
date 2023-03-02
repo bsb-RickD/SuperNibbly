@@ -7,11 +7,9 @@ WORK_QUEUE_ASM = 1
 .include "inc/common.inc"
 .endif
 
-.ifndef ARRAY_ASM
-.include "lib/array.asm"
-.endif
-
 .import function_ptrs
+.import array_append_array, array_remove_array
+.import array_append
 
 .macro commands_to_add base, p1, p2, p3, p4
 .local OFFSET

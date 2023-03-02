@@ -5,11 +5,11 @@ UT_INC = 1
 .include "inc/common.inc"
 .endif
 
-.macro compare_memory mem1, mem2, len
+.macro cmp_memory mem1, mem2, len
    LoadW R11, mem1
    LoadW R12, mem2
    lxy #len
-   jsr compare_memory_
+   jsr compare_memory
 .endmacro
 
 ; it is a pass Z is set
@@ -35,12 +35,12 @@ UT_INC = 1
 .endmacro
 
 .macro ut_exp_memory_equal mem1, mem2, len
-   compare_memory mem1, mem2, len
+   cmp_memory mem1, mem2, len
    ut_exp_equal
 .endmacro
 
 .macro ut_exp_memory_neq mem1, mem2, len
-   compare_memory mem1, mem2, len
+   cmp_memory mem1, mem2, len
    ut_exp_neq
 .endmacro
 

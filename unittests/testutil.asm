@@ -7,18 +7,14 @@
 
    jmp main
 
-.ifndef UT_INC
-.include "lib/ut.inc"
+.ifndef UNITTESTING_INC
+.include "inc/unittesting.inc"
 .endif
 
-.ifndef PRINT_INC
-.include "lib/print.inc"
-.endif
+.import push_all_registers, pop_all_registers
+.import push_registers_0_to_7, push_registers_8_to_15
+.import pop_registers_0_to_7, pop_registers_8_to_15
 
-.import ut_pass_on_not_equal, ut_pass_on_equal
-.import push_all_registers, pop_all_registers, push_registers_0_to_7, push_registers_8_to_15, pop_registers_0_to_7, pop_registers_8_to_15
-.import print_x_length, print_length_leading
-.import str_ut_welcome
 
 .proc main   
    printl str_ut_welcome

@@ -7,26 +7,22 @@
 
    jmp main
 
-.ifndef COMMON_INC
-.include "inc/common.inc"
+.ifndef UNITTESTING_INC
+.include "inc/unittesting.inc"
 .endif
 
-.ifndef UT_ASM
-.include "lib/ut.asm"
+.ifndef VERA_INC
+.include "lib/vera.inc"
 .endif
 
-.ifndef VERA_ASM
-.include "lib/vera.asm"
+.ifndef MEORY_INC
+.include "lib/memory.inc"
 .endif
 
-.ifndef LZSA_ASM
-.include "lib/lzsa.asm"
-.endif
 
-.ifndef MEMORY_ASM
-.include "lib/memory.asm"
-.endif
-
+.import print_hex
+.import memory_decompress
+.import copy_memory_bank_safe
 
 .proc main   
    printl str_ut_welcome
@@ -73,8 +69,7 @@ test_vram_buffer:
    copy_memory VERA_data0, test_vram_buffer, TEST_vram_reference_len
 
    ; compare
-   compare_memory test_vram_buffer, test_vram_reference, TEST_vram_reference_len
-   ut_exp_equal
+   ut_exp_memory_equal test_vram_buffer, test_vram_reference, TEST_vram_reference_len
 
    rts
 .endproc 
@@ -92,8 +87,7 @@ test_vram_buffer:
    switch_vera_to_dataport_0        ; CHROUT needs this to work   
    
    ; compare
-   compare_memory test_vram_buffer, test_vram_reference, TEST_vram_reference_len
-   ut_exp_equal
+   ut_exp_memory_equal test_vram_buffer, test_vram_reference, TEST_vram_reference_len
 
    rts
 .endproc 
@@ -120,9 +114,8 @@ test_vram_buffer:
    bne loop
 
    ; compare
-   compare_memory test_vram_buffer, test_vram_reference, TEST_vram_reference_len
-   ut_exp_equal
-
+   ut_exp_memory_equal test_vram_buffer, test_vram_reference, TEST_vram_reference_len
+   
    rts
 .endproc 
 
@@ -168,8 +161,7 @@ test_vram_buffer:
    switch_vera_to_dataport_0   ; CHROUT needs this to work   
    
    ; compare
-   compare_memory test_vram_buffer, reference_buffer, TEST_vram_reference_len
-   ut_exp_equal
+   ut_exp_memory_equal test_vram_buffer, reference_buffer, TEST_vram_reference_len
 
    rts
 reference_buffer:
@@ -204,8 +196,7 @@ reference_buffer:
    LoadW R1, lzsa_output
    jsr KRNL_MEM_DECOMPRESS
    ; compare and print result
-   compare_memory lzsa_output, lzsa_reference, LZSA_reference_len
-   ut_exp_equal
+   ut_exp_memory_equal lzsa_output, lzsa_reference, LZSA_reference_len
    rts
 .endproc
 
@@ -218,8 +209,7 @@ reference_buffer:
    LoadW R1, lzsa_output
    jsr memory_decompress
    ; compare and print result
-   compare_memory lzsa_output, lzsa_reference, LZSA_reference_len
-   ut_exp_equal
+   ut_exp_memory_equal lzsa_output, lzsa_reference, LZSA_reference_len
    rts
 .endproc
 
@@ -240,8 +230,7 @@ reference_buffer:
    LoadW R1, lzsa_output
    jsr memory_decompress
    ; compare and print result
-   compare_memory lzsa_output, lzsa_reference, LZSA_reference_len
-   ut_exp_equal
+   ut_exp_memory_equal lzsa_output, lzsa_reference, LZSA_reference_len
    rts
 .endproc
 
@@ -284,8 +273,7 @@ reference_buffer:
    copy_memory VERA_data0, lzsa_output, LZSA_reference_len
 
    ; compare and print result
-   compare_memory lzsa_output, lzsa_reference, LZSA_reference_len
-   ut_exp_equal   
+   ut_exp_memory_equal lzsa_output, lzsa_reference, LZSA_reference_len
 
    rts
 msg: Lstr "lzsa decompress vram"
@@ -347,8 +335,7 @@ next_round:
    copy_memory VERA_data0, lzsa_output, LZSA_reference_len
 
    ; compare and print result
-   compare_memory lzsa_output, lzsa_reference, LZSA_reference_len
-   ut_exp_equal
+   ut_exp_memory_equal lzsa_output, lzsa_reference, LZSA_reference_len
 
    ; increase address by 7
    clc
@@ -410,8 +397,7 @@ msg: Lstr "lzsa decompress vram moving dest "
    copy_memory VERA_data0, lzsa_output, LZSA_reference_len
 
    ; actual comparison
-   compare_memory lzsa_output, lzsa_reference, LZSA_reference_len
-   ut_exp_equal
+   ut_exp_memory_equal lzsa_output, lzsa_reference, LZSA_reference_len
    
    rts
 msg: Lstr "krnl decompress vram"
@@ -421,23 +407,20 @@ msg: Lstr "krnl decompress vram"
 .proc test_mem_equal
    printl msg
    prints "1"
-   compare_memory memory_1, memory_1, MEMORY_len
-   ut_exp_equal
+   ut_exp_memory_equal memory_1, memory_1, MEMORY_len
 
    printl msg
    prints "2"
    fill_memory memory_1, MEMORY_len, $AB
    fill_memory lzsa_output, MEMORY_len, $AB
-   compare_memory memory_1, lzsa_output, MEMORY_len
-   ut_exp_equal
+   ut_exp_memory_equal memory_1, lzsa_output, MEMORY_len
    rts
 msg: Lstr "mem same "
 .endproc
 
 .proc test_mem_different
    prints "mem different"
-   compare_memory memory_1, memory_2, lzsa_output
-   ut_exp_neq  ; we expect compary to report difference!
+   ut_exp_memory_neq memory_1, memory_2, lzsa_output  ; we expect compary to report difference!
    rts
 .endproc
 

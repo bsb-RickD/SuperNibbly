@@ -7,18 +7,9 @@
 
    jmp main
 
-.ifndef UT_INC
-.include "lib/ut.inc"
+.ifndef UNITTESTING_INC
+.include "inc/unittesting.inc"
 .endif
-
-.ifndef PRINT_INC
-.include "lib/print.inc"
-.endif
-
-.import ut_pass_on_not_equal, ut_pass_on_equal
-.import print_x_length, print_length_leading, compare_memory_
-.import str_ut_welcome
-
 
 .ifndef GENERIC_WORKERS_INC
 .include "lib/generic_workers.inc"
@@ -276,7 +267,7 @@ par_worker:
    lda par_range8_2
    cmp #15
    jne decrement_error
-   compare_memory empty, par_random_range_obj, 5
+   cmp_memory empty, par_random_range_obj, 5
    jeq no_random_generator_init
 
    LoadW R15, par_worker

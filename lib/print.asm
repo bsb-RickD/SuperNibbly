@@ -9,7 +9,7 @@ PRINT_ASM = 1
 
 .import div88, div1616
 
-.export print_dec_8, print_dec_16, print_x_length, print_length_leading
+.export print_dec_8, print_dec_16, print_x_length, print_length_leading, print_hex
 
 
 ; R11 points to string, zero terminated
