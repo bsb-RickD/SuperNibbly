@@ -7,6 +7,10 @@ UTIL_ASM = 1
 .include "inc/regs.inc"
 .endif
 
+.export push_all_registers, pop_all_registers
+.export push_registers_0_to_7, pop_registers_0_to_7
+.export push_registers_8_to_15, pop_registers_8_to_15
+
 .macro save_return_address
    ; save return address   
    ply

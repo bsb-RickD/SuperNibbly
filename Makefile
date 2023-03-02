@@ -1,9 +1,11 @@
 ASSEMBLER=ca65
 ARCHIVER=ar65
-LINKER=cl65
+LINKER=ld65
 
 INC_DIRS=-I .
-ASM_FLAGS=-t cx16
+PLATFORM_FLAGS=-t cx16
+STD_LIBRARY=cx16.lib
+
 LIB_DIR=lib
 UT_DIR=unittests
 MAIN_DIR=.
@@ -29,11 +31,12 @@ ALL_OBJ_FILES=$(patsubst %.asm,$(BUILD_DIR)/%.o,$(ALL_SRC_FILES))
 LIBRARY=$(BUILD_DIR)/$(LIB_DIR)/lib.lib
 
 all: $(ALL_BUILD_DIRS) $(UT_PRG_FILES)
-
-unittests: $(UT_PRG_FILES)
+lib: $(ALL_BUILD_DIRS) $(LIBRARY)
+unittests: $(ALL_BUILD_DIRS) $(UT_PRG_FILES)
 
 clean:
 	rm -rf $(BUILD_DIR)
+	rm -rf $(UT_PRG_FILES)
 
 
 # lib creation 
@@ -41,26 +44,14 @@ $(LIBRARY): $(LIB_OBJ_FILES)
 	$(ARCHIVER) r $@ $^
 
 # unit test compilation (#$@: target of rule, $< prerequiste for target?)
-#$(UT_PRG_FILES): $(UT_OBJ_FILES) $(LIBRARY)
-#	$(LINKER) -C cx16-asm.cfg $(INC_DIRS) -l $(patsubst %.o,%.list,$<) $< $(LIBRARY) -o $@
 %.prg: $(BUILD_DIR)/$(UT_DIR)/%.o $(LIBRARY)
-	$(LINKER) -C cx16-asm.cfg $(INC_DIRS) -l $(patsubst %.o,%.list,$<) $< $(LIBRARY) -o $@  
-
-
-#$(LIB_BUILD_DIR):
-#	mkdir $(LIB_BUILD_DIR)
-
-# unit tests
-#$(UT_OBJ_FILES): $(UT_BUILD_DIR)/%.o: $(UT_DIR)/%.asm
-#	$(ASSEMBLER) $(ASM_FLAGS) $(INC_DIRS) -l $(patsubst %.o,%.list,$@) $< -o $@
-
-
-# create the build dir structure
-$(ALL_BUILD_DIRS):
-	$(foreach D,$(ALL_BUILD_DIRS),mkdir -p $(D) )
+	$(LINKER) $(PLATFORM_FLAGS) --mapfile $(patsubst %.o,%.map,$<) -o $@ $< $(LIBRARY) $(STD_LIBRARY)
 
 
 # general assembly rule
 $(BUILD_DIR)/%.o: %.asm
-	$(ASSEMBLER) $(ASM_FLAGS) $(INC_DIRS) -l $(patsubst %.o,%.list,$@) $^ -o $@
+	$(ASSEMBLER) $(PLATFORM_FLAGS) $(INC_DIRS) -l $(patsubst %.o,%.list,$@) $^ -o $@
 
+# create the build dir structure
+$(ALL_BUILD_DIRS):
+	$(foreach D,$(ALL_BUILD_DIRS),mkdir -p $(D) )

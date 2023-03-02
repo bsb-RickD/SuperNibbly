@@ -1,6 +1,6 @@
 .org $080D
+.segment "ONCE"
 .segment "CODE"
-.forceimport __STARTUP__
 
 .feature c_comments
 .linecont +
@@ -19,7 +19,6 @@
 .import push_all_registers, pop_all_registers, push_registers_0_to_7, push_registers_8_to_15, pop_registers_0_to_7, pop_registers_8_to_15
 .import print_x_length, print_length_leading
 .import str_ut_welcome
-
 
 .proc main   
    printl str_ut_welcome

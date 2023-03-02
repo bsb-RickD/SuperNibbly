@@ -13,14 +13,13 @@ UT_ASM = 1
 
 .import print_length_leading
 
-.export ut_pass_on_equal, str_ut_welcome
+.export ut_pass_on_equal, ut_pass_on_not_equal, compare_memory_, str_ut_welcome
 
 str_ut_welcome: Lstr "=== unit test framework ===", CHR_NL, CHR_NL
 str_ut_passed: Lstr CHR_COLOR_GREEN, "passed", CHR_COLOR_WHITE, CHR_NL
 str_ut_failed: Lstr CHR_COLOR_RED, "failed", CHR_COLOR_WHITE, CHR_NL
 
 ; print unit test result - passed if Z is set
-.ifref ut_pass_on_equal
 .proc ut_pass_on_equal
    php
    sec
@@ -36,7 +35,6 @@ failed:
    printl str_ut_failed
    rts
 .endproc
-.endif
 
 ; print unit test result - passed if Z is clear
 .proc ut_pass_on_not_equal
