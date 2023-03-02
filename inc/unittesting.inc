@@ -15,6 +15,7 @@ UNITTESTING_INC=1
 
 .import ut_pass_on_not_equal, ut_pass_on_equal
 .import print_x_length, print_length_leading
+.import print_dec_8, print_dec_16, print_hex
 .import str_ut_welcome
 .import compare_memory
 

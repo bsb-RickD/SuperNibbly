@@ -7,13 +7,11 @@
 
    jmp main
 
-.ifndef PRINT_ASM
-.include "lib/print.asm"
+.ifndef UNITTESTING_INC
+.include "inc/unittesting.inc"
 .endif
 
-.ifndef RANDOM_ASM
-.include "lib/random.asm"
-.endif
+.import rand_seed_time, rand_range_init, rand_range, rand8
 
 .proc main      
    jsr rand_test

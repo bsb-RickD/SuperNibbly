@@ -19,8 +19,6 @@
 .include "lib/memory.inc"
 .endif
 
-
-.import print_hex
 .import memory_decompress
 .import copy_memory_bank_safe
 
