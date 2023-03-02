@@ -15,6 +15,8 @@ VERA_ASM = 1
 .include "inc/vera.inc"
 .endif
 
+.export write_to_palette_mapped
+
 .proc push_current_vera_address
    ; save return address   
    plx

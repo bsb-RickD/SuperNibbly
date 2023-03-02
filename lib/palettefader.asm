@@ -11,6 +11,8 @@ PALETTEFADER_ASM = 1
 .include "lib/math.inc"
 .endif
 
+.export palettefader_start_fade, palettefader_step_fade
+
 ; palette fader class layout
 ;
 ; num colors to fade       1 byte   (+1, 0 meaning 1, etc.)    offset 0
@@ -32,7 +34,7 @@ PALETTEFADER_ASM = 1
 ; (depending on the interpolation mode)
 ;
 ; returns: c will be 0 - so to indicate that step fade is not done yet
-.proc palettefader_start_fade   
+.proc palettefader_start_fade
    bcs fade_from_target
    ; fade from source - move the palette pointer to R0
    jsr palettefader_output_source

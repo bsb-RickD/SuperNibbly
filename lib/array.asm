@@ -11,6 +11,9 @@ ARRAY_ASM = 1
 .include "inc/mac.inc"
 .endif
 
+.export array_append, array_remove 
+.export array_append_array, array_remove_array
+
 ; R15 - pointer to the array
 ; a - the value to add
 ;

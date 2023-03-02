@@ -15,6 +15,7 @@ LZSA_ASM = 1
 .include "inc/vera.inc"
 .endif
 
+.export memory_decompress
 
 ;----------------------------------------------------------------------
 ; LZSA2 Decompression

@@ -17,6 +17,10 @@ RANDOM_ASM = 1
 
 .import mul816
 
+.export rand8
+.export rand_seed_time, rand_seed
+.export rand_range_init, rand_range
+
 ; random range objects (16 bit) look like this:
 ;
 ; word range length			; offset 0  

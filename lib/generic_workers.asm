@@ -12,6 +12,11 @@ GENERIC_WORKERS_ASM = 1
 .import memory_decompress
 .import array_remove 
 
+.export worker_parallel, worker_parallel_reset, worker_sequence
+.export worker_generate_random, worker_initialize_random_range
+.export worker_decrement_16, worker_decrement_8
+
+
 ; sequence structure
 ;
 ; byte count   ; offset 0 - how many elements are in the sequence
