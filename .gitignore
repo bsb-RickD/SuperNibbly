@@ -3,6 +3,7 @@ build
 *.list
 *.o
 *.prg
+*.d
 dump.bin
 *.pyc
 dump-1.bin

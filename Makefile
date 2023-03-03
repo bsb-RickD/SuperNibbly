@@ -26,13 +26,13 @@ UT_PRG_FILES=$(patsubst $(UT_DIR)/%.asm,./%.prg,$(UT_SRC_FILES))
 ALL_SRC_FILES=$(foreach D,$(CODE_DIRS),$(wildcard $(D)/*.asm))
 ALL_OBJ_FILES=$(patsubst %.asm,$(BUILD_DIR)/%.o,$(ALL_SRC_FILES))
 
-#$(info ALL_SRC_FILES is $(ALL_SRC_FILES))
-
 LIBRARY=$(BUILD_DIR)/$(LIB_DIR)/lib.lib
 
 all: $(ALL_BUILD_DIRS) $(UT_PRG_FILES)
 lib: $(ALL_BUILD_DIRS) $(LIBRARY)
 unittests: $(ALL_BUILD_DIRS) $(UT_PRG_FILES)
+
+#$(info included is $(ALL_SRC_FILES:.asm=.d))
 
 clean:
 	rm -rf $(BUILD_DIR)
@@ -50,8 +50,11 @@ $(LIBRARY): $(LIB_OBJ_FILES)
 
 # general assembly rule
 $(BUILD_DIR)/%.o: %.asm
-	$(ASSEMBLER) $(PLATFORM_FLAGS) $(INC_DIRS) -l $(patsubst %.o,%.list,$@) $^ -o $@
+	$(ASSEMBLER) $(PLATFORM_FLAGS) $(INC_DIRS) -l $(patsubst %.o,%.list,$@) --create-dep $(<:.asm=.d) $< -o $@
 
 # create the build dir structure
 $(ALL_BUILD_DIRS):
 	$(foreach D,$(ALL_BUILD_DIRS),mkdir -p $(D) )
+
+# include the dependencies
+-include $(ALL_SRC_FILES:.asm=.d)

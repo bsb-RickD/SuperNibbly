@@ -1,9 +1,11 @@
 .ifndef MATH_INC
 MAH_INC = 1
 
+
 Lerp416_table  = $400
 Asln4_table    = $500
 Rorn4_table    = $500
+
 
 ; 8 bit division, unsigned
 ;
@@ -132,6 +134,5 @@ Rorn4_table    = $500
    bne @next
 @done:   
 .endmacro
-
 
 .endif
