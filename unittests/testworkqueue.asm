@@ -7,18 +7,17 @@
 
    jmp main
 
-.ifndef UT_INC
-.include "lib/ut.inc"
+.ifndef UNITTESTING_INC
+.include "inc/unittesting.inc"
 .endif
 
-.ifndef PRINT_INC
-.include "lib/print.inc"
-.endif
+.ifndef WORK_QUEUE_INC
+.include "lib/work_queue.inc"
+.endif 
 
-.import ut_pass_on_not_equal, ut_pass_on_equal
-.import push_all_registers, pop_all_registers, push_registers_0_to_7, push_registers_8_to_15, pop_registers_0_to_7, pop_registers_8_to_15
-.import print_x_length, print_length_leading
-.import str_ut_welcome
+.import execute_work_queue, init_work_queue, add_to_work_queue
+
+.export function_ptrs
 
 variable_1:
 .byte 17
@@ -122,10 +121,9 @@ ut_wq:
    prints "trigger empty queue"
 
    LoadW R15, ut_wq
-   jsr execute_work_queue                    ; run empty queue
+   jsr execute_work_queue                       ; run empty queue
 
-   compare_memory variable_1, expected, 5    ; expect memory unchanged
-   ut_exp_equal
+   ut_exp_memory_equal variable_1, expected, 5  ; expect memory unchanged
 
    rts
 expected:
@@ -138,11 +136,10 @@ expected:
 
    LoadW R15, ut_wq
    lda #1
-   jsr add_to_work_queue                     ; append first worker to queue - this one should pull the others in
-   jsr execute_work_queue                    ; run queue
+   jsr add_to_work_queue                        ; append first worker to queue - this should pull the others in
+   jsr execute_work_queue                       ; run queue
 
-   compare_memory variable_1, expected, 5    ; expected memory check
-   ut_exp_equal
+   ut_exp_memory_equal variable_1, expected, 5  ; expected memory check
 
    rts
 expected:
@@ -154,10 +151,9 @@ expected:
    prints "triggered follow ups?"
 
    LoadW R15, ut_wq
-   jsr execute_work_queue                    ; run queue
+   jsr execute_work_queue                       ; run queue
 
-   compare_memory variable_1, expected, 5    ; expected memory check
-   ut_exp_equal
+   ut_exp_memory_equal variable_1, expected, 5  ; expected memory check
 
    rts
 expected:
@@ -168,10 +164,9 @@ expected:
    prints "triggered dec's once more?"
 
    LoadW R15, ut_wq
-   jsr execute_work_queue                    ; run queue
+   jsr execute_work_queue                       ; run queue
 
-   compare_memory variable_1, expected, 5    ; expected memory check
-   ut_exp_equal
+   ut_exp_memory_equal variable_1, expected, 5  ; expected memory check
 
    rts
 expected:

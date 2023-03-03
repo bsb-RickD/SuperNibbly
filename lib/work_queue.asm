@@ -11,28 +11,7 @@ WORK_QUEUE_ASM = 1
 .import array_append_array, array_remove_array
 .import array_append
 
-.macro commands_to_add base, p1, p2, p3, p4
-.local OFFSET
-OFFSET = ((base-function_ptrs)/8)
-.if .paramcount = 0
-   .byte 0,0,0,0
-.elseif .paramcount = 1
-   .error "you need to specify a base ptr"
-.elseif .paramcount = 2
-   .byte OFFSET+p1,0,0,0
-.elseif .paramcount = 3
-   .byte OFFSET+p1,OFFSET+p2,0,0
-.elseif .paramcount = 4
-   .byte OFFSET+p1,OFFSET+p2,OFFSET+p3,0
-.elseif .paramcount = 5
-   .byte OFFSET+p1,OFFSET+p2,OFFSET+p3,OFFSET+p4
-.endif
-.if (.paramcount > 1) .and (base < $80D)
-   .error "base ptr is very suspicious - did you forget to specify one?"
-.endif   
-.endmacro 
-
-.define no_commands_to_add commands_to_add
+.export init_work_queue, add_to_work_queue, execute_work_queue
 
 ;
 ; work queue structure
