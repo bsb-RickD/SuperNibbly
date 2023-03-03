@@ -7,13 +7,11 @@
 
    jmp main
 
-.ifndef PRINT_ASM
-.include "lib/print.asm"
+.ifndef UNITTESTING_INC
+.include "inc/unittesting.inc"
 .endif
 
-.ifndef FILEIO_ASM
-.include "lib/fileio.asm"
-.endif
+.import file_open, file_close, file_read
 
 .proc main      
    jsr load_test

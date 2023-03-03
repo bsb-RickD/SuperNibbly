@@ -7,68 +7,7 @@ FILEIO_ASM = 1
 .include "inc/common.inc"
 .endif
 
-ERR_STRING_NOT_ZERO_TERMINATED_OR_TOO_LONG = $0A
-
-; R11 points to string
-;
-; out:
-;  c clear: success
-;     R11 points to found 0
-;     y,x hold length (y: lo-byte, x: hi-byte)
-; 
-;  c set: fail
-;     R11, x, y modified
-;     a set to ERR_STRING_NOT_ZERO_TERMINATED_OR_TOO_LONG
-.proc str_len
-   ldx #0
-   ldy #0
-scan:   
-   lda (R11),y   
-   beq length_found  ; 0 found, y,x hold length
-   iny
-   bne scan          ; no overflow, carry on
-   inc R1+1
-   beq error         ; memory overflow? -> error!
-   inx
-   bra scan
-error:
-   sec               ; carry to show error
-   lda #ERR_STRING_NOT_ZERO_TERMINATED_OR_TOO_LONG
-   rts
-length_found:
-   clc
-   rts
-.endproc
-
-; in:
-;  R11 points to filename, zero terminated
-; out:
-;  c clear: success
-; 
-;  c set: fail
-;     a holds kernal error code or ERR_STRING_NOT_ZERO_TERMINATED_OR_TOO_LONG
-.proc file_set_lfs_and_name
-   lda #1         ; Logical Number = 1
-   ldx #8         ; Device = "SD card" (emulation host FS)
-   ldy #0         ; Secondary Address = 0, meaning we can specify where to load to on LOAD
-   jsr KRNL_SETLFS   
-   PushW R11
-   jsr str_len
-   PopW R11
-   bcs prev_error ; error detected upstream, bail out
-   cpx #0         ; if x > 0 - then the filename is longer than 255 bytes
-   bne error
-   tya            ; a = filename length
-   clc
-   ldx R11
-   ldy R11+1
-   jmp KRNL_SETNAM   ; we jump there, and kernal will do the rts to the caller
-error:   
-   lda #ERR_STRING_NOT_ZERO_TERMINATED_OR_TOO_LONG
-   sec
-prev_error:   
-   rts
-.endproc
+.export file_open, file_read, file_close
 
 ; in:
 ;  R0 points to filename, leading length string
@@ -185,6 +124,10 @@ error:
    rts   
 .endproc
 
+/* 
+
+file_load and file_save need to be changed to use non zero terminated strings for filenames
+then refactor out a new set_lfs_and_name function
 
 ; in:
 ;  R11 points to filename, zero terminated
@@ -224,5 +167,7 @@ error:
 error:   
    rts
 .endproc
+
+*/
 
 .endif
