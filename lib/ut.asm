@@ -8,7 +8,7 @@ UT_ASM = 1
 .endif
 
 .ifndef PRINT_INC
-.include "lib/print.inc"
+.include "inc/print.inc"
 .endif
 
 .import print_length_leading

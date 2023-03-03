@@ -8,7 +8,7 @@ PALETTEFADER_ASM = 1
 .endif
 
 .ifndef MATH_INC
-.include "lib/math.inc"
+.include "inc/math.inc"
 .endif
 
 .export palettefader_start_fade, palettefader_step_fade

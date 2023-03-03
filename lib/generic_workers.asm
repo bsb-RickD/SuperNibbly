@@ -4,7 +4,7 @@ GENERIC_WORKERS_ASM = 1
 .segment "CODE"
 
 .ifndef GENERIC_WORKERS_INC
-.include "lib/generic_workers.inc"
+.include "inc/generic_workers.inc"
 .endif
 
 .import rand_range, rand_range_init

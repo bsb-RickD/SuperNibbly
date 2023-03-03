@@ -8,7 +8,7 @@ STRLEN_ASM = 1
 .endif
 
 .ifndef STRLEN_INC
-.include "lib/strlen.inc"
+.include "inc/strlen.inc"
 .endif
 
 ; R11 points to string

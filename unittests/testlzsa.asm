@@ -12,11 +12,11 @@
 .endif
 
 .ifndef VERA_INC
-.include "lib/vera.inc"
+.include "inc/vera.inc"
 .endif
 
 .ifndef MEORY_INC
-.include "lib/memory.inc"
+.include "inc/memory.inc"
 .endif
 
 .import memory_decompress

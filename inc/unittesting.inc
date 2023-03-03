@@ -6,11 +6,11 @@ UNITTESTING_INC=1
 .endif
 
 .ifndef UT_INC
-.include "lib/ut.inc"
+.include "inc/ut.inc"
 .endif
 
 .ifndef PRINT_INC
-.include "lib/print.inc"
+.include "inc/print.inc"
 .endif
 
 .import ut_pass_on_not_equal, ut_pass_on_equal

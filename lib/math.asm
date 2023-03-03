@@ -12,7 +12,7 @@ MATH_ASM = 1
 .endif
 
 .ifndef MATH_INC
-.include "lib/math.inc"
+.include "inc/math.inc"
 .endif
 
 .export mul88, mad88, mul816, mad816, div88, div1616

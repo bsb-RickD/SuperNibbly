@@ -4,11 +4,11 @@ MEMORY_ASM = 1
 .segment "CODE"
 
 .ifndef MEMORY_INC
-.include "lib/memory.inc"
+.include "inc/memory.inc"
 .endif
 
 .export copy_memory_bank_safe
- 
+
 ;
 ; R0: source
 ; R1: target

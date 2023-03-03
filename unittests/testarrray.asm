@@ -9,7 +9,7 @@
 .endif
 
 .ifndef MEMORY_INC
-.include "lib/memory.inc"
+.include "inc/memory.inc"
 .endif
 
 .import array_append, array_remove

@@ -12,7 +12,7 @@
 .endif
 
 .ifndef WORK_QUEUE_INC
-.include "lib/work_queue.inc"
+.include "inc/work_queue.inc"
 .endif 
 
 .import execute_work_queue, init_work_queue, add_to_work_queue

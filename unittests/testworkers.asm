@@ -12,11 +12,11 @@
 .endif
 
 .ifndef GENERIC_WORKERS_INC
-.include "lib/generic_workers.inc"
+.include "inc/generic_workers.inc"
 .endif
 
 .ifndef MEMORY_INC
-.include "lib/memory.inc"
+.include "inc/memory.inc"
 .endif
 
 .import worker_parallel, worker_parallel_reset, worker_sequence
