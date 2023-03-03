@@ -2,23 +2,18 @@
 .segment "ONCE"
 .segment "CODE"
 
-.feature c_comments
-.linecont +
-
    jmp main
 
-.ifndef UT_ASM
-.include "lib/ut.asm"
+.ifndef UNITTESTING_INC
+.include "inc/unittesting.inc"
 .endif
 
-.ifndef ARRAY_ASM
-.include "lib/array.asm"
+.ifndef MEMORY_INC
+.include "lib/memory.inc"
 .endif
 
-.ifndef MEMORY_ASM
-.include "lib/memory.asm"
-.endif
-
+.import array_append, array_remove
+.import array_append_array, array_remove_array
 
 .proc main   
    printl str_ut_welcome
@@ -65,8 +60,7 @@ expected:
 .byte c
 Array_size = *-expected
 do_comparison:
-   compare_memory array, expected, Array_size
-   ut_exp_equal
+   ut_exp_memory_equal array, expected, Array_size
 .endmacro
 
 

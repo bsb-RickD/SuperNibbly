@@ -16,7 +16,10 @@ MATH_ASM = 1
 .endif
 
 .export mul88, mad88, mul816, mad816, div88, div1616
-.export init_lerp416_table, lerp416, lerp416_lookup
+.export init_lerp416_table
+
+; lerp is not supported for now
+;.export lerp416, lerp416_lookup
 
 ; 8 bit division, unsigned
 ; r11H = r11H/r11L, a = remainder
@@ -55,6 +58,7 @@ mul816:
 mad816 = mul816+4
 
 
+/*
 ; lerp 4 bit numbers from x to y in 16 steps, a holds step 0..16
 ; result in a
 ;
@@ -77,6 +81,7 @@ mad816 = mul816+4
 	and #$0f 
 	rts
 .endproc
+*/
 
 .proc init_lerp416_table
 	stz R0L
@@ -123,6 +128,7 @@ ror_loop:
 	rts
 .endproc
 
+/*
 ; lerp 4 bit numbers from x to y in 16 steps, a holds step 0..16
 ; result in x : lerp result * 16
 ;
@@ -155,5 +161,6 @@ return_x:
 	tax                 ; move to x
 	rts	
 .endproc
+*/
 
 .endif

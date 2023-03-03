@@ -7,15 +7,11 @@
 
    jmp main
 
-.ifndef UT_INC
-.include "lib/ut.inc"
+.ifndef UNITTESTING_INC
+.include "inc/unittesting.inc"
 .endif
 
-.ifndef PRINT_INC
-.include "lib/print.inc"
-.endif
-
-.import print_x_length
+.import mul88, mul816, mad816, mad88, lerp416
 
 .proc main   
    printl str_ut_welcome
@@ -25,13 +21,11 @@
    jsr test_mul816
    jsr test_mad816
    jsr test_negadd   
-   jsr test_lerp
-   jsr test_lerp_lookup
-
+   
    rts
 .endproc
 
-
+/*
 lerp_results:
 .byte 7,8,8,9,9,10,10,11,11,12,12,13,13,14,14,15,15
 
@@ -108,6 +102,7 @@ loop:
    ut_exp_equal
    rts
 .endproc
+*/
 
 
 .proc test_negadd

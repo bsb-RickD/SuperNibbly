@@ -1,6 +1,8 @@
 .ifndef REGS_INC
 REGS_INC = 1
 
+.feature c_comments 		; we always want to be able to use /* .... */
+
 ; Zero page scratch area
 ZEROPAGE_SCRATCH     = $22
 ZEROPAGE_SCRATCH_END = $80
