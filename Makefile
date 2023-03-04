@@ -6,7 +6,7 @@ ASSEMBLER_FLAGS=-I . -l $(<:%.asm=$(BUILD_DIR)/%.list) --create-dep $(<:%.asm=$(
 PLATFORM_FLAGS=-t cx16
 ASSEMBLE_FILE=$(ASSEMBLER) $(PLATFORM_FLAGS) $(ASSEMBLER_FLAGS) $< -o $(<:%.asm=$(BUILD_DIR)/%.o)
 
-LINKER_FLAGS=--mapfile $(<:%.asm=$(BUILD_DIR)/%.map)
+LINKER_FLAGS=--mapfile $(<:%.o=%.map)
 STD_LIBRARY=cx16.lib
 
 LIB_DIR=lib
@@ -23,8 +23,7 @@ LIB_OBJ_FILES=$(patsubst %.asm,$(BUILD_DIR)/%.o,$(LIB_SRC_FILES))
 
 UT_SRC_FILES=$(wildcard $(UT_DIR)/*.asm)
 UT_PRG_FILES=$(UT_SRC_FILES:$(UT_DIR)/%.asm=%.prg)
-#UT_OBJ_FILES=$(patsubst %.asm,$(BUILD_DIR)/%.o,$(UT_SRC_FILES))
-
+UT_OBJ_FILES=$(UT_SRC_FILES:%.asm=$(BUILD_DIR)/%.o)
 
 ALL_SRC_FILES=$(foreach D,$(CODE_DIRS),$(wildcard $(D)/*.asm))
 ALL_OBJ_FILES=$(patsubst %.asm,$(BUILD_DIR)/%.o,$(ALL_SRC_FILES))
@@ -49,11 +48,13 @@ $(LIBRARY): $(LIB_OBJ_FILES)
 
 # unit test compilation
 #    $@: target of rule (%.prg in our case), 
-#    $< first pre-requisite ($(UT_DIR)/%.asm in our case)
+#    $< first pre-requisite ($(BUILD_DIR)/$(UT_DIR)/%.o in our case)
 #    (see Make automatic variables)
-%.prg: $(UT_DIR)/%.asm $(LIBRARY)
-	$(ASSEMBLE_FILE)
-	$(LINKER) $(PLATFORM_FLAGS) $(LINKER_FLAGS) -o $@ $(<:%.asm=$(BUILD_DIR)/%.o) $(LIBRARY) $(STD_LIBRARY)
+$(UT_PRG_FILES): %.prg: $(BUILD_DIR)/$(UT_DIR)/%.o $(LIBRARY)
+	$(LINKER) $(PLATFORM_FLAGS) $(LINKER_FLAGS) -o $@ $< $(LIBRARY) $(STD_LIBRARY)
+
+# needed so the unit test obj files don't get deleted as unneeded
+$(UT_PRG_FILES): $(UT_OBJ_FILES)
 
 # general assembly rule
 $(BUILD_DIR)/%.o: %.asm
