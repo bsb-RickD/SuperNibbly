@@ -4,7 +4,6 @@ LINKER=ld65
 
 ASSEMBLER_FLAGS=-I . -l $(<:%.asm=$(BUILD_DIR)/%.list) --create-dep $(<:%.asm=$(BUILD_DIR)/%.d)
 PLATFORM_FLAGS=-t cx16
-ASSEMBLE_FILE=$(ASSEMBLER) $(PLATFORM_FLAGS) $(ASSEMBLER_FLAGS) $< -o $(<:%.asm=$(BUILD_DIR)/%.o)
 
 LINKER_FLAGS=--mapfile $(<:%.o=%.map)
 STD_LIBRARY=cx16.lib
@@ -30,9 +29,9 @@ ALL_OBJ_FILES=$(patsubst %.asm,$(BUILD_DIR)/%.o,$(ALL_SRC_FILES))
 
 LIBRARY=$(BUILD_DIR)/$(LIB_DIR)/lib.lib
 
-all: $(ALL_BUILD_DIRS) $(UT_PRG_FILES)
-lib: $(ALL_BUILD_DIRS) $(LIBRARY)
-unittests: $(ALL_BUILD_DIRS) $(UT_PRG_FILES)
+all: $(UT_PRG_FILES)
+lib: $(LIBRARY)
+unittests: $(UT_PRG_FILES)
 folders: $(ALL_BUILD_DIRS)
 
 #$(info included is $(ALL_SRC_FILES:.asm=.d))
@@ -47,15 +46,20 @@ $(LIBRARY): $(LIB_OBJ_FILES)
 	$(ARCHIVER) r $@ $^
 
 # unit test compilation
-#    $@: target of rule (%.prg in our case), 
-#    $< first pre-requisite ($(BUILD_DIR)/$(UT_DIR)/%.o in our case)
-#    (see Make automatic variables)
 $(UT_PRG_FILES): %.prg: $(BUILD_DIR)/$(UT_DIR)/%.o $(LIBRARY)
 	$(LINKER) $(PLATFORM_FLAGS) $(LINKER_FLAGS) -o $@ $< $(LIBRARY) $(STD_LIBRARY)
 
 # general assembly rule
-$(BUILD_DIR)/%.o: %.asm
-	$(ASSEMBLE_FILE)
+#    $@: target of rule ($(BUILD_DIR)/%.o in our case), 
+#    $< first pre-requisite (%.asm in our case)
+#
+#    !!! We are not using $^ because, the additional prerequisite, $(ALL_BUILD_DIRS), is not used for compilation
+#    $(ALL_BUILD_DIRS) is there so that we don't compile without creating the build dirs
+#
+#    (see Make automatic variables for explanation on the weird $^, $<, etc.)
+#
+$(BUILD_DIR)/%.o: %.asm | $(ALL_BUILD_DIRS)
+	$(ASSEMBLER) $(PLATFORM_FLAGS) $(ASSEMBLER_FLAGS) $< -o $@
 
 # create the build dir structure
 $(ALL_BUILD_DIRS):
