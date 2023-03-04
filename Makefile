@@ -53,9 +53,6 @@ $(LIBRARY): $(LIB_OBJ_FILES)
 $(UT_PRG_FILES): %.prg: $(BUILD_DIR)/$(UT_DIR)/%.o $(LIBRARY)
 	$(LINKER) $(PLATFORM_FLAGS) $(LINKER_FLAGS) -o $@ $< $(LIBRARY) $(STD_LIBRARY)
 
-# needed so the unit test obj files don't get deleted as unneeded
-$(UT_PRG_FILES): $(UT_OBJ_FILES)
-
 # general assembly rule
 $(BUILD_DIR)/%.o: %.asm
 	$(ASSEMBLE_FILE)
