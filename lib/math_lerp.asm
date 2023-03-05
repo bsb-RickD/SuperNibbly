@@ -1,5 +1,5 @@
-.ifndef MATH_ASM
-MATH_ASM = 1
+.ifndef MATH_LERP_ASM
+MATH_LERP_ASM = 1
 
 .segment "CODE"
 
@@ -11,52 +11,12 @@ MATH_ASM = 1
 .include "inc/mac.inc"
 .endif
 
-.ifndef MATH_INC
-.include "inc/math.inc"
-.endif
+.import mad88
 
-.export mul88, mad88, mul816, mad816, div88, div1616
 .export init_lerp416_table
 
 ; lerp is not supported for now
 ;.export lerp416, lerp416_lookup
-
-; 8 bit division, unsigned
-; r11H = r11H/r11L, a = remainder
-.proc div88
-	div88_ r11H, r11L
-	rts
-.endproc
-
-; R0 = R0/R1, R2 = remainder
-.proc div1616
-	div1616_ R1, R0, R2
-	rts
-.endproc
-
-; 8 bit multiply
-; a = r11H*r11L
-mul88:
-	mul88_ r11H, r11L
-	rts
-
-; 8 bit multiply add
-; a = a+r11H*r11L
-mad88 = mul88+9
-
-
-; 16*8 bit multiply, 16 bit result
-; R2 = R0 * R1L
-mul816:
-	stz R2L
-	stz R2H
-	mul816_ R0, R1, R2
-	rts
-
-; 16*8 bit multiply, 16 bit result
-; R2 = R2 + (R0 * R1L)
-mad816 = mul816+4
-
 
 /*
 ; lerp 4 bit numbers from x to y in 16 steps, a holds step 0..16
