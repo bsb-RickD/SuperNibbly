@@ -15,7 +15,11 @@ VERA_ASM = 1
 .include "inc/vera.inc"
 .endif
 
-.export write_to_palette_mapped
+.export write_to_palette_mapped, write_to_palette_const_color
+.export push_current_vera_address, pop_current_vera_address
+.export push_both_vera_addresses, pop_both_vera_addresses
+.export switch_to_textmode, switch_to_320_240_tiled_mode
+.export c64_pal
 
 .proc push_current_vera_address
    ; save return address   
@@ -240,7 +244,6 @@ loop:
 
    rts
 .endproc
-
 
 c64_pal: .byte $00,$0, $ff,$f, $00,$8, $fe,$a, $4c,$c, $c5,$0, $0a,$0, $e7,$e,$85,$d,$40,$6,$77,$f,$33,$3,$77,$7,$f6,$a,$8f,$0,$bb,$b
 

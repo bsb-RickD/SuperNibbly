@@ -19,6 +19,7 @@ IRQ_ASM = 1
 .include "inc/vera.inc"
 .endif
 
+.export default_irq, init_irq, reset_irq
 
 ; globals
 default_irq:      .addr 0   

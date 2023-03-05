@@ -11,49 +11,33 @@
 .include "inc/common.inc"
 .endif
 
-.ifndef VERA_ASM
-.include "lib/vera.asm"
+.ifndef VSYNC_INC
+.include "inc/vsync.inc"
 .endif
 
-.ifndef VSYNC_ASM
-.include "lib/vsync.asm"
+.ifndef PRINT_INC
+.include "inc/print.inc"
 .endif
 
-.ifndef PALETTEFADER_ASM
-.include "lib/palettefader.asm"
+.ifndef SPRITES_INC
+.include "inc/sprites.inc"
 .endif
 
-.ifndef UTIL_ASM
-.include "lib/util.asm"
-.endif
+.export function_ptrs, seq_dropping_nibbly
 
-.ifndef SPRITES_ASM
-.include "lib/sprites.asm"
-.endif
-
-.ifndef ARRAY_ASM
-.include "lib/array.asm"
-.endif
-
-.ifndef RANDOM_ASM
-.include "lib/random.asm"
-.endif
-
-.ifndef GENERIC_WORKERS_ASM
-.include "lib/generic_workers.asm"
-.endif
-
-.ifndef WORK_QUEUE_ASM
-.include "lib/work_queue.asm"
-.endif
-
-.ifndef FILEIO_ASM
-.include "lib/fileio.asm"
-.endif
-
-.ifndef PRINT_ASM
-.include "lib/print.asm"
-.endif
+.import write_to_palette_const_color
+.import push_both_vera_addresses, pop_both_vera_addresses, push_all_registers, pop_all_registers
+.import init_work_queue, add_to_work_queue, execute_work_queue
+.import print_x_length
+.import switch_to_textmode
+.import init_irq, reset_irq, vsync_irq, wait_for_vsync, vsync_irq_exit
+.import memory_decompress
+.import file_open, file_read, file_close
+.import init_drop
+.import animate_sprite, switch_all_sprites_off
+.import init_lerp416_table
+.import rand_seed_time
+.import c64_pal
 
 sem_unpack:
    .byte 1
@@ -370,18 +354,6 @@ palfade_state:
    rts 
 .endproc
 
-.ifndef LZSA_ASM
-.include "lib/lzsa.asm"
-.endif
-
-.ifndef JUMPING_FISH_ASM
-.include "intro/jumping_fish.asm"
-.endif
-
-.ifndef DROPPING_NIBBLY_ASM
-.include "intro/dropping_nibbly.asm"
-.endif
-
 ; animated sprite example class definition
 ;
 ; -------------------------------------- we start with the oversize sprite def ----------------------------
@@ -405,6 +377,10 @@ animated_smoke:
 .byte 5              ; 10:  frames to wait before switching to next anim frame 
 .byte 5              ; 11:  current delay count
                      ; 12:  size of struct
+
+.ifndef sprite_smoke_0 
+.include "intro/intro_sprites_base.inc" 
+.endif
 
 intro_screen:
 .incbin "assets/intro_data.bin"

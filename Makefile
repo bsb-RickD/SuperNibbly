@@ -10,9 +10,10 @@ STD_LIBRARY=cx16.lib
 
 LIB_DIR=lib
 UT_DIR=unittests
+INTRO_DIR=intro
 MAIN_DIR=.
 
-CODE_DIRS=$(LIB_DIR) $(UT_DIR) $(MAIN_DIR)
+CODE_DIRS=$(LIB_DIR) $(UT_DIR) $(MAIN_DIR) $(INTRO_DIR)
 BUILD_DIR=build
 
 ALL_BUILD_DIRS=$(foreach D,$(CODE_DIRS),$(BUILD_DIR)/$(D))
@@ -29,7 +30,13 @@ ALL_OBJ_FILES=$(patsubst %.asm,$(BUILD_DIR)/%.o,$(ALL_SRC_FILES))
 
 LIBRARY=$(BUILD_DIR)/$(LIB_DIR)/lib.lib
 
-all: $(UT_PRG_FILES)
+INTRO_SRC_FILES=intro.asm intro/jumping_fish.asm intro/dropping_nibbly.asm
+INTRO_OBJ_FILES=$(INTRO_SRC_FILES:%.asm=$(BUILD_DIR)/%.o)
+
+
+EXECUTABLES=intro.prg
+
+all: $(UT_PRG_FILES) $(EXECUTABLES)
 lib: $(LIBRARY)
 unittests: $(UT_PRG_FILES)
 folders: $(ALL_BUILD_DIRS)
@@ -47,7 +54,10 @@ $(LIBRARY): $(LIB_OBJ_FILES)
 
 # unit test compilation
 $(UT_PRG_FILES): %.prg: $(BUILD_DIR)/$(UT_DIR)/%.o $(LIBRARY)
-	$(LINKER) $(PLATFORM_FLAGS) $(LINKER_FLAGS) -o $@ $< $(LIBRARY) $(STD_LIBRARY)
+	$(LINKER) $(PLATFORM_FLAGS) $(LINKER_FLAGS) -o $@ $^ $(STD_LIBRARY)
+
+intro.prg: $(INTRO_OBJ_FILES) $(LIBRARY)
+	$(LINKER) $(PLATFORM_FLAGS) $(LINKER_FLAGS) -o $@ $^ $(STD_LIBRARY)
 
 # general assembly rule
 #    $@: target of rule ($(BUILD_DIR)/%.o in our case), 

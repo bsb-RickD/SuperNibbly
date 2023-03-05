@@ -1,13 +1,25 @@
 .ifndef DROPPING_NIBBLY_ASM
 DROPPING_NIBBLY_ASM = 1
 
-.ifndef SPRITES_ASM
-.include "sprites.asm"
+.ifndef COMMON_INC
+.include "inc/common.inc" 
+.endif
+
+.ifndef GENERIC_WORKERS_INC
+.include "inc/generic_workers.inc"
+.endif
+
+.ifndef SPRITES_INC
+.include "inc/sprites.inc"
 .endif
 
 .ifndef sprite_smoke_0 
-.include "intro/intro_sprites.inc" 
+.include "intro/intro_sprites_base.inc" 
 .endif
+
+.import show_sprite, seq_dropping_nibbly
+
+.export init_drop, drop_letter, dropping_n, dropping_i, dropping_b1, dropping_b2, dropping_l, dropping_y
 
 init_drop_y_positions:
 .word neg_word(89), neg_word(98), neg_word(107), neg_word(108), neg_word(106), neg_word(96)

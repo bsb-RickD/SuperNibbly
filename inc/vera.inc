@@ -126,7 +126,6 @@ VERA_sprite_layer_background = 1 << 2
 VERA_sprite_layer_between    = 2 << 2
 VERA_sprite_layer_foreground = 3 << 2
 
-
 ; switch vera back to data port 0 - CHROUT depends on that
 .macro switch_vera_to_dataport_0
    stz VERA_ctrl

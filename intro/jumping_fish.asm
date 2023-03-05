@@ -1,14 +1,20 @@
 .ifndef JUMPING_FISH_ASM
 JUMPING_FISH_ASM = 1
 
-.ifndef SPRITES_ASM
-.include "sprites.asm"
+.ifndef VERA_INC
+.include "inc/vera.inc" 
+.endif
+
+.ifndef SPRITES_INC
+.include "inc/sprites.inc" 
 .endif
 
 .ifndef sprite_smoke_0 
 .include "intro/intro_sprites_base.inc" 
 .endif
 
+.export fish_pause_range, fish_generate_pause, fish_pause_counter, fish_x_range, fish_y_range
+.export fish_generate_x, fish_generate_y, jumping_fish
 
 ; random range parameters
 fish_pause_range:

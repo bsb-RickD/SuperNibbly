@@ -15,6 +15,9 @@ GENERIC_WORKERS_ASM = 1
 .export worker_parallel, worker_parallel_reset, worker_sequence
 .export worker_generate_random, worker_initialize_random_range
 .export worker_decrement_16, worker_decrement_8
+.export worker_decompress_to_vram
+.export worker_palette_fade
+.export worker_signal_semaphore, worker_wait_semaphore
 
 
 ; sequence structure
