@@ -37,8 +37,10 @@ INTRO_OBJ_FILES=$(INTRO_SRC_FILES:%.asm=$(BUILD_DIR)/%.o)
 TRAVEL_SRC_FILES=travel.asm $(TRAVEL_DIR)/travel_workers.asm
 TRAVEL_OBJ_FILES=$(TRAVEL_SRC_FILES:%.asm=$(BUILD_DIR)/%.o)
 
+PLAYFIELD_SRC_FILES=playfield.asm
+PLAYFIELD_OBJ_FILES=$(PLAYFIELD_SRC_FILES:%.asm=$(BUILD_DIR)/%.o)
 
-EXECUTABLES=intro.prg travel.prg
+EXECUTABLES=intro.prg travel.prg playfield.prg
 
 all: $(UT_PRG_FILES) $(EXECUTABLES)
 lib: $(LIBRARY)
@@ -64,6 +66,9 @@ intro.prg: $(INTRO_OBJ_FILES) $(LIBRARY)
 	$(LINKER) $(PLATFORM_FLAGS) $(LINKER_FLAGS) -o $@ $^ $(STD_LIBRARY)
 
 travel.prg: $(TRAVEL_OBJ_FILES) $(LIBRARY)
+	$(LINKER) $(PLATFORM_FLAGS) $(LINKER_FLAGS) -o $@ $^ $(STD_LIBRARY)
+
+playfield.prg: $(PLAYFIELD_OBJ_FILES) $(LIBRARY)
 	$(LINKER) $(PLATFORM_FLAGS) $(LINKER_FLAGS) -o $@ $^ $(STD_LIBRARY)
 
 # general assembly rule

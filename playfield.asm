@@ -11,26 +11,13 @@
 .include "inc/common.inc"
 .endif
 
-.ifndef VERA_ASM
-.include "lib/vera.asm"
+.ifndef MEMORY_INC
+.include "inc/memory.inc"
 .endif
 
-.ifndef VSYNC_ASM
-.include "lib/vsync.asm"
-.endif
-
-.ifndef PALETTEFADER_ASM
-.include "lib/palettefader.asm"
-.endif
-
-.ifndef LZSA_ASM
-.include "lib/lzsa.asm"
-.endif
-
-.ifndef MEMORY_ASM
-.include "lib/memory.asm"
-.endif
-
+.import memory_decompress
+.import write_to_palette
+.import switch_to_textmode
 
 tileset:
 .byte 0
