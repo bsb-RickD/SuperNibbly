@@ -15,7 +15,7 @@ VERA_ASM = 1
 .include "inc/vera.inc"
 .endif
 
-.export write_to_palette_mapped, write_to_palette_const_color
+.export write_to_palette_mapped, write_to_palette_const_color, write_to_palette
 .export push_current_vera_address, pop_current_vera_address
 .export push_both_vera_addresses, pop_both_vera_addresses
 .export switch_to_textmode, switch_to_320_240_tiled_mode

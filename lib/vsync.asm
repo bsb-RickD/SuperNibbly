@@ -14,6 +14,7 @@ VSYNC_ASM = 1
 .import default_irq
 
 .export vsync_irq, vsync_count, wait_for_vsync, vsync_irq_exit
+.export copper_list_enabled, copper_list_start, copper_ptr
 
 ; globals
 vsync_count:      .word 0

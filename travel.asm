@@ -11,28 +11,12 @@
 .include "inc/common.inc"
 .endif
 
-.ifndef VERA_ASM
-.include "lib/vera.asm"
+.ifndef SPRITES_INC
+.include "inc/sprites.inc"
 .endif
 
-.ifndef SPRITES_ASM
-.include "lib/sprites.asm"
-.endif
-
-.ifndef RANDOM_ASM
-.include "lib/random.asm"
-.endif
-
-.ifndef VSYNC_ASM
-.include "lib/vsync.asm"
-.endif
-
-.ifndef WORK_QUEUE_ASM
-.include "lib/work_queue.asm"
-.endif
-
-.ifndef ARRAY_ASM
-.include "lib/array.asm"
+.ifndef VSYNC_INC
+.include "inc/vsync.inc"
 .endif
 
 function_ptrs:
@@ -40,6 +24,31 @@ function_ptrs:
 .ifndef FUNCTION_PTRS_INC
 .include "travel/travel_function_ptrs.inc"
 .endif
+
+.import copper_list_start, copper_list_enabled
+.import memory_decompress
+.import write_to_palette
+.import init_irq, vsync_irq, vsync_irq_exit, wait_for_vsync, reset_irq
+.import init_work_queue, add_to_work_queue, execute_work_queue
+.import array_append
+.import switch_to_320_240_tiled_mode, switch_to_textmode
+.import rand_seed_time
+.import switch_all_sprites_off
+
+.export function_ptrs
+
+; these are the buffers used by the wq_instance
+travel_exec_queue:
+   .res 64,0
+travel_add_queue:
+   .res 16,0
+travel_remove_queue:
+   .res 16,0
+
+wq_travel_instance:
+.word travel_exec_queue
+.word travel_add_queue
+.word travel_remove_queue
 
 .proc main
    ; restore state for multiple runs
@@ -59,14 +68,15 @@ function_ptrs:
    init_vsync_irq
 
    ; init work queue
-   LoadW R15, work_queue
-   lda #0
-   sta (R15)
+   LoadW R15,wq_travel_instance
+   jsr init_work_queue
 
+   
+   ; populate work queue with the travel workers
    lda #(TRAVEL_FPI+0)
 add_fptrs:   
    pha
-   jsr array_append
+   jsr add_to_work_queue
    pla
    inc
    cmp #(TRAVEL_FPI+23)
@@ -76,6 +86,7 @@ add_fptrs:
 iterate_main_loop:   
    jsr wait_for_vsync
 
+   LoadW R15,wq_travel_instance
    jsr execute_work_queue
 
    jsr KRNL_GETIN                   ; read key
@@ -160,9 +171,9 @@ fix_pal_indexes:
 .include "travel/copper_lists.inc"
 .include "travel/travel_common_sprites.inc"
 
-.ifndef TRAVEL_WORKERS_ASM
-.include "travel/travel_workers.asm"
-.endif
+;.ifndef TRAVEL_WORKERS_ASM
+;.include "travel/travel_workers.asm"
+;.endif
 
 travel_screen:
 .incbin "assets/travel_data.bin"
@@ -207,7 +218,3 @@ landscape_pointers:
 .word volcano_landscape, volcano_sprite_indexes, volcano_copper_list
 .word ice_landscape, ice_sprite_indexes, ice_copper_list
 .word desert_landscape, desert_sprite_indexes, desert_copper_list
-
-.ifndef LZSA_ASM
-.include "lib/lzsa.asm"
-.endif
