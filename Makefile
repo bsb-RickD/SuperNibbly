@@ -44,6 +44,7 @@ EXECUTABLES=intro.prg travel.prg playfield.prg
 
 all: $(UT_PRG_FILES) $(EXECUTABLES)
 lib: $(LIBRARY)
+exes: $(EXECUTABLES)
 unittests: $(UT_PRG_FILES)
 folders: $(ALL_BUILD_DIRS)
 
