@@ -1,4 +1,5 @@
 *.bin binary
 *.prg binary
+*.png binary
 
 * text eol=crlf
