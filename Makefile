@@ -1,18 +1,18 @@
+MAIN_DIR=src
+LIB_DIR=$(MAIN_DIR)/lib
+UT_DIR=$(MAIN_DIR)/unittests
+INTRO_DIR=$(MAIN_DIR)/intro
+TRAVEL_DIR=$(MAIN_DIR)/travel
+
 ASSEMBLER=ca65
 ARCHIVER=ar65
 LINKER=ld65
 
-ASSEMBLER_FLAGS=-I . -g -l $(<:%.asm=$(BUILD_DIR)/%.list) --create-dep $(<:%.asm=$(BUILD_DIR)/%.d)
+ASSEMBLER_FLAGS=-I $(MAIN_DIR) --bin-include-dir  $(MAIN_DIR) -g -l $(<:%.asm=$(BUILD_DIR)/%.list) --create-dep $(<:%.asm=$(BUILD_DIR)/%.d)
 PLATFORM_FLAGS=-t cx16
 
 LINKER_FLAGS=-vm --mapfile $(<:%.o=%.map) -Ln $(<:%.o=%.labels) --dbgfile $(<:%.o=%.debug)
 STD_LIBRARY=cx16.lib
-
-LIB_DIR=lib
-UT_DIR=unittests
-INTRO_DIR=intro
-TRAVEL_DIR=travel
-MAIN_DIR=.
 
 CODE_DIRS=$(LIB_DIR) $(UT_DIR) $(MAIN_DIR) $(INTRO_DIR) $(TRAVEL_DIR)
 BUILD_DIR=build
@@ -29,15 +29,15 @@ UT_OBJ_FILES=$(UT_SRC_FILES:%.asm=$(BUILD_DIR)/%.o)
 ALL_SRC_FILES=$(foreach D,$(CODE_DIRS),$(wildcard $(D)/*.asm))
 ALL_OBJ_FILES=$(patsubst %.asm,$(BUILD_DIR)/%.o,$(ALL_SRC_FILES))
 
-LIBRARY=$(BUILD_DIR)/$(LIB_DIR)/lib.lib
+LIBRARY=$(BUILD_DIR)/lib.lib
 
-INTRO_SRC_FILES=intro.asm $(INTRO_DIR)/jumping_fish.asm $(INTRO_DIR)/dropping_nibbly.asm
+INTRO_SRC_FILES=$(MAIN_DIR)/intro.asm $(INTRO_DIR)/jumping_fish.asm $(INTRO_DIR)/dropping_nibbly.asm
 INTRO_OBJ_FILES=$(INTRO_SRC_FILES:%.asm=$(BUILD_DIR)/%.o)
 
-TRAVEL_SRC_FILES=travel.asm $(TRAVEL_DIR)/travel_workers.asm
+TRAVEL_SRC_FILES=$(MAIN_DIR)/travel.asm $(TRAVEL_DIR)/travel_workers.asm
 TRAVEL_OBJ_FILES=$(TRAVEL_SRC_FILES:%.asm=$(BUILD_DIR)/%.o)
 
-PLAYFIELD_SRC_FILES=playfield.asm
+PLAYFIELD_SRC_FILES=$(MAIN_DIR)/playfield.asm
 PLAYFIELD_OBJ_FILES=$(PLAYFIELD_SRC_FILES:%.asm=$(BUILD_DIR)/%.o)
 
 EXECUTABLES=intro.prg travel.prg playfield.prg
@@ -53,6 +53,7 @@ folders: $(ALL_BUILD_DIRS)
 clean:
 	rm -rf $(BUILD_DIR)
 	rm -rf $(UT_PRG_FILES)
+	rm -rf $(EXECUTABLES)
 
 
 # lib creation 
