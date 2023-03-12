@@ -18,6 +18,7 @@
 .import memory_decompress
 .import write_to_palette
 .import switch_to_textmode
+.import switch_all_sprites_off
 
 tileset:
 .byte 0
@@ -36,6 +37,7 @@ level:
    lda tileset
    jsr switch_gfx_set
    jsr show_level
+   jsr switch_all_sprites_off
 
    jsr switch_to_tiled_mode
 
@@ -114,7 +116,10 @@ switch_level:
    ; scroll the playfield a bit to the left
    LoadB VERA_L0_hscroll_l, 5
    sta VERA_L1_hscroll_l
-   
+
+   LoadB VERA_L0_vscroll_l, 0
+   sta VERA_L0_hscroll_l
+      
    rts
 .endproc
 

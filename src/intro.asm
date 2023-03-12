@@ -258,7 +258,8 @@ iterate_main_loop:
 
    ; cleanup
    clear_vsync_irq
-   jsr switch_to_textmode   
+   jsr switch_all_sprites_off
+   jsr switch_to_textmode
    
    rts
 report_error:
