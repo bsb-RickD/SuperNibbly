@@ -1,6 +1,7 @@
 from PIL import Image
 from ImageTiler import image_bytes
 from ImageUtils import write_data, append_palette
+import os
 
 
 def get_mask(img):
@@ -114,14 +115,14 @@ these 7 tiles are then combined with the 6 pill states (no pill, size 1, 2, 3, 4
 """
 
 
-def main():
-    img = Image.open(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\level1.png")
+def write_game_tiles(input_dir, output_dir):
+    img = Image.open(os.path.join(input_dir, "level1.png"))
 
-    pills = (None, img.crop((81, 77, 97, 93)), img.crop((81, 60, 97, 76)), img.crop((81, 43, 97, 59)), \
+    pills = (None, img.crop((81, 77, 97, 93)), img.crop((81, 60, 97, 76)), img.crop((81, 43, 97, 59)),
              img.crop((81, 26, 97, 42)), img.crop((81, 9, 97, 25)))
 
     for n in range(1, 8):
-        img = Image.open(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\level%d.png" % n)
+        img = Image.open(os.path.join(input_dir, "level%d.png" % n))
         wall = img.crop((21, 5, 42, 26))
 
         tiled = Image.new(mode="P", size=(16, 16 * 47), color=0)
@@ -146,15 +147,12 @@ def main():
 
         # tiled.show() # to debug
 
-        write_data(bytearray(image_bytes(bytearray(tiled.getdata()), 4)), "wall_gfx_set_%d" % n)
+        write_data(bytearray(image_bytes(bytearray(tiled.getdata()), 4)),
+                   os.path.join(output_dir, "wall_gfx_set_%d" % n))
 
         pal = wall.getpalette()
         pal = [pal[i:i + 3] for i in range(3, 16 * 3, 3)]
         pb = bytearray()
         append_palette(pal, pb)
 
-        write_data(pb, "palette_gfx_set_%d" % n)
-
-
-if __name__ == "__main__":
-    main()
+        write_data(pb, os.path.join(output_dir, "palette_gfx_set_%d" % n))

@@ -1,6 +1,8 @@
 import argparse
 import os
 import sys
+
+from GameTiles import write_game_tiles
 from ImageTiler import ImageTiler
 from ImageUtils import print_header, load_image, load_image_plus_pal
 from PaletteOptimizer import no_transparent_color, PaletteOptimizer, fixed_transparent_color
@@ -11,10 +13,10 @@ def super_nibbly_title(input_dir, output_dir):
     os.makedirs(output_dir, exist_ok=True)
 
     print_header("Super Nibbly Title")
-    title = load_image(os.path.join(input_dir,"TITEL_BG_x16.png"))
-    titanm = load_image(os.path.join(input_dir,"titanm.png"))
-    titanm_1 = load_image(os.path.join(input_dir,"titanm-1_x16.png"))
-    woodly2 = load_image(os.path.join(input_dir,"woodly2.png"))
+    title = load_image(os.path.join(input_dir, "TITEL_BG_x16.png"))
+    titanm = load_image(os.path.join(input_dir, "titanm.png"))
+    titanm_1 = load_image(os.path.join(input_dir, "titanm-1_x16.png"))
+    woodly2 = load_image(os.path.join(input_dir, "woodly2.png"))
 
     # define the sprites
     sg_base = SpriteGroup([
@@ -27,7 +29,7 @@ def super_nibbly_title(input_dir, output_dir):
         Sprite(woodly2, (150, 1), (204, 70), name="b2"),
         Sprite(woodly2, (209, 1), (260, 78), name="l"),
         Sprite(woodly2, (264, 1), (315, 82), name="y")
-        ])
+    ])
     sg_intro = SpriteGroup([
         Sprite(titanm_1, (10, 452), (57, 500), name="head"),
         MultiSprite(titanm_1, (474, 455), (581, 496), (3, 1), name="necks"),
@@ -44,7 +46,7 @@ def super_nibbly_title(input_dir, output_dir):
         Sprite(titanm_1, (311, 98), (350, 115), name="head_crash"),
         Sprite(titanm_1, (316, 209), (395, 240), name="jf_fat"),
         Sprite(titanm_1, (410, 322), (460, 353), name="zack"),
-        MultiSprite(titanm_1, (421, 369), (452, 395), (1,3), name="toff_crash_slup"),
+        MultiSprite(titanm_1, (421, 369), (452, 395), (1, 3), name="toff_crash_slup"),
         Sprite(titanm_1, (471, 334), (497, 365), name="debris_hat"),
         Sprite(titanm_1, (501, 335), (521, 353), name="debris_tail"),
         Sprite(titanm_1, (526, 334), (561, 368), name="debris_prop"),
@@ -63,10 +65,10 @@ def super_nibbly_title(input_dir, output_dir):
     # use optimized palette for tiles and sprites
     it.calc_tiles(po)
     sg_base.calc_sprite_bitmaps(po, it.get_used_memory())
-    sg_intro.calc_sprite_bitmaps(po, it.get_used_memory()+sg_base.get_used_memory())
+    sg_intro.calc_sprite_bitmaps(po, it.get_used_memory() + sg_base.get_used_memory())
 
     # write the sprites as debug images
-    sg_base.save_as_png(po, os.path.join(output_dir,"Debug"))
+    sg_base.save_as_png(po, os.path.join(output_dir, "Debug"))
 
     # save some space on sprites
     it.hide_sprites_in_screen_buffer(sg_base)
@@ -80,8 +82,8 @@ def super_nibbly_title(input_dir, output_dir):
 
 def super_nibbly_travel(input_dir, output_dir):
     print_header("Super Nibbly Travel Screen")
-    travel, pal = load_image_plus_pal(os.path.join(input_dir,"LMAPP_x16.png"))
-    anim = load_image(os.path.join(input_dir,"minanm.png"))
+    travel, pal = load_image_plus_pal(os.path.join(input_dir, "LMAPP_x16.png"))
+    anim = load_image(os.path.join(input_dir, "minanm.png"))
 
     # background image
     it = ImageTiler(travel, fixed_transparent_color((pal[0], pal[1], pal[2])))
@@ -123,7 +125,8 @@ def super_nibbly_travel(input_dir, output_dir):
     for i in range(4):
         landscape_sprite_groups[i].calc_sprite_bitmaps(po, total_used_memory)
         landscape_sprite_groups[i].save(os.path.join(output_dir, "travel_%s_sprites" % landscapes[i]))
-        landscape_sprite_groups[i].save_just_pal_index(os.path.join(output_dir, "travel_%s_pal_indexes" % landscapes[i]))
+        landscape_sprite_groups[i].save_just_pal_index(
+            os.path.join(output_dir, "travel_%s_pal_indexes" % landscapes[i]))
 
     # write everything to disk
     sg_main.save(os.path.join(output_dir, "travel_common_sprites"))
@@ -133,19 +136,19 @@ def super_nibbly_travel(input_dir, output_dir):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Tool to generate the super nibbly assets')
-    parser.add_argument('input_dir', help='path to the input directory, holding the source images', default="src_assets")
-    parser.add_argument('output_dir', help='path to the output directory', default = "build/assets")
-    parser.add_argument('--assets', choices=['title', 'travel'], help='which assets to generate', required=True)
+    parser.add_argument('input_dir', help='path to the input directory, holding the source images',
+                        default="src_assets")
+    parser.add_argument('output_dir', help='path to the output directory', default="build/assets")
+    parser.add_argument('--assets', choices=['title', 'travel', 'tiles'], help='which assets to generate',
+                        required=True)
 
     args = parser.parse_args()
 
-    input_dir = args.input_dir
-    output_dir = args.output_dir
-    assets = args.assets
-
     if args.assets == "title":
-        super_nibbly_title(input_dir, output_dir)
-    if args.assets == "travel":
-        super_nibbly_travel(input_dir, output_dir)
+        super_nibbly_title(args.input_dir, args.output_dir)
+    elif args.assets == "travel":
+        super_nibbly_travel(args.input_dir, args.output_dir)
+    elif args.assets == "tiles":
+        write_game_tiles(args.input_dir, args.output_dir)
 
     sys.exit(0)

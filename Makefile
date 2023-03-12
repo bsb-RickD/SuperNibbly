@@ -54,11 +54,13 @@ TRAVEL_ASSETS=$(ASSETS_DIR)/travel_data.bin $(TRAVEL_SRC_DIR)/travel_common_spri
              $(ASSETS_DIR)/travel_palette.bin $(ASSETS_DIR)/travel_palette_mapping.bin\
              $(foreach A,$(TRAVEL_LANDSCAPES),$(ASSETS_DIR)/travel_$(A)_sprites.bin $(TRAVEL_SRC_DIR)/travel_$(A)_pal_indexes.inc)\
 
-ALL_ASSETS=$(INTRO_ASSETS) $(TRAVEL_ASSETS)
-
-
 PLAYFIELD_SRC_FILES=$(MAIN_SRC_DIR)/playfield.asm
 PLAYFIELD_OBJ_FILES=$(PLAYFIELD_SRC_FILES:%.asm=$(BUILD_DIR)/%.o)
+PLAYFIELD_GFX_SETS=1 2 3 4 5 6 7
+PLAYFIELD_SRC_ASSETS=$(foreach A,$(PLAYFIELD_GFX_SETS),$(ASSET_SRC_DIR)/level$(A).png)
+PLAYFIELD_ASSETS=$(foreach A,$(PLAYFIELD_GFX_SETS),$(ASSETS_DIR)/wall_gfx_set_$(A).bin $(ASSETS_DIR)/palette_gfx_set_$(A).bin)
+
+ALL_ASSETS=$(INTRO_ASSETS) $(TRAVEL_ASSETS) $(PLAYFIELD_ASSETS)
 
 EXECUTABLES=intro.prg travel.prg playfield.prg
 
@@ -106,9 +108,9 @@ playfield.prg: $(PLAYFIELD_OBJ_FILES) $(LIBRARY)
 $(BUILD_DIR)/%.o: %.asm | $(ALL_BUILD_DIRS)
 	$(ASSEMBLER) $(PLATFORM_FLAGS) $(ASSEMBLER_FLAGS) $< -o $@
 
-$(BUILD_DIR)/$(MAIN_SRC_DIR)/intro.o: $(INTRO_ASSETS)
 
-$(BUILD_DIR)/$(MAIN_SRC_DIR)/travel.o: $(TRAVEL_ASSETS)
+# === Asset building for intro ==========================================================
+$(BUILD_DIR)/$(MAIN_SRC_DIR)/intro.o: $(INTRO_ASSETS)
 
 $(INTRO_ASSETS): $(TOOL_SRC_FILES) $(INTRO_SRC_ASSETS)
 	$(PYTHON) $(ASSET_COMPILER) $(ASSET_SRC_DIR) $(ASSET_BUILD_DIR) --assets title
@@ -121,6 +123,9 @@ $(INTRO_ASSETS): $(TOOL_SRC_FILES) $(INTRO_SRC_ASSETS)
 	-rm -f $(ASSET_BUILD_DIR)/intro_data.raw
 	lzsa -v -r -f2 $(ASSET_BUILD_DIR)/intro_sprites.bin $(ASSETS_DIR)/intro_sprites.bin
 
+# === Asset building for travel =========================================================
+$(BUILD_DIR)/$(MAIN_SRC_DIR)/travel.o: $(TRAVEL_ASSETS)
+
 $(TRAVEL_ASSETS): $(TOOL_SRC_FILES) $(TRAVEL_SRC_ASSETS)
 	$(PYTHON) $(ASSET_COMPILER) $(ASSET_SRC_DIR) $(ASSET_BUILD_DIR) --assets travel
 	cat $(ASSET_BUILD_DIR)/travel_screen.bin $(ASSET_BUILD_DIR)/travel_tiles.bin $(ASSET_BUILD_DIR)/travel_common_sprites.bin > $(ASSET_BUILD_DIR)/travel_data.raw
@@ -132,6 +137,15 @@ $(TRAVEL_ASSETS): $(TOOL_SRC_FILES) $(TRAVEL_SRC_ASSETS)
 	cp $(ASSET_BUILD_DIR)/travel_green_sprites.inc $(TRAVEL_SRC_DIR)/travel_landscape_sprites.inc
 	cp $(ASSET_BUILD_DIR)/travel_common_sprites.inc $(TRAVEL_SRC_DIR)/travel_common_sprites.inc
 	$(foreach A,$(TRAVEL_LANDSCAPES),cp $(ASSET_BUILD_DIR)/travel_$(A)_pal_indexes.inc $(TRAVEL_SRC_DIR);)
+
+# === Asset building for playfield ======================================================
+$(BUILD_DIR)/$(MAIN_SRC_DIR)/travel.o: $(PLAYFIELD_ASSETS)
+
+$(PLAYFIELD_ASSETS): $(TOOL_SRC_FILES) $(PLAYFIELD_SRC_ASSETS)
+	$(PYTHON) $(ASSET_COMPILER) $(ASSET_SRC_DIR) $(ASSET_BUILD_DIR) --assets tiles
+	$(foreach A,$(PLAYFIELD_GFX_SETS),lzsa -v -r -f2 $(ASSET_BUILD_DIR)/wall_gfx_set_$(A).bin $(ASSETS_DIR)/wall_gfx_set_$(A).bin;)
+	$(foreach A,$(PLAYFIELD_GFX_SETS),cp $(ASSET_BUILD_DIR)/palette_gfx_set_$(A).bin $(ASSETS_DIR);)
+
 
 # create the build dir structure
 $(ALL_BUILD_DIRS):

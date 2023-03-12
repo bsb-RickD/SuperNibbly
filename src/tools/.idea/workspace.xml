@@ -6,21 +6,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3af9e987-ee4a-4e9e-a0e6-6c4e604ea779" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/../../Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/../../Makefile" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../TESTLOAD" beforeDir="false" afterPath="$PROJECT_DIR$/../../TESTLOAD" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../assets/intro_data.bin" beforeDir="false" afterPath="$PROJECT_DIR$/../../assets/intro_data.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../assets/intro_palette.bin" beforeDir="false" afterPath="$PROJECT_DIR$/../../assets/intro_palette.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../assets/intro_palette_mapping.bin" beforeDir="false" afterPath="$PROJECT_DIR$/../../assets/intro_palette_mapping.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../assets/intro_sprites.bin" beforeDir="false" afterPath="$PROJECT_DIR$/../../assets/intro_sprites.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../inc/math.inc" beforeDir="false" afterPath="$PROJECT_DIR$/../inc/math.inc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../intro/intro_sprites.inc" beforeDir="false" afterPath="$PROJECT_DIR$/../intro/intro_sprites.inc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../intro/intro_sprites_base.inc" beforeDir="false" afterPath="$PROJECT_DIR$/../intro/intro_sprites_base.inc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/BuildAssets.py" beforeDir="false" afterPath="$PROJECT_DIR$/BuildAssets.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ImageUtils.py" beforeDir="false" afterPath="$PROJECT_DIR$/ImageUtils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PaletteOptimizer.py" beforeDir="false" afterPath="$PROJECT_DIR$/PaletteOptimizer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../src_assets/titanm-1_x16.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../src_assets/titanm-1_x16.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GameTiles.py" beforeDir="false" afterPath="$PROJECT_DIR$/GameTiles.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../supernibbly.vhd" beforeDir="false" afterPath="$PROJECT_DIR$/../../supernibbly.vhd" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -66,11 +54,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/BuildAssets.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="328">
-              <caret line="125" column="49" selection-start-line="125" selection-start-column="49" selection-end-line="125" selection-end-column="49" />
+            <state relative-caret-position="651">
+              <caret line="147" column="59" lean-forward="true" selection-start-line="147" selection-start-column="59" selection-end-line="147" selection-end-column="59" />
               <folding>
                 <element signature="e#0#15#0" expanded="true" />
               </folding>
@@ -102,8 +90,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/GameTiles.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="17">
-              <caret line="3" selection-start-line="3" selection-end-line="3" />
+            <state relative-caret-position="73">
+              <caret line="117" column="20" selection-start-line="117" selection-start-column="4" selection-end-line="117" selection-end-column="20" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
               </folding>
@@ -111,10 +99,10 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/PaletteOptimizer.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="578">
+            <state relative-caret-position="923">
               <caret line="142" column="12" selection-start-line="142" selection-start-column="12" selection-end-line="142" selection-end-column="12" />
               <folding>
                 <element signature="e#0#88#0" expanded="true" />
@@ -182,11 +170,11 @@
       <list>
         <option value="$PROJECT_DIR$/ImageTiler.py" />
         <option value="$PROJECT_DIR$/CopperList.py" />
-        <option value="$PROJECT_DIR$/GameTiles.py" />
         <option value="$PROJECT_DIR$/Sprites.py" />
         <option value="$PROJECT_DIR$/ImageUtils.py" />
-        <option value="$PROJECT_DIR$/BuildAssets.py" />
         <option value="$PROJECT_DIR$/PaletteOptimizer.py" />
+        <option value="$PROJECT_DIR$/GameTiles.py" />
+        <option value="$PROJECT_DIR$/BuildAssets.py" />
       </list>
     </option>
   </component>
@@ -317,18 +305,18 @@
       <workItem from="1678304176037" duration="3491000" />
       <workItem from="1678467619600" duration="3490000" />
       <workItem from="1678547453768" duration="854000" />
-      <workItem from="1678610064135" duration="3712000" />
+      <workItem from="1678610064135" duration="4948000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="146798000" />
+    <option name="totallyTimeSpent" value="148034000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1912" y="-10" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.17643923" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.17643923" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -509,16 +497,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/GameTiles.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17">
-          <caret line="3" selection-start-line="3" selection-end-line="3" />
-          <folding>
-            <element signature="e#0#21#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/ImageUtils.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="510">
@@ -539,22 +517,32 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/BuildAssets.py">
+    <entry file="file://$PROJECT_DIR$/PaletteOptimizer.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="328">
-          <caret line="125" column="49" selection-start-line="125" selection-start-column="49" selection-end-line="125" selection-end-column="49" />
+        <state relative-caret-position="923">
+          <caret line="142" column="12" selection-start-line="142" selection-start-column="12" selection-end-line="142" selection-end-column="12" />
           <folding>
-            <element signature="e#0#15#0" expanded="true" />
+            <element signature="e#0#88#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/PaletteOptimizer.py">
+    <entry file="file://$PROJECT_DIR$/GameTiles.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="578">
-          <caret line="142" column="12" selection-start-line="142" selection-start-column="12" selection-end-line="142" selection-end-column="12" />
+        <state relative-caret-position="73">
+          <caret line="117" column="20" selection-start-line="117" selection-start-column="4" selection-end-line="117" selection-end-column="20" />
           <folding>
-            <element signature="e#0#88#0" expanded="true" />
+            <element signature="e#0#21#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BuildAssets.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="651">
+          <caret line="147" column="59" lean-forward="true" selection-start-line="147" selection-start-column="59" selection-end-line="147" selection-end-column="59" />
+          <folding>
+            <element signature="e#0#15#0" expanded="true" />
           </folding>
         </state>
       </provider>
