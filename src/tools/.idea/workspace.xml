@@ -7,8 +7,39 @@
   <component name="ChangeListManager">
     <list default="true" id="3af9e987-ee4a-4e9e-a0e6-6c4e604ea779" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/../../TESTLOAD" beforeDir="false" afterPath="$PROJECT_DIR$/../../TESTLOAD" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BuildAssets.py" beforeDir="false" afterPath="$PROJECT_DIR$/BuildAssets.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/GameTiles.py" beforeDir="false" afterPath="$PROJECT_DIR$/GameTiles.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../assets/intro_data.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../assets/intro_palette.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../assets/intro_palette_mapping.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../assets/intro_sprites.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../assets/palette_gfx_set_1.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../assets/palette_gfx_set_2.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../assets/palette_gfx_set_3.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../assets/palette_gfx_set_4.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../assets/palette_gfx_set_5.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../assets/palette_gfx_set_6.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../assets/palette_gfx_set_7.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../assets/travel_data.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../assets/travel_desert_sprites.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../assets/travel_green_sprites.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../assets/travel_ice_sprites.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../assets/travel_palette.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../assets/travel_palette_mapping.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../assets/travel_volcano_sprites.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../assets/wall_gfx_set_1.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../assets/wall_gfx_set_2.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../assets/wall_gfx_set_3.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../assets/wall_gfx_set_4.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../assets/wall_gfx_set_5.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../assets/wall_gfx_set_6.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../assets/wall_gfx_set_7.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../intro/intro_sprites.inc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../intro/intro_sprites_base.inc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../travel/travel_common_sprites.inc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../travel/travel_desert_pal_indexes.inc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../travel/travel_green_pal_indexes.inc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../travel/travel_ice_pal_indexes.inc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../travel/travel_landscape_sprites.inc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../travel/travel_volcano_pal_indexes.inc" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../../supernibbly.vhd" beforeDir="false" afterPath="$PROJECT_DIR$/../../supernibbly.vhd" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -54,11 +85,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/BuildAssets.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="651">
-              <caret line="147" column="59" lean-forward="true" selection-start-line="147" selection-start-column="59" selection-end-line="147" selection-end-column="59" />
+            <state relative-caret-position="736">
+              <caret line="152" lean-forward="true" selection-start-line="152" selection-end-line="152" />
               <folding>
                 <element signature="e#0#15#0" expanded="true" />
               </folding>
@@ -87,7 +118,7 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/GameTiles.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="73">
@@ -305,12 +336,12 @@
       <workItem from="1678304176037" duration="3491000" />
       <workItem from="1678467619600" duration="3490000" />
       <workItem from="1678547453768" duration="854000" />
-      <workItem from="1678610064135" duration="4948000" />
+      <workItem from="1678610064135" duration="5628000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="148034000" />
+    <option name="totallyTimeSpent" value="148714000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1912" y="-10" width="1936" height="1056" extended-state="6" />
@@ -527,22 +558,22 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/BuildAssets.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="736">
+          <caret line="152" lean-forward="true" selection-start-line="152" selection-end-line="152" />
+          <folding>
+            <element signature="e#0#15#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/GameTiles.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="73">
           <caret line="117" column="20" selection-start-line="117" selection-start-column="4" selection-end-line="117" selection-end-column="20" />
           <folding>
             <element signature="e#0#21#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/BuildAssets.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="651">
-          <caret line="147" column="59" lean-forward="true" selection-start-line="147" selection-start-column="59" selection-end-line="147" selection-end-column="59" />
-          <folding>
-            <element signature="e#0#15#0" expanded="true" />
           </folding>
         </state>
       </provider>
