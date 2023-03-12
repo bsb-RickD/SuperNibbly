@@ -1,4 +1,5 @@
 from ImageUtils import write_data, append_palette, print_header, write_palette_debug_png
+import os
 
 MAX_SUB_PALETTE_SIZE = 15
 MAX_FULL_PALETTE_SIZE = 256
@@ -131,14 +132,15 @@ class PaletteOptimizer:
                 return 0, self.full_palette
             raise ValueError("Sprite palette not found in full palette!")
 
-    def save(self, filename, write_asm=False):
+    def save(self, filename, write_asm=False, debug_palette_folder = None):
         palette_bytes = bytearray()
         append_palette(self.color_set[1:], palette_bytes)
 
         write_data(palette_bytes, filename, write_asm=write_asm)
 
-        write_palette_debug_png("pal_debug.png", self.full_palette)
-        write_palette_debug_png("pal_debug_2.png", self.color_set)
+        if debug_palette_folder is not None:
+            write_palette_debug_png(os.path.join(debug_palette_folder, "pal_debug_full.png"), self.full_palette)
+            write_palette_debug_png(os.path.join(debug_palette_folder, "pal_debug_color_set.png"), self.color_set)
 
         virtual_pal_bytes = bytearray()
 

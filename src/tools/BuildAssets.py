@@ -1,15 +1,20 @@
+import argparse
+import os
+import sys
 from ImageTiler import ImageTiler
 from ImageUtils import print_header, load_image, load_image_plus_pal
 from PaletteOptimizer import no_transparent_color, PaletteOptimizer, fixed_transparent_color
 from Sprites import SpriteGroup, MultiSprite, Sprite, SPRITE_LAYER_BACKGROUND
 
 
-def super_nibbly_title():
+def super_nibbly_title(input_dir, output_dir):
+    os.makedirs(output_dir, exist_ok=True)
+
     print_header("Super Nibbly Title")
-    title = load_image(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\TITEL_BG_x16.png")
-    titanm = load_image(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\titanm.png")
-    titanm_1 = load_image(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\titanm-1_x16.png")
-    woodly2 = load_image(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\woodly2.png")
+    title = load_image(os.path.join(input_dir,"TITEL_BG_x16.png"))
+    titanm = load_image(os.path.join(input_dir,"titanm.png"))
+    titanm_1 = load_image(os.path.join(input_dir,"titanm-1_x16.png"))
+    woodly2 = load_image(os.path.join(input_dir,"woodly2.png"))
 
     # define the sprites
     sg_base = SpriteGroup([
@@ -61,25 +66,25 @@ def super_nibbly_title():
     sg_intro.calc_sprite_bitmaps(po, it.get_used_memory()+sg_base.get_used_memory())
 
     # write the sprites as debug images
-    sg_base.save_as_png(po)
+    sg_base.save_as_png(po, os.path.join(output_dir,"Debug"))
 
     # save some space on sprites
     it.hide_sprites_in_screen_buffer(sg_base)
 
     # write everything to disk
-    sg_base.save("intro_sprites_base")
-    sg_intro.save("intro_sprites")
-    po.save("intro_palette")
-    it.save("intro")
+    sg_base.save(os.path.join(output_dir, "intro_sprites_base"))
+    sg_intro.save(os.path.join(output_dir, "intro_sprites"))
+    po.save(os.path.join(output_dir, "intro_palette"))
+    it.save(os.path.join(output_dir, "intro"))
 
 
-def super_nibbly_travel():
+def super_nibbly_travel(input_dir, output_dir):
     print_header("Super Nibbly Travel Screen")
-    travel, pal = load_image_plus_pal(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\LMAPP_x16.png")
-    anim = load_image(r"C:\Users\epojar\Dropbox\OldDiskBackup\Nibbly\All_PNG_Files\minanm.png")
+    travel, pal = load_image_plus_pal(os.path.join(input_dir,"LMAPP_x16.png"))
+    anim = load_image(os.path.join(input_dir,"minanm.png"))
 
     # background image
-    it = ImageTiler(travel, fixed_transparent_color((pal.palette[0], pal.palette[1], pal.palette[2])))
+    it = ImageTiler(travel, fixed_transparent_color((pal[0], pal[1], pal[2])))
 
     sg_main = SpriteGroup([
         MultiSprite(anim, (246, 32), (293, 231), (1, 10), name="speech_big"),
@@ -117,15 +122,30 @@ def super_nibbly_travel():
     landscapes = ["green", "ice", "volcano", "desert"]
     for i in range(4):
         landscape_sprite_groups[i].calc_sprite_bitmaps(po, total_used_memory)
-        landscape_sprite_groups[i].save("travel_%s_sprites" % landscapes[i])
-        landscape_sprite_groups[i].save_just_pal_index("travel_%s_pal_indexes" % landscapes[i])
+        landscape_sprite_groups[i].save(os.path.join(output_dir, "travel_%s_sprites" % landscapes[i]))
+        landscape_sprite_groups[i].save_just_pal_index(os.path.join(output_dir, "travel_%s_pal_indexes" % landscapes[i]))
 
     # write everything to disk
-    sg_main.save("travel_common_sprites")
-    po.save("travel_palette")
-    it.save("travel")
+    sg_main.save(os.path.join(output_dir, "travel_common_sprites"))
+    po.save(os.path.join(output_dir, "travel_palette"))
+    it.save(os.path.join(output_dir, "travel"))
 
 
 if __name__ == "__main__":
-    super_nibbly_title()
-    #super_nibbly_travel()
+    parser = argparse.ArgumentParser(description='Tool to generate the super nibbly assets')
+    parser.add_argument('input_dir', help='path to the input directory, holding the source images', default="src_assets")
+    parser.add_argument('output_dir', help='path to the output directory', default = "build/assets")
+    parser.add_argument('--assets', choices=['title', 'travel'], help='which assets to generate', required=True)
+
+    args = parser.parse_args()
+
+    input_dir = args.input_dir
+    output_dir = args.output_dir
+    assets = args.assets
+
+    if args.assets == "title":
+        super_nibbly_title(input_dir, output_dir)
+    if args.assets == "travel":
+        super_nibbly_travel(input_dir, output_dir)
+
+    sys.exit(0)

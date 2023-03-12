@@ -239,10 +239,9 @@ def load_image(filename):
 
 def load_image_plus_pal(filename):
     img = Image.open(filename)
-    palette = img.palette
 
     # Normalize the RGB values from [0, 255] to [0, 1]
-    palette = np.array(palette) / 255
+    palette = np.array(img.getpalette()) / 255
 
     # Quantize the palette using Numpy
     quantized_palette = (np.round(palette / (17 / 255)) * (17 / 255)) * 255
@@ -254,7 +253,7 @@ def load_image_plus_pal(filename):
     img.putpalette(quantized_palette)
 
     img = img.convert("RGB")
-    return img, palette
+    return img, quantized_palette
 
 
 def create_screen_buffer_entry(tile_index, palette_index, h_flip, v_flip):

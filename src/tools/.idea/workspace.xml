@@ -5,7 +5,24 @@
     <bookmark url="file://$PROJECT_DIR$/ImageTiler.py" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3af9e987-ee4a-4e9e-a0e6-6c4e604ea779" name="Default Changelist" comment="" />
+    <list default="true" id="3af9e987-ee4a-4e9e-a0e6-6c4e604ea779" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/../../Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/../../Makefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../TESTLOAD" beforeDir="false" afterPath="$PROJECT_DIR$/../../TESTLOAD" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../assets/intro_data.bin" beforeDir="false" afterPath="$PROJECT_DIR$/../../assets/intro_data.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../assets/intro_palette.bin" beforeDir="false" afterPath="$PROJECT_DIR$/../../assets/intro_palette.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../assets/intro_palette_mapping.bin" beforeDir="false" afterPath="$PROJECT_DIR$/../../assets/intro_palette_mapping.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../assets/intro_sprites.bin" beforeDir="false" afterPath="$PROJECT_DIR$/../../assets/intro_sprites.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../inc/math.inc" beforeDir="false" afterPath="$PROJECT_DIR$/../inc/math.inc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../intro/intro_sprites.inc" beforeDir="false" afterPath="$PROJECT_DIR$/../intro/intro_sprites.inc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../intro/intro_sprites_base.inc" beforeDir="false" afterPath="$PROJECT_DIR$/../intro/intro_sprites_base.inc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BuildAssets.py" beforeDir="false" afterPath="$PROJECT_DIR$/BuildAssets.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ImageUtils.py" beforeDir="false" afterPath="$PROJECT_DIR$/ImageUtils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PaletteOptimizer.py" beforeDir="false" afterPath="$PROJECT_DIR$/PaletteOptimizer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src_assets/titanm-1_x16.png" beforeDir="false" afterPath="$PROJECT_DIR$/../../src_assets/titanm-1_x16.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../supernibbly.vhd" beforeDir="false" afterPath="$PROJECT_DIR$/../../supernibbly.vhd" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,13 +66,13 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/BuildAssets.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-561">
-              <caret line="6" column="20" selection-start-line="6" selection-start-column="20" selection-end-line="6" selection-end-column="20" />
+            <state relative-caret-position="328">
+              <caret line="125" column="49" selection-start-line="125" selection-start-column="49" selection-end-line="125" selection-end-column="49" />
               <folding>
-                <element signature="e#0#33#0" expanded="true" />
+                <element signature="e#0#15#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -73,8 +90,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ImageUtils.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3485">
-              <caret line="207" column="4" selection-start-line="207" selection-start-column="4" selection-end-line="207" selection-end-column="4" />
+            <state relative-caret-position="510">
+              <caret line="255" column="33" selection-start-line="255" selection-start-column="33" selection-end-line="255" selection-end-column="33" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
               </folding>
@@ -94,11 +111,14 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/PaletteOptimizer.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1938">
-              <caret line="114" selection-start-line="114" selection-end-line="114" />
+            <state relative-caret-position="578">
+              <caret line="142" column="12" selection-start-line="142" selection-start-column="12" selection-end-line="142" selection-end-column="12" />
+              <folding>
+                <element signature="e#0#88#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -106,8 +126,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Sprites.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2431">
-              <caret line="150" column="23" selection-start-line="150" selection-start-column="8" selection-end-line="150" selection-end-column="23" />
+            <state relative-caret-position="307">
+              <caret line="162" column="19" selection-start-line="162" selection-start-column="8" selection-end-line="162" selection-end-column="19" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
               </folding>
@@ -148,10 +168,14 @@
       <find>try</find>
       <find>debug</find>
       <find>putdata</find>
+      <find>Debug</find>
+      <find>save_as_png</find>
+      <find>pal_debug</find>
+      <find>pal_</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
   </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
@@ -161,16 +185,16 @@
         <option value="$PROJECT_DIR$/GameTiles.py" />
         <option value="$PROJECT_DIR$/Sprites.py" />
         <option value="$PROJECT_DIR$/ImageUtils.py" />
-        <option value="$PROJECT_DIR$/PaletteOptimizer.py" />
         <option value="$PROJECT_DIR$/BuildAssets.py" />
+        <option value="$PROJECT_DIR$/PaletteOptimizer.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-128" />
-    <option name="y" value="72" />
-    <option name="width" value="1932" />
-    <option name="height" value="1046" />
+    <option name="x" value="2041" />
+    <option name="y" value="-10" />
+    <option name="width" value="1934" />
+    <option name="height" value="1048" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -178,7 +202,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -190,6 +213,7 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -197,7 +221,7 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$/ImageUtils.py" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+    <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -288,17 +312,23 @@
       <workItem from="1675434900782" duration="7265000" />
       <workItem from="1675682237671" duration="1399000" />
       <workItem from="1677157589774" duration="854000" />
+      <workItem from="1678211026210" duration="931000" />
+      <workItem from="1678212368364" duration="225000" />
+      <workItem from="1678304176037" duration="3491000" />
+      <workItem from="1678467619600" duration="3490000" />
+      <workItem from="1678547453768" duration="854000" />
+      <workItem from="1678610064135" duration="3712000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="134095000" />
+    <option name="totallyTimeSpent" value="146798000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <frame x="1912" y="-10" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.16577825" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.17643923" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -347,6 +377,12 @@
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
   </component>
+  <component name="VcsManagerConfiguration">
+    <ignored-roots>
+      <path value="$PROJECT_DIR$/.." />
+      <path value="$PROJECT_DIR$" />
+    </ignored-roots>
+  </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
@@ -357,12 +393,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/PaletteOptimizer.py</url>
-          <line>115</line>
+          <line>116</line>
           <option name="timeStamp" value="18" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/PaletteOptimizer.py</url>
-          <line>101</line>
+          <line>102</line>
           <option name="timeStamp" value="19" />
         </line-breakpoint>
       </breakpoints>
@@ -439,6 +475,9 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://D:/freetype-py/examples/wordle.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
     <entry file="file://$PROJECT_DIR$/ImageTiler.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="816">
@@ -470,16 +509,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ImageUtils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3485">
-          <caret line="207" column="4" selection-start-line="207" selection-start-column="4" selection-end-line="207" selection-end-column="4" />
-          <folding>
-            <element signature="e#0#21#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/GameTiles.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="17">
@@ -490,17 +519,20 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/PaletteOptimizer.py">
+    <entry file="file://$PROJECT_DIR$/ImageUtils.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1938">
-          <caret line="114" selection-start-line="114" selection-end-line="114" />
+        <state relative-caret-position="510">
+          <caret line="255" column="33" selection-start-line="255" selection-start-column="33" selection-end-line="255" selection-end-column="33" />
+          <folding>
+            <element signature="e#0#21#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Sprites.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2431">
-          <caret line="150" column="23" selection-start-line="150" selection-start-column="8" selection-end-line="150" selection-end-column="23" />
+        <state relative-caret-position="307">
+          <caret line="162" column="19" selection-start-line="162" selection-start-column="8" selection-end-line="162" selection-end-column="19" />
           <folding>
             <element signature="e#0#21#0" expanded="true" />
           </folding>
@@ -509,10 +541,20 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/BuildAssets.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-561">
-          <caret line="6" column="20" selection-start-line="6" selection-start-column="20" selection-end-line="6" selection-end-column="20" />
+        <state relative-caret-position="328">
+          <caret line="125" column="49" selection-start-line="125" selection-start-column="49" selection-end-line="125" selection-end-column="49" />
           <folding>
-            <element signature="e#0#33#0" expanded="true" />
+            <element signature="e#0#15#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/PaletteOptimizer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="578">
+          <caret line="142" column="12" selection-start-line="142" selection-start-column="12" selection-end-line="142" selection-end-column="12" />
+          <folding>
+            <element signature="e#0#88#0" expanded="true" />
           </folding>
         </state>
       </provider>

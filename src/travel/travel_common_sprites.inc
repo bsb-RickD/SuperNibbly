@@ -4,7 +4,7 @@ sprite_speech_big_0:
 .word 982+VERA_sprite_colors_16	; address/32 (+ color indicator) 
 .word 0, 0	; x,y pos
 .byte VERA_sprite_layer_foreground	; 4 bit Collision mask, 3 bit z-depth, VFlip HFlip
-.byte VERA_sprite_height_32+VERA_sprite_width_64+5	;h, w, palette index
+.byte VERA_sprite_height_32+VERA_sprite_width_64+0	;h, w, palette index
 
 ; Sprite speech_big, frame 1 (64x32 - 16 colors)
 sprite_speech_big_1:
@@ -12,7 +12,7 @@ sprite_speech_big_1:
 .word 1014+VERA_sprite_colors_16	; address/32 (+ color indicator) 
 .word 0, 0	; x,y pos
 .byte VERA_sprite_layer_foreground	; 4 bit Collision mask, 3 bit z-depth, VFlip HFlip
-.byte VERA_sprite_height_32+VERA_sprite_width_64+5	;h, w, palette index
+.byte VERA_sprite_height_32+VERA_sprite_width_64+0	;h, w, palette index
 
 ; Sprite speech_big, frame 2 (64x32 - 16 colors)
 sprite_speech_big_2:
@@ -20,7 +20,7 @@ sprite_speech_big_2:
 .word 1046+VERA_sprite_colors_16	; address/32 (+ color indicator) 
 .word 0, 0	; x,y pos
 .byte VERA_sprite_layer_foreground	; 4 bit Collision mask, 3 bit z-depth, VFlip HFlip
-.byte VERA_sprite_height_32+VERA_sprite_width_64+5	;h, w, palette index
+.byte VERA_sprite_height_32+VERA_sprite_width_64+0	;h, w, palette index
 
 ; Sprite speech_big, frame 3 (64x32 - 16 colors)
 sprite_speech_big_3:
@@ -28,7 +28,7 @@ sprite_speech_big_3:
 .word 1078+VERA_sprite_colors_16	; address/32 (+ color indicator) 
 .word 0, 0	; x,y pos
 .byte VERA_sprite_layer_foreground	; 4 bit Collision mask, 3 bit z-depth, VFlip HFlip
-.byte VERA_sprite_height_32+VERA_sprite_width_64+5	;h, w, palette index
+.byte VERA_sprite_height_32+VERA_sprite_width_64+0	;h, w, palette index
 
 ; Sprite speech_big, frame 4 (64x32 - 16 colors)
 sprite_speech_big_4:
@@ -36,7 +36,7 @@ sprite_speech_big_4:
 .word 1110+VERA_sprite_colors_16	; address/32 (+ color indicator) 
 .word 0, 0	; x,y pos
 .byte VERA_sprite_layer_foreground	; 4 bit Collision mask, 3 bit z-depth, VFlip HFlip
-.byte VERA_sprite_height_32+VERA_sprite_width_64+5	;h, w, palette index
+.byte VERA_sprite_height_32+VERA_sprite_width_64+0	;h, w, palette index
 
 ; Sprite speech_big, frame 5 (64x32 - 16 colors)
 sprite_speech_big_5:
@@ -44,7 +44,7 @@ sprite_speech_big_5:
 .word 1142+VERA_sprite_colors_16	; address/32 (+ color indicator) 
 .word 0, 0	; x,y pos
 .byte VERA_sprite_layer_foreground	; 4 bit Collision mask, 3 bit z-depth, VFlip HFlip
-.byte VERA_sprite_height_32+VERA_sprite_width_64+5	;h, w, palette index
+.byte VERA_sprite_height_32+VERA_sprite_width_64+0	;h, w, palette index
 
 ; Sprite speech_big, frame 6 (64x32 - 16 colors)
 sprite_speech_big_6:
@@ -52,7 +52,7 @@ sprite_speech_big_6:
 .word 1174+VERA_sprite_colors_16	; address/32 (+ color indicator) 
 .word 0, 0	; x,y pos
 .byte VERA_sprite_layer_foreground	; 4 bit Collision mask, 3 bit z-depth, VFlip HFlip
-.byte VERA_sprite_height_32+VERA_sprite_width_64+5	;h, w, palette index
+.byte VERA_sprite_height_32+VERA_sprite_width_64+0	;h, w, palette index
 
 ; Sprite speech_big, frame 7 (64x32 - 16 colors)
 sprite_speech_big_7:
@@ -60,7 +60,7 @@ sprite_speech_big_7:
 .word 1206+VERA_sprite_colors_16	; address/32 (+ color indicator) 
 .word 0, 0	; x,y pos
 .byte VERA_sprite_layer_foreground	; 4 bit Collision mask, 3 bit z-depth, VFlip HFlip
-.byte VERA_sprite_height_32+VERA_sprite_width_64+5	;h, w, palette index
+.byte VERA_sprite_height_32+VERA_sprite_width_64+0	;h, w, palette index
 
 ; Sprite speech_big, frame 8 (64x32 - 16 colors)
 sprite_speech_big_8:
@@ -68,7 +68,7 @@ sprite_speech_big_8:
 .word 1238+VERA_sprite_colors_16	; address/32 (+ color indicator) 
 .word 0, 0	; x,y pos
 .byte VERA_sprite_layer_foreground	; 4 bit Collision mask, 3 bit z-depth, VFlip HFlip
-.byte VERA_sprite_height_32+VERA_sprite_width_64+5	;h, w, palette index
+.byte VERA_sprite_height_32+VERA_sprite_width_64+0	;h, w, palette index
 
 ; Sprite speech_big, frame 9 (64x32 - 16 colors)
 sprite_speech_big_9:
@@ -76,7 +76,7 @@ sprite_speech_big_9:
 .word 1270+VERA_sprite_colors_16	; address/32 (+ color indicator) 
 .word 0, 0	; x,y pos
 .byte VERA_sprite_layer_foreground	; 4 bit Collision mask, 3 bit z-depth, VFlip HFlip
-.byte VERA_sprite_height_32+VERA_sprite_width_64+5	;h, w, palette index
+.byte VERA_sprite_height_32+VERA_sprite_width_64+0	;h, w, palette index
 
 ; Sprite speech_medium, frame 0 (32x32 - 16 colors)
 sprite_speech_medium_0:
@@ -84,7 +84,7 @@ sprite_speech_medium_0:
 .word 1302+VERA_sprite_colors_16	; address/32 (+ color indicator) 
 .word 0, 0	; x,y pos
 .byte VERA_sprite_layer_foreground	; 4 bit Collision mask, 3 bit z-depth, VFlip HFlip
-.byte VERA_sprite_height_32+VERA_sprite_width_32+5	;h, w, palette index
+.byte VERA_sprite_height_32+VERA_sprite_width_32+0	;h, w, palette index
 
 ; Sprite speech_medium, frame 1 (32x32 - 16 colors)
 sprite_speech_medium_1:
@@ -92,7 +92,7 @@ sprite_speech_medium_1:
 .word 1318+VERA_sprite_colors_16	; address/32 (+ color indicator) 
 .word 0, 0	; x,y pos
 .byte VERA_sprite_layer_foreground	; 4 bit Collision mask, 3 bit z-depth, VFlip HFlip
-.byte VERA_sprite_height_32+VERA_sprite_width_32+5	;h, w, palette index
+.byte VERA_sprite_height_32+VERA_sprite_width_32+0	;h, w, palette index
 
 ; Sprite speech_medium, frame 2 (32x32 - 16 colors)
 sprite_speech_medium_2:
@@ -100,7 +100,7 @@ sprite_speech_medium_2:
 .word 1334+VERA_sprite_colors_16	; address/32 (+ color indicator) 
 .word 0, 0	; x,y pos
 .byte VERA_sprite_layer_foreground	; 4 bit Collision mask, 3 bit z-depth, VFlip HFlip
-.byte VERA_sprite_height_32+VERA_sprite_width_32+5	;h, w, palette index
+.byte VERA_sprite_height_32+VERA_sprite_width_32+0	;h, w, palette index
 
 ; Sprite speech_medium, frame 3 (32x32 - 16 colors)
 sprite_speech_medium_3:
@@ -108,7 +108,7 @@ sprite_speech_medium_3:
 .word 1350+VERA_sprite_colors_16	; address/32 (+ color indicator) 
 .word 0, 0	; x,y pos
 .byte VERA_sprite_layer_foreground	; 4 bit Collision mask, 3 bit z-depth, VFlip HFlip
-.byte VERA_sprite_height_32+VERA_sprite_width_32+5	;h, w, palette index
+.byte VERA_sprite_height_32+VERA_sprite_width_32+0	;h, w, palette index
 
 ; Sprite speech_medium, frame 4 (32x32 - 16 colors)
 sprite_speech_medium_4:
@@ -116,7 +116,7 @@ sprite_speech_medium_4:
 .word 1366+VERA_sprite_colors_16	; address/32 (+ color indicator) 
 .word 0, 0	; x,y pos
 .byte VERA_sprite_layer_foreground	; 4 bit Collision mask, 3 bit z-depth, VFlip HFlip
-.byte VERA_sprite_height_32+VERA_sprite_width_32+5	;h, w, palette index
+.byte VERA_sprite_height_32+VERA_sprite_width_32+0	;h, w, palette index
 
 ; Sprite speech_medium, frame 5 (32x32 - 16 colors)
 sprite_speech_medium_5:
@@ -124,7 +124,7 @@ sprite_speech_medium_5:
 .word 1382+VERA_sprite_colors_16	; address/32 (+ color indicator) 
 .word 0, 0	; x,y pos
 .byte VERA_sprite_layer_foreground	; 4 bit Collision mask, 3 bit z-depth, VFlip HFlip
-.byte VERA_sprite_height_32+VERA_sprite_width_32+5	;h, w, palette index
+.byte VERA_sprite_height_32+VERA_sprite_width_32+0	;h, w, palette index
 
 ; Sprite speech_small, frame 0 (32x32 - 16 colors)
 sprite_speech_small_0:
@@ -132,7 +132,7 @@ sprite_speech_small_0:
 .word 1398+VERA_sprite_colors_16	; address/32 (+ color indicator) 
 .word 0, 0	; x,y pos
 .byte VERA_sprite_layer_foreground	; 4 bit Collision mask, 3 bit z-depth, VFlip HFlip
-.byte VERA_sprite_height_32+VERA_sprite_width_32+5	;h, w, palette index
+.byte VERA_sprite_height_32+VERA_sprite_width_32+0	;h, w, palette index
 
 ; Sprite speech_small, frame 1 (32x32 - 16 colors)
 sprite_speech_small_1:
@@ -140,5 +140,5 @@ sprite_speech_small_1:
 .word 1414+VERA_sprite_colors_16	; address/32 (+ color indicator) 
 .word 0, 0	; x,y pos
 .byte VERA_sprite_layer_foreground	; 4 bit Collision mask, 3 bit z-depth, VFlip HFlip
-.byte VERA_sprite_height_32+VERA_sprite_width_32+5	;h, w, palette index
+.byte VERA_sprite_height_32+VERA_sprite_width_32+0	;h, w, palette index
 
