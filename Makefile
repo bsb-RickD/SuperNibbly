@@ -51,6 +51,7 @@ TRAVEL_OBJ_FILES=$(TRAVEL_SRC_FILES:%.asm=$(BUILD_DIR)/%.o)
 TRAVEL_SRC_ASSETS=$(ASSET_SRC_DIR)/LMAPP_x16.png $(ASSET_SRC_DIR)/minanm.png
 TRAVEL_LANDSCAPES=green ice volcano desert
 TRAVEL_ASSETS=$(ASSETS_DIR)/travel_data.bin $(TRAVEL_SRC_DIR)/travel_common_sprites.inc $(TRAVEL_SRC_DIR)/travel_landscape_sprites.inc\
+             $(ASSETS_DIR)/travel_palette.bin $(ASSETS_DIR)/travel_palette_mapping.bin\
              $(foreach A,$(TRAVEL_LANDSCAPES),$(ASSETS_DIR)/travel_$(A)_sprites.bin $(TRAVEL_SRC_DIR)/travel_$(A)_pal_indexes.inc)\
 
 ALL_ASSETS=$(INTRO_ASSETS) $(TRAVEL_ASSETS)
@@ -127,6 +128,7 @@ $(TRAVEL_ASSETS): $(TOOL_SRC_FILES) $(TRAVEL_SRC_ASSETS)
 	-rm -f $(ASSET_BUILD_DIR)/travel_data.raw
 	$(foreach A,$(TRAVEL_LANDSCAPES),lzsa -v -r -f2 $(ASSET_BUILD_DIR)/travel_$(A)_sprites.bin $(ASSETS_DIR)/travel_$(A)_sprites.bin;)
 	cp $(ASSET_BUILD_DIR)/travel_palette.bin $(ASSETS_DIR)
+	cp $(ASSET_BUILD_DIR)/travel_palette_mapping.bin $(ASSETS_DIR)
 	cp $(ASSET_BUILD_DIR)/travel_green_sprites.inc $(TRAVEL_SRC_DIR)/travel_landscape_sprites.inc
 	cp $(ASSET_BUILD_DIR)/travel_common_sprites.inc $(TRAVEL_SRC_DIR)/travel_common_sprites.inc
 	$(foreach A,$(TRAVEL_LANDSCAPES),cp $(ASSET_BUILD_DIR)/travel_$(A)_pal_indexes.inc $(TRAVEL_SRC_DIR);)

@@ -27,7 +27,7 @@ function_ptrs:
 
 .import copper_list_start, copper_list_enabled
 .import memory_decompress
-.import write_to_palette
+.import write_to_palette_mapped
 .import init_irq, vsync_irq, vsync_irq_exit, wait_for_vsync, reset_irq
 .import init_work_queue, add_to_work_queue, execute_work_queue
 .import array_append
@@ -113,11 +113,11 @@ iterate_main_loop:
    MoveW $9f20, decompress_landscape_sprites_vram_address
 
    ; set the palette
-   LoadW R11, travel_pal
-   ldx #(TRAVEL_PALETTE_SIZE/2)-1
+   LoadW R0, travel_pal
+   LoadW R1, travel_pal_mapping
    lda #0
-   sei
-   jsr write_to_palette
+   sei   
+   jsr write_to_palette_mapped
    cli
    rts
 .endproc
@@ -186,6 +186,9 @@ decompress_landscape_sprites_vram_address: .word 0
 travel_pal:
 .incbin "assets/travel_palette.bin"
 TRAVEL_PALETTE_SIZE = *-travel_pal
+
+travel_pal_mapping:
+.incbin "assets/travel_palette_mapping.bin"
 
 green_sprite_indexes:
 .include "travel/travel_green_pal_indexes.inc"
