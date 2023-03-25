@@ -16,7 +16,7 @@ TINY_PLANES_ASM = 1
 .import par_tiny_planes, sprite_plane_0
 .import show_sprite
 
-.export move_plane
+.export move_plane, init_tiny_planes
 .export plane_movement_1, plane_movement_2, plane_movement_3
 
 ; tiny plane movement table for plane 1
@@ -407,8 +407,8 @@ plane_movement_3:
    .byte 0,251,0
 
 
-plane_delay:
-.byte  7
+;plane_delay:
+;.byte  7
 
 ;
 ; Animate plane according to the movement data
@@ -427,12 +427,12 @@ plane_delay:
 ; .byte x-add, y-add, sprite-frame   ; offset 12 plus - the actual data
 ;    (x and y add are signed bytes)
 .proc move_plane
-   lda plane_delay
-   dec 
-   sta plane_delay
-   bne once_more
-   lda #7
-   sta plane_delay
+   ;lda plane_delay
+   ;dec 
+   ;sta plane_delay
+   ;bne once_more
+   ;lda #7
+   ;sta plane_delay
 
    ThisLoadW R15,R14,10,-            ; load current ptr into R14
    ThisLoadW R14,R0,0                ; load x,y add into R0

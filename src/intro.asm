@@ -33,7 +33,7 @@
 .import init_irq, reset_irq, vsync_irq, wait_for_vsync, vsync_irq_exit
 .import memory_decompress
 .import file_open, file_read, file_close
-.import init_drop
+.import init_drop, init_tiny_planes
 .import animate_sprite, switch_all_sprites_off
 .import init_lerp416_table
 .import rand_seed_time
@@ -179,6 +179,8 @@ wq_vsync_instance:
    stz seq_wait_for_unpack+1
 
    stz par_init_fish_random+1
+
+   jsr init_tiny_planes
    
    jsr init_drop
 
