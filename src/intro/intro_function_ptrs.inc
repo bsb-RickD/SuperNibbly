@@ -12,6 +12,7 @@ INTRO_FUNCTION_PTRS_INC = 1
 .import jumping_fish, fish_generate_pause, fish_pause_counter, fish_pause_range
 .import fish_x_range, fish_generate_x, fish_y_range, fish_generate_y
 .import drop_letter, dropping_n, dropping_i, dropping_b1, dropping_b2, dropping_l, dropping_y
+.import move_plane, plane_movement_1, plane_movement_2, plane_movement_3
 .import worker_decrement_16, worker_generate_random, worker_wait_semaphore, worker_sequence, worker_parallel
 .import worker_initialize_random_range, worker_signal_semaphore, worker_decompress_to_vram, worker_palette_fade
 .import switch_sprite_off
@@ -78,6 +79,13 @@ seq_wait_for_unpack:
       worker_parallel, par_init_fish_random,          \
       worker_wait_semaphore, sem_unpack,              \         
       all_blue_and_switch_to_tiled_mode, 0
+
+
+; let the three planes fly..
+;
+par_tiny_planes:
+   make_parallel                                      \
+      move_plane, plane_movement_2                    \
 
 
 ; the fish jump sequence: 

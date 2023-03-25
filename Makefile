@@ -40,7 +40,7 @@ TOOL_SRC_FILES=$(wildcard $(TOOLS_DIR)/*.py)
 
 LIBRARY=$(BUILD_DIR)/lib.lib
 
-INTRO_SRC_FILES=$(MAIN_SRC_DIR)/intro.asm $(INTRO_SRC_DIR)/jumping_fish.asm $(INTRO_SRC_DIR)/dropping_nibbly.asm
+INTRO_SRC_FILES=$(MAIN_SRC_DIR)/intro.asm $(wildcard $(INTRO_SRC_DIR)/*.asm)
 INTRO_OBJ_FILES=$(INTRO_SRC_FILES:%.asm=$(BUILD_DIR)/%.o)
 INTRO_SRC_ASSETS=$(ASSET_SRC_DIR)/TITEL_BG_x16.png $(ASSET_SRC_DIR)/titanm.png $(ASSET_SRC_DIR)/titanm-1_x16.png $(ASSET_SRC_DIR)/woodly2.png
 INTRO_ASSETS=$(ASSETS_DIR)/intro_data.bin $(ASSETS_DIR)/intro_sprites.bin $(ASSETS_DIR)/intro_palette_mapping.bin\

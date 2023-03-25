@@ -23,7 +23,7 @@
 .include "inc/sprites.inc"
 .endif
 
-.export function_ptrs, seq_dropping_nibbly
+.export function_ptrs, seq_dropping_nibbly, par_tiny_planes
 
 .import write_to_palette_const_color
 .import push_both_vera_addresses, pop_both_vera_addresses, push_all_registers, pop_all_registers

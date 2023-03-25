@@ -15,6 +15,7 @@ JUMPING_FISH_ASM = 1
 
 .export fish_pause_range, fish_generate_pause, fish_pause_counter, fish_x_range, fish_y_range
 .export fish_generate_x, fish_generate_y, jumping_fish
+.export sprite_plane_0
 
 ; random range parameters
 fish_pause_range:
